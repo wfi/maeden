@@ -70,6 +70,8 @@ Note: * = wall
       @ = Rock
       # = Door
       K = key
+      R = Robot
+      G = ray-gun
      [0-9] = Agent with particular ID
       H = Helper Agent
       + = food source or food piece (distinguish via smell)
@@ -146,7 +148,7 @@ commands forward, back, turn right, turn left, grab something, use
 something from the inventory, drop something from the inventory, and
 wait (do nothing).
 
-Behavior of Objects
+BEHAVIOR OF OBJECTS: OBSTACLES AND TOOLS
 
 Doors and Keys.  Doors can be permanently opened by using a key.  If
 an agent has a key in its inventory and is facing a door, the command
@@ -156,6 +158,11 @@ consumes the key.
 Rocks and Hammers.  As with doors and keys, rocks can be removed by
 using a hammer.  The corresponding command would be "u T" (when facing
 a rock).  Note, the hammer is _not_ consumed.
+
+Robots and Ray-guns.  A robot may appear as an obstacle and can be
+removed by using a ray-gun.  The ray-gun only has an effective distance
+of a single space; that is, the agent must be immediately facing the 
+robot in order for the ray-gun to remove the obstacle.
 
 Narrows.  If an agent is holding one or more items in its inventory,
 in cannot pass through a narrows.  Dropping all the items in the
