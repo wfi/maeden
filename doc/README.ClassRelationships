@@ -1,0 +1,27 @@
+[v.2010.11.18.1]
+----------------------------------------------------------
+---------------- Maeden Java Class Overview --------------
+----------------------------------------------------------
+
+The Grid class is where the main simulation occurs.  The Grid stores
+all objects that exist in the world and takes care of determining how
+agents interact with (sense and manipulate) the world.  Grid uses each
+agent's socket connections to read movement or manipulation commands
+from controllers, and to send the appropriate agent-relative sensory
+information (see README.senses) to the respective agent controllers.
+Grid also manages the graphic behavior for the global-view of the
+simulation (note, not the view perceived by an agent).
+
+The GridObject class is the parent class for all objects that exist
+within the grid-world.  (Do not confuse a GridObject instance with a
+Grid object which is an instance of the Grid class.)  All objects
+extend this class under the naming convention GOB<type>, where <type>
+is the specific grid-object being implemented.  Users who wish to
+extend the types of objects found in the world will extend GridObject
+and implement the necessary methods so as to achieve the desired
+behavior of the simulated object type.
+
+GOBAgent is the simulation-side class for communicating with agent
+controllers.  Instances of this class maintains the socket connections
+with the respective agent's controller process and sends sesory info
+to the agent and receives actions attempted by the agent.

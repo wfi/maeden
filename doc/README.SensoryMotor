@@ -1,0 +1,177 @@
+[v.2012.02.29.1]
+--------------------------------------------------------------
+----------  Maeden Sensory-Motor Interface Protocol  ---------
+--------------------------------------------------------------
+
+SENSORY INFORMATION
+
+Sensory information is sent to each agent controller on each cycle.
+before each action.  The senses are sent as nine (9) lines of text.
+
+0.  Maeden Directive: The number of lines to follow (8), or one of the
+words: DIE, SUCCESS, or END.  DIE is sent when the agent runs out of
+energy.  SUCCESS is sent when the agent eats the food.  (In the
+non-default simulator mode, eating an item of food simply increases
+the agent's energy by a set amount; this increase is reflected in the
+next sensory packet sent to the agent.)  END is sent when some other
+agent eats the food.  Although multilpe food objects may exist in the
+world, in the default mode as soon as one agent eats the food the
+simulation ends.
+
+1.  The "smell" direction to the food source.  This is sent as the
+direction to the food-source relative to the agent's current heading.
+The value will be the first character of the appropriate relative
+direction for directions: "forward", "back", "right", "left", or
+"here" (i.e., 'f', 'b', 'r', 'l', or 'h').  A food source may have one
+or more pieces of food.  When an agent attempts to grab the food
+source, it ends up with a piece of food in its inventory.  The food
+source remains in place and continues to provide the smell direction
+regardless of the food pieces that may be carried or dropped by any
+agents.
+
+2.  The "inventory" of the agent is sent.  The inventory is sent as a
+list of single-character strings, one for each item being carried by
+the agent.  Example objects that may be carried include: "K", "T",
+"+", or "$".  K indicates the agent is carrying a key, T a hammer, +
+the food, etc.  If the agent's inventory is empty, the empty list will
+be sent: ().
+
+3.  The "sight" information.  The agent has a visual field that is
+seven (7) cells deep and five (5) cells wide.  The agent can see rows
+of five including one row behind it, the current row (i.e., two cells
+to either side), and five (5) rows ahead.
+	 
+Visual information is given as a paranthesized list of rows, where
+each row is a parenthesized list of cells, where each cell is a
+parethesized list of double-quoted strings as described for the ground
+information below (#5).
+
+For example, if the agent with ID of 2 was standing with a key and a
+hammer to its left, while facing a wall with a door two cells away and
+the food three rows beyond the door, the received visual information
+line would look like this (without line-breaks):
+
+((()     ()       ()     ()     ()   )
+
+ (()     ("K" "T")("2")  ()     ()   )
+
+ (()     ()       ()     ()     ()   )
+
+ (("*")  ("*")    ("#")  ("*")  ("*"))
+
+ (()     ()       ()     ()     ()   )
+
+ (()     ()       ()     ()     ()   )
+
+ (()     ()       ("+")  ()     ()   ))
+
+Note: * = wall
+      T = hammer
+      @ = Rock
+      # = Door
+      K = key
+     [0-9] = Agent with particular ID
+      H = Helper Agent
+      + = food source or food piece (distinguish via smell)
+      O = food collection point (letter Oh)
+      $ = gold piece
+
+Note, this presentation may be logically thought of as a view from
+underneath the agent, with the agent facing toward the bottom of the
+screen. The actual origin of the array [0,0] is over the agent's left
+shoulder.  However, it may be convenient for an agent controller to
+work in "agent-centered" coordinates where the agent is always located
+at [0,0] with negative rows and columns over the left shoulder.  This
+is left as an exercises for designers of agents.
+
+4.  The "Ground Contents" consisting of items that occupy the same
+cell as this agent (except the agent itself).  Each item's character
+(if there is such an item) is wrapped in double quotes and the
+collection (always at least one) is wrapped in parantheses.  For
+example: ("K" "3") for the situation where agent 3 is also in the same
+location and a key is on the ground.  The empty list, (), is sent if
+nothing other than the agent is present.
+
+Note: the agent-self does not appear in the ground contents, but _does_
+appear in the visual information.
+
+5.  The "messages" that this agent hears.  All messages that are in
+hearing range of the agent are sent inside parentheses.  For example:
+(Message1 Message2 Message3 ... MessageN ) Note: Each individual
+Message will conform to the format described in Inter-Agent
+Communication README.
+
+6.  The "energy" is sent.  The energy corresponds to the amount of
+energy that the agent has left.  The lower the amount of energy, the
+fewer the number of moves can be performed by the agent.  It is sent
+and should be interpreted as an integer.
+
+7.  The result status on the most recent agent action is given as
+either "ok" or "fail".  Given the physics of the environment, this
+line will be "ok" if the action was able to be completed, actually was
+completed, and had the desired result.  Thus, if the last action was
+"f"orward and if the agent actually moved one cell in the direction of
+its current heading, the result will be "ok".  However, if the last
+action was "u" and either the inventory is empty, the agent is not
+facing anything, the tool in the inventory does not match the object
+the agent is facing, or for some other reason the expected result does
+not attain (perhaps, because the environment has been enhanced with
+non-determinism), then the value for this line will be "fail".
+
+8.  The world time is sent.  Because agents sense and act
+asynchronously, agents are sent the time maintained by the simulator.
+This data should be interpereted as an integer.
+
+EFFECTOR COMMANDS
+
+Maeden agents have a simple set of commands that may be performed.
+They may move forward and back; turn left or right; grab, use or drop
+an object, or wait and do nothing. (In addition, agents may talk or
+shout as described in Inter-Agent Communication README.)  Actions are
+expressed as single characters followed by a newline character.  The
+three actions -- grab, use and drop -- accept an optional second
+argument.  Without this second argument, the first item available is
+selected (for grabbing, using or dropping).  Because more the one item
+may rest in a cell or be carried in the inventory, the second argument
+allows the agent to specify a particular item to grab, use or drop.
+Thus, to pick up the food if more than one item were present on the
+ground, the command "g +" would be sent (again, assuming the string is
+terminated with a newline).  Similarly, if an agent were trying to
+open a door and its inventory held: ("$" "+" "K" "$"), the agent would
+send the command "u K" in order to open a door that it was immediately
+facing.
+
+In summary, the valid actions are: f, b, r, l, g, u, d, and w for the
+commands forward, back, turn right, turn left, grab something, use
+something from the inventory, drop something from the inventory, and
+wait (do nothing).
+
+Behavior of Objects
+
+Doors and Keys.  Doors can be permanently opened by using a key.  If
+an agent has a key in its inventory and is facing a door, the command
+"u K" will cause the door to disappear.  Note, this action also
+consumes the key.
+
+Rocks and Hammers.  As with doors and keys, rocks can be removed by
+using a hammer.  The corresponding command would be "u T" (when facing
+a rock).  Note, the hammer is _not_ consumed.
+
+Narrows.  If an agent is holding one or more items in its inventory,
+in cannot pass through a narrows.  Dropping all the items in the
+inventory will allow the agent to pass.
+
+Food.  In the default mode, eating the food terminates the simulation.
+When this mode is overridden, eating the food increases the enery of the agent
+by a set amount.
+
+Food Supply.  It is actually the food supply that agents smell -- not
+food items.  An agent may harvest a food item from the supply only
+once every so often.  The interval is independent of which agent last
+harvested food.
+
+Gold.  Currently, gold items do nothing, but they're fun to grab.
+
+Hitting.  If an agent is facing another agent and applies the hit command,
+the agent that is being hit loses an amount of energy.  It is possible to 
+kill an agent by repeated hitting.

@@ -1,0 +1,112 @@
+[v.2012.02.29.1]
+--------------------------------------------------------
+-------------------- Maeden README ---------------------
+--------------------------------------------------------
+
+I.   General Overview and Startup
+II.  Java Code Architecture
+III. Communication over Sockets
+IV.  Inter-Agent Communication
+V.   Agent Sensory-Motor Interface
+
+--------------------------------------------------------
+
+I.  General Overview and Startup
+
+Maeden provides an asynchronous simulation server to separate and
+distinct agent controller processes.  The controller may be either a
+manual interaction through the keyboard and graphical display (a
+sample controller is provided in KeyboardController.java) or an
+autonomous process.  The simulation presents a grid-world consisting
+of a small number of itmes which may be manipulated in order to
+accomplish various tasks.  Users of Maeden may create their own worlds
+and tasks within them.  The default task is to locate and consume a
+food item.  The simulater comes with several sets of ready-made worlds
+provide a wide range of task difficulties.  In the default condition,
+the simulation ends once the food is eaten.  Thus, the simulator must
+(currently) be started separately for each world.
+
+A run consists of the server process and one additional process for
+each agent.  The server should be started first, with command line
+arguments specifying the world to simulate.  For example:
+
+    $ java Grid worlds/tw03
+
+will initiate a simulation using the test-world numebr 3 with the
+graphical display enabled.  Optional arguments following the world
+include:
+- a boolean flag enabling/disabling the global graphical
+  display (useful for debugging agent behaviors), 
+- the number of agents that will be connecting to this simulation,
+- the number of milliseconds to wait between simulation time steps
+  (default 50 milliseconds).
+
+Once the server has been started as described, it begins listening for
+agent connection requests.  Agents can connect and disconnect at their
+own discretion without interrupting the simulation (see Sockets
+README).  Note however, if the default task condition is true, then
+consuming the food (once obtained) will terminate the simulation for
+all agents currently active in it.  Once an agent connects, it may
+sense, think and act at its own rate up to the resolution of the
+simulator.  Multiple agents sense and act asynchronously.  The
+sense-think-act cycle is governed by the protocol described in the
+Sensory-Motor Interface README.
+
+Further instructions for starting the server and the required
+arguments are found in the source code for the server, Grid.java.  The
+controller(s) for any agents are started as separate processes in
+accordance with the languages used to implement them.  For a simple
+simulation involving a single agent controlled by a human, one would
+start the server one shell as described above and then start the
+Keyboard Controller
+
+    $ java KeyboardController
+
+in a second shell.  The KeyboardController provides an overhead view
+of what the agent sees, other sensory information in a dashboard, and
+an interface for submitting commands to the server.
+
+--------------------------------------------------------
+II.  Java Code Architecture
+
+A Grid class defines the overall simulation object.  Items that appear
+in a simulated world inherit from the GridObject class and by
+convention have names such as GOBWall, GOBHammer, and GOBAgent.
+Objects and agents in the simulated world are represented as instances
+of classes that are managed by the Grid object.  An external agent
+controller is associated with a thin object (GOBAgent) in the
+simulation that serves as the interface to the Grid simulation,
+providing sensory information and passing along action requests.  For
+more information, see Class Relationships README.
+
+--------------------------------------------------------
+III.  Communication over Sockets
+
+All communication between an agent controller and the simulator proper
+is done through standard network sockets.  Consequently, agent
+controllers may be implemented in any language that supports this
+standard interface.  For example, a controller written in Common Lisp
+can control an agent in the Maeden simulator (written in Java) and can
+interact with another agent controlled by a program written in C++,
+and both can interact with another agent being controlled by a human
+via the KeyboardController program.  To learn more about Socket
+communication, see the file Sockets README; for details of the
+sensory-motor protocol, see Sensory-Motor Interface README.
+
+--------------------------------------------------------
+IV.  Inter-Agent Communication
+
+Agents in the Maeden simulator have the capability to talk to one
+another.  In order to formulate a coherent message to be transmitted
+to other agents, it must be sent in the correct form.  To learn more
+see the Inter-Agent Communication README.
+
+--------------------------------------------------------
+V.  Agent Sensory-Motor Interface
+
+All agents in the Maeden simulator have a set of "senses" and
+"effectors" through which agents interact with the environment.
+Senses provide limited information to the controller on the basis of
+which actions are selected.  The sensory data and action specification
+protocols consists of one or more lines of text as described in
+Sensory-Motor Interface README.

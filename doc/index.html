@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Maeden Multi-Agent Simulator Homepage</title>
+  <meta name="author" content="Wayne Iba"/>
+  <meta name="Description" content="Overview of Maeden multi-agent simulator"/>
+  <meta name="Keywords" content="multi-agent simulator artificial intelligence"/>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"/>
+  <link href="locmaeden.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3561636-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+</head>
+
+<body>
+<div id="wrapper">
+<div id="header">
+<h1>The M&AElig;DEN Simulator</h1>
+<big style="font-weight: bold;">
+<small>Administered by <a href="../index.html">Wayne Iba</a></small></big>
+</div>
+<div id="nav">
+  <ul>
+    <li>Overivew</li>
+    <li><a href="history.html">History</a></li>
+    <li><a href="contributors.html">Contributors</a></li>
+    <li><a href="status.html">Obtaining M&AElig;DEN</a></li>
+    <li><a href="documentation.html">Documentation</a></li>
+    <br>
+    <li><a href="../index.html">Wayne's homepage</a></li>
+  </ul>
+</div>
+
+<div id="maedenpage">
+<img title="Sample Maeden World" style="border: 2px solid ; width: 45%; float: right; margin: 10px"
+     src="worldviewtxt.png" alt="overhead view of a sample world showing an agent and many of the obstacles and tools encountered in Maeden" />
+
+<p>The M&AElig;DEN simulator provides a testbed 
+for studying problem solving in either a single or a multi-agent context.
+Both humans and artificial intelligence agents may interact with objects in the environment
+and with each other
+as they attempt to solve problems of varying difficulty.
+This Java-based simulator interacts asynchronously with
+multiple agent controllers written in any language
+using the standard socket layer.
+Agents may cooperate to solve problems
+or they may fight each other over limited resources.
+The testbed
+supports a simple visual sense of an agent's immediate surroundings,
+an olfactory sense indicating the direction of the food supply,
+an auditory perception of messages sent by other agents, 
+and several other simple sensory features.
+Similarly, M&AElig;DEN provides effector capabilities to move about the
+environment, manipulate tools and objects, attack other agents, and broadcast messages.</p>
+<p>
+In terms of environment characteristics,
+M&AElig;DEN is: 
+<ul>
+<li>partially observable: agents do not have direct access to the entire world</li>
+<li>stochastic: actions do not always have the same effect (but may be set to deterministic)</li>
+<li>dynamic: the world may change apart from an agent's own actions</li>
+<li>asynchronous multi-agent: multiple agents interact with the world and each other asynchronously</li>
+<li>discrete: objects exist within a grid and agents move from one cell to orthogonally adjacent cells</li>
+</ul>
+</p>
+</div>
+
+<div id="footer">
+last updated: 2/29/2012
+</div>
+
+</div>
+</body>
+</html>

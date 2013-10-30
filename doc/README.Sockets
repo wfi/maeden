@@ -1,0 +1,49 @@
+[v.2012.02.29.1]
+-----------------------------------------------------
+------------- Maeden Socket Communication -----------
+-----------------------------------------------------
+
+All communication between the Maeden simulator and an agent controller
+is done through the standard socket layer.  Sockets provide
+versatility in the Maeden Simulator so that controllers written in
+different languages can still interact with Maeden.  The Grid class
+provides the code for the server socket that accepts connections from
+agent controllers.  Maeden listens on port number 7237, known within
+the Java code as MAEDENPORT.
+
+Once a connection is established, the socket is used for two-way
+communication between the environment server and the agent controller;
+sending sensory data from server to agent and sending actions from
+agent to server (see Sensory-Motor Interface README).  Agent
+controllers are given ID's starting with 0 according to the order in
+which they contact the server.  There is currently a soft limit of 10
+agents in a single simulation because of the format sensory
+information is conveyed.  Raising this limit will require
+modifications to the server code.
+
+Initial Handshake.  When first establishing a socket connection, the
+agent controller must first "sign in" as either a client "base" agent
+or as a "helper" agent.  (It is assumed that helper agents do not
+attempt to use the food, thereby terminating the simulation.)  To sign
+in, each agent sends the string either "base" or "helper", followed by
+a newline character.  (All communications over the socket are
+terminated by newlines.)  After receiving the agent's role, the Grid
+server sends the agent's ID on a single line (newline terminated).
+Having completed the initial handshake/registration, the server makes
+the first sensory packet available and the agent controller may enter
+a sense/think/act cycle.  Note, sensory packets are sent after each
+agent action and should be consumed in their entirety.
+
+Once the simulation is ended (either the food is eaten or the last
+base agent or client dies), each socket is closed in the method
+Grid.cleanClose().  All buffers are exited (for the agent) and the
+sockets are closed (for the agent and the Grid server socket).  [If
+the user overrides the default behavior where eating the food
+terminates the simulator, then the server must be killed manually.]
+
+To connect to the server socket (in Java):
+try{
+    gridSocket = new Socket([hostname], MAEDENPORT);
+} catch(UnknownHostException e) {
+} catch(IOException e) {
+}

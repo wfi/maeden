@@ -1,0 +1,97 @@
+@import url(http://fonts.googleapis.com/css?family=Merriweather|Alegreya+SC:400);
+
+/* Comments */
+body {
+    /* background-color: #777777; */
+    background: #aaaaaa url(../ltgreytexture.jpg);
+    font-size:14px;
+    font-family: Merriweather, Georgia, serif;
+    /* font-family:Verdana,Arial,Helvetica,sans-serif; */
+}
+div#wrapper
+{
+    background-color: #ffffff;
+    width: 800px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0px;
+    border: thin solid #000000;
+}
+div#header {
+    padding: 15px;
+    margin: 0px;
+    text-align: left;
+}
+div#maedenpage
+{
+    margin-left: 30%;
+    margin-right: 10px;
+    margin-top: 1px;
+    padding: 10px;
+}
+div#nav {
+    width: 25%;
+    padding: 10px;
+    margin-top: 1px;
+    float: left;
+}
+div#footer {
+    padding: 15px;
+    margin: 0px;
+    font-size: 10px;
+    /* border-top: thin solid #000000; */
+    text-align: right;
+}
+
+a:link {
+text-decoration: none;
+}
+a:visited {
+text-decoration: none;
+}
+a:hover {
+text-decoration: underline;
+color: #FF0000;
+}
+a:active {
+text-decoration: none;
+}
+
+div#header {
+    font-family: 'Alegreya SC', Georgia, serif;
+}
+div#header * {
+    font-family: 'Alegreya SC', Georgia, serif;
+}
+
+div#maedenpage h1, h2, h3, h4, h5, h6{
+    font-family: 'Alegreya SC', Georgia, serif;
+}
+
+div#nav {
+    font-family: 'Alegreya SC', Georgia, serif;
+}
+div#nav ul li{
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 1em;
+    text-indent: -1.5em;
+}
+
+div#footer ul li{
+color : #000000;
+background-color : transparent;
+display: inline;
+}
+
+div#footer ul li a{
+color : #115EAC;
+background-color : transparent;
+text-decoration : none;
+}
+
+div#footer ul li a:hover{
+text-decoration : underline;
+}

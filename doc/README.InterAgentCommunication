@@ -1,0 +1,73 @@
+[v.2009.04.02.1]
+-------------------------------------------------------
+----------- Maeden Inter-Agent Communication ----------
+-------------------------------------------------------
+
+Communication between agents is intended to be agnostic with respect
+to the agent communication language.  As far as the Maeden simulation
+"should be concerned," there should be a message payload and several
+enviromental characteristics of the speech-act.  Those would include
+the speaker, its location and the speech volume and these would
+determine how the simulator handles the message.  However, the current
+implementation does assume a particular basic agent communication
+language.  This assumption should be removed in the next version.
+
+Current format.  The relevant agent commands are "talk" and "shout".
+Following either talk or shout, the type of speech-act is signified as
+either "command" or "question".  (A question is used to communicate a
+declarative statement as the answer to a possibly unasked question.)
+The message proper follows the command and speech-act type preamble.
+In the case of a command, the command name is given with a subject to
+which the command applies, followed by a payment.  In the case of a
+question (or statement), the question-type specifies the nature of the
+question, again the subject indicates to what the question applies,
+and a final optional answer completes the message.  So if a human user
+wants to ask (tell) another agent to lead it to the food (e.g., using the
+KeyboardController), the command would look like this:
+
+	talk command lead + 1000
+
+The two syntactic forms for a talk or shout action:
+	
+	[volume=talk|shout] command [command-name] [subject] [payment]
+	[volume=talk|shout] question [question-type] [subject-of-question] [answer (optional)]
+
+When implementing a controller for Maeden, this is the required form
+for sending a speech-act.  Note, there are no quotes, brackets or
+parentheses in actual talk/shout actions.  However, they must be
+terminated with a newline.  Agent designers may create their own
+vocabulary within this framework.  That is, the Grid server does not
+inspect the command-name, subject, question-type, etc.  (However, the
+payment must be a valid representation of an integer.)
+
+The Maeden simulator will process a talk or shout command and provide
+an appropriate message to any agents that happen to be within range.
+A shouted message will be heard farther away than a talked message.
+The message that will actually get sent to an agent within range will
+look like this:
+
+When a message is received by an agent (that is, when a controller
+senses an incoming message), it will be formatted as follows:
+	 	 
+	( [sending agent's id (in range of 0-9)]
+	  [relative direction to sender (one of back, forward, left, right)]
+	  [volume]
+	  ( [command | question]
+	    [command-name | question-type]
+	    [subject]
+	    [payment | {optional answer} ] ) )
+
+Note that while Base agents are observed as their ID, which also
+appear in messages they send, helper agents appear as an 'H' in the
+visual field.  However, in messages, their actual ID appears as the
+first component of the message list.
+	
+This message format is created by the classes: ComSentence,
+ComSentenceCommand, and ComSentenceQuestion.  The message is sent as a
+string to support generic agent controller languages.  Note, the
+parentheses are present but the curly braces are not.  This message
+format is created within the classes: ComSentenceCommand and
+ComSentenceQuestion.  The Maeden simulator will process the
+space-separated string sent by a controller but the individual
+controllers must parse any received messages (including parentheses)
+on their own.

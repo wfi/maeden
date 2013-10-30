@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>History of the Maeden Simulator</title>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <meta name="Description" content="History of Maeden multi-agent simulator"/>
+  <meta name="Keywords" content="maeden multi-agent simulator history"/>
+  <meta name="author" content="Wayne Iba">
+  <link href="locmaeden.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3561636-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+</head>
+<body>
+
+<div id="wrapper">
+
+<div id="header">
+<h1>History of the M&AElig;DEN Simulator</h1>
+</div>
+
+<div id="nav">
+  <ul>
+    <li><a href="index.html">Overivew</a></li>
+    <li>History</li>
+    <li><a href="contributors.html">Contributors</a></li>
+    <li><a href="status.html">Obtaining M&AElig;DEN</a></li>
+    <li><a href="documentation.html">Documentation</a></li>
+    <br>
+    <li><a href="../index.html">Wayne's homepage</a></li>
+  </ul>
+</div>
+
+<div id="maedenpage">
+
+<p>The M&AElig;DEN simulator grew out of a desire to study the nature of
+service
+and assistance. Specifically, we wanted a testbed that supported:
+multiple agents and communication between them, a range of challenging
+tasks that would not distract us from the study of service but would
+allow us to vary the difficulty of problems, open-source development
+and extensions. We preferred something in Common-Lisp but that
+was not
+a requirement.</p>
+
+<p>After looking around, we decided to build from a Common-Lisp version of
+Paine, Chattoe &amp; Perkins's Eden environment. Thus, Maeden
+stands for Multi-agent Eden. What follows is
+a very coarse chronology with links to further information.</p>
+
+
+
+<h4>circa 1992</h4>
+Simon Perkins
+designed and wrote the original code for
+Eden. Jocelyn Paine, Simon Perkins and Edmund Chattoe extended
+and rewrote the system for the Oxford University AI Society.
+Jocelyn Paine subsequently implemented extensive modifications for use
+in teaching AI.<br>
+<ul>
+  <li>Perkins, S. &amp; Paine, J.
+    (1992). <em>Help Eden</em>.
+    <a href="http://www.j-paine.org/eden_original.html">http://www.j-paine.org/eden_original.html</a></li>
+  <li>Paine, J., Chattoe, E., &amp; Perkins, S. (1992). <em>Announcing the EDEN/POPBEAST AI
+      Competition and Teaching Kit.</em>
+    <a href="http://www.j-paine.org/prolog/eden/announce">http://www.j-paine.org/prolog/eden/announce</a></li>
+</ul>
+
+<h4>circa 1993</h4>
+Jocelyn Paine
+forked Eden2, with the purpose of
+supporting the teaching of Artificial Intelligence.
+<ul>
+  <li>Paine, J. (1993). <em>EDEN2 - Prolog and Pop-11 Microworld for Teaching</em>.
+    <a href="http://www.j-paine.org/prolog/eden2/eden2.pre">http://www.j-paine.org/prolog/eden2/eden2.pre</a></li>
+</ul>
+
+<h4>circa 1994</h4>
+Glenn Iba
+implemented a rational reconstruction of the
+original Eden in Common Lisp (MCL).<br>
+
+<h4>circa 1996</h4>
+Jocelyn Paine
+provided extensive notes for designing
+agents and using the original Eden simulator to test them.<br>
+<ul>
+  <li>Paine, J. (1996). <em>Practical handouts (Eden)</em>.
+<a href="http://www.j-paine.org/students/students.html#practicals">http://www.j-paine.org/students/students.html#practicals</a></li>
+</ul>
+
+<h4>circa 2000</h4>
+Jocelyn Paine
+re-structured Eden II as a Java-based
+simulator interacting with a Poplog agent controller (brain).<br>
+<ul>
+  <li>Paine, J. (2000).Using Java and
+the Web as a front-end
+to an agent-based Artificial Intelligence course. <a
+ href="http://www.j-paine.org/teaching_with_agents.html">http://www.j-paine.org/teaching_with_agents.html</a></li>
+</ul>
+
+<h4>Summer 2004</h4>
+Wayne Iba,
+Nick Burwell and Chris Phillips extended
+Glenn Iba's Common Lisp version of Eden with the intent of studying
+service; the
+new system was dubbed M&AElig;DEN. They added support for
+multiple agents, communication between agents, and a number of other
+minor features.
+<ul>
+<li>Iba, W. &amp; Burwell, N.
+(2005). <a href="aaaiSS05dist.pdf">Building a testbed for
+studying service</a>,
+<em>Proceedings of the AAAI Spring Symposium, Persistent Assistants: Living and Working with AI.</em>
+Stanford: AAAI Press.</li>
+<li>Iba, W. &amp; Burwell, N. (2005). <a
+ href="flairs05dist.pdf">Studying service: an exploration of
+the costs and benefits of assistance</a>, 
+<em>Proceedings of the 18th International FLAIRS Conference.</em> Clearwater, FL: AAAI Press.</li>
+</ul>
+
+<h4>Academic year 2004-2005</h4>
+Wayne Iba and students in his
+introductory Computer Science course started reimplementing M&AElig;DEN
+in Java, using sockets to communicate between agent controllers and
+the simulator proper. Different agent controllers were written in
+Common-Lisp and Java.
+
+<h4>Summer 2005</h4>
+Josh Holm worked with Wayne on the Java simulator and the Common Lisp agent
+controllers. The system was conceptually divided into the
+M&AElig;DEN simulator proper, and a controller architecture, GARCIA,
+with which we were studying service. Much of the work during this
+time was focused on GARCIA, completely overhauling path planning and
+communication. Agents now create and accumulate a model of other
+agents, what they know, what they can do, etc. Future changes to
+the agent architecture will be documented elsewhere. These pages
+will focus exclusively on the M&AElig;DEN simulator.<br>
+<ul>
+  <li>Iba, W. &amp; Holm, J. (2006).
+    Assistance: is it better to receive than to give?,
+    <em>Proceedings of the International Conference on Artificial Intelligence</em>. Las Vegas: NV.</li>
+</ul>
+
+<h4>Fall 2010</h4>
+During my sabbatical, I made a number of minor changes and additions
+to M&AElig;DEN.
+These included gold items; default object selection for grab, use and drop;
+fighting between agents; food supply harvest intervals; etc.  I also
+started transitioning the code to use generics.
+
+<h4>Fall 2011</h4>
+The students in my CS116 Artificial Intelligence class 
+implemented the changes needed to make agent connection and interaction
+operate asynchronously.
+
+</div>
+
+<div id="footer">
+last updated: 11/24/2010
+</div>
+
+</div>
+</body>
+</html>
