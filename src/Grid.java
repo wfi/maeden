@@ -152,6 +152,20 @@ public class Grid
 				       //maedengraphics*/
 				       ));
 		    break;
+		case 'R': // robotMonster
+		    addGOB(new GOBRobot(x,y,squareSize
+					///*maedengraphics
+					, this
+					//maedengraphics*/
+					));
+		    break;
+		case 'G': // rayGun
+		    addGOB(new GOBRayGun(x,y,squareSize
+					///*maedengraphics
+					, this
+					//maedengraphics*/
+					));
+		    break;
 		default:
 		    System.out.println("Unrecognized symbol error at (" + x + "," + y + "): " + gridspaceInputData.map(x,y));
 		    return;
@@ -404,7 +418,7 @@ public class Grid
 	    GridObject gob;
 	    for (Iterator e = myMap[x][y].iterator(); e.hasNext(); ){
 		gob = (GridObject) e.next();
-		if ("+kKtT$".indexOf(Character.toString(gob.printChar())) >= 0
+		if ("+kKtT$G".indexOf(Character.toString(gob.printChar())) >= 0
 		    // (gob.printChar() == '+' || gob.printChar() == 'K' || gob.printChar() == 'T')
 		    &&
 		    (gob.printChar() == tool)) //if gold, food, key, or hammer is in cell, and that is tool that is wanted return true

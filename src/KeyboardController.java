@@ -179,6 +179,8 @@ public class KeyboardController extends Frame {
 		    case 'Q': visField.addLast(new GOBQuicksand(j, i, cellSize)); break;    //Quicksand
 		    case 'O': visField.addLast(new GOBFoodCollect(j, i, cellSize)); break;  //Food Collection
 		    case '$': visField.addLast(new GOBGold(j, i, cellSize, gd)); break;   //Gold
+		    case 'R': visField.addLast(new GOBRobot(j, i, cellSize, gd)); break;  // Robot Monster
+		    case 'G': visField.addLast(new GOBRayGun(j, i, cellSize, gd)); break;  // Robot-Monster-Killing Ray-Gun
 		    default:
 			if(cellChar >= '0' && cellChar <= '9' && i == 5 && j == 2)
 			    visField.addLast(new GOBAgent(j, i, cellSize, 'N'));

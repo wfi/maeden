@@ -22,7 +22,7 @@ public class GOBGold extends GridObject {
     //Constructor stes printchar, color
     public GOBGold(int ix, int iy, int s){
 	super(ix,iy,s);
-	printChar = '$';        //printchar is +
+	printChar = '$';        //printchar is $
 	///*maedengraphics
 	myColor = Color.yellow; //color is yellow
 	//maedengraphics*/
