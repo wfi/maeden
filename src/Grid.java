@@ -201,7 +201,7 @@ public class Grid
     }
 
     //public accessor for the agents
-    public LinkedList agents() {
+    public LinkedList<GOBAgent> agents() {
 	return agents;
     }
 
@@ -242,14 +242,14 @@ public class Grid
     public void processAgentActions() {
 	GOBAgent a;
 	try {
-	    for (Iterator i = agents.iterator(); i.hasNext(); ){
-		a = (GOBAgent)i.next();
+	    for (Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ){ // TODO: genericize Iterator
+		a = i.next();
 		a.getNextCommand();           //have current agent get next command from controller process
 	    }
 	} catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
 	try {
-	    for (Iterator i = agents.iterator(); i.hasNext(); ){    //process and perform each agent's action
-		a = (GOBAgent)i.next();
+	    for (Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ){    //process and perform each agent's action
+		a = i.next();
 		//Process the action only if there is a next command
 		if(a.nextCommand() != null)
 		    {
@@ -265,8 +265,8 @@ public class Grid
 	//System.out.println("Messages collected");
 	boolean foundBase = false;
 	try {
-	    for(Iterator i = agents.iterator(); i.hasNext();) {          //remove any dead agents
-		a = (GOBAgent) i.next();
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext();) {          //remove any dead agents
+		a = i.next();
 		switch(a.status()) {
 		case 'c':                        //agent is alive, hasn't found the food
 		    if ( (a.getAgentRole()).equals("base") ){ foundBase = true; }
@@ -299,7 +299,7 @@ public class Grid
      */
     public void sendAgentSensations() {
 	GOBAgent a;
-	for (Iterator i = agents.iterator(); i.hasNext(); ){  //for each agent do this
+	for (Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ){  //for each agent do this
 	    a = (GOBAgent)i.next();
 	    if (a.getNeedUpdate()) {
 		// 0. Maeden Directive
@@ -614,8 +614,8 @@ public class Grid
      *Post: all messages are stored in msgs linkedlist
      */
     public void getAgentMessages() {
-	for(Iterator e = agents.iterator(); e.hasNext();) {      //get all messages from all agents and store them
-	    GOBAgent a = (GOBAgent) e.next();
+	for(Iterator<GOBAgent> e = agents.iterator(); e.hasNext();) {      //get all messages from all agents and store them
+	    GOBAgent a = e.next();
 	    if(a.hasMsg())                                       //if agent has message, store it
 		msgs.addLast(a.msg());
 	}
@@ -647,8 +647,8 @@ public class Grid
 		//check distance from sender
 		if(Math.abs(ag.pos.x - thisMsg.origin().x) < msgDist && Math.abs(ag.pos.y - thisMsg.origin().y) < msgDist) {
 		    //get direction from sender to receiver
-		    for(Iterator i = agents.iterator(); i.hasNext();) {
-			GOBAgent thisAgent = (GOBAgent) i.next();
+		    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext();) {
+			GOBAgent thisAgent = i.next();
 			if(thisAgent.getAgentID() == thisMsg.ID()) {
 			    Point agHeading = new Point(ag.dx(), ag.dy());
 			    thisMsg.setDir(relDirToPt(ag.pos, agHeading, thisAgent.pos));
@@ -724,8 +724,8 @@ public class Grid
 	//try {Thread.sleep(20000);} catch (Exception e) {System.out.println("error with sleeping"); }
 	// *** remove **********************************
 	if( agents != null && !agents.isEmpty() ) {  //if there are agents on the grid still
-	    for(Iterator i = agents.iterator(); i.hasNext();) {  //iterate through and close their connections
-		GOBAgent g = (GOBAgent) i.next();
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext();) {  //iterate through and close their connections
+		GOBAgent g =  i.next();
 		g.printstats();
 		g.send().println("End");              //Other agent got food, simulation ended
 		g.cleanDie();
