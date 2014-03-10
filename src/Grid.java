@@ -49,7 +49,7 @@ public class Grid
     private LinkedList<ComSentence> msgs = new LinkedList<ComSentence>();   //holds agent messages
     private LinkedList<GridObject> gobs = new LinkedList<GridObject>();   //holds world gridobjects
     private LinkedList<GOBAgent> agents; //holds world agents
-    private LinkedList[][] myMap;                 //holds gridobjects
+    private LinkedListGOB[][] myMap;                 //holds gridobjects
 
     // misc (possibly temporary) variables
     private GridObject food;                   //world goal
@@ -88,7 +88,7 @@ public class Grid
         yRows = gridspaceInputData.rows();
 
 	// Initialize grid map now from read sizes
-	myMap = new LinkedList[xCols][yRows];        // note: non-conventional order of columns, rows
+	myMap = new LinkedListGOB[xCols][yRows]; // note: non-conventional order of columns, rows
 	agents = new LinkedList<GOBAgent>();
 
 	// set cell size from desired physical window width and logical size found in file
@@ -191,12 +191,12 @@ public class Grid
     }
 
     //public accessor for the grid map
-    public LinkedList[][] myMap() {
+    public LinkedListGOB[][] myMap() {
 	return myMap;
     }
 
     //public accessor for the gobs
-    public LinkedList gobs() {
+    public LinkedList<GridObject> gobs() {
 	return gobs;
     }
 
@@ -386,11 +386,13 @@ public class Grid
     public void addGOB(GridObject val){
 	gobs.addLast(val);                                              // add object to the last slot of the gobs linked list
 	if (myMap[val.pos.x][val.pos.y] == null)
-	    myMap[val.pos.x][val.pos.y] = new LinkedList<GridObject>(); // if cell is null, create new linked list
-	if ( val.printChar() == 'A' || val.printChar() == 'H' )
-	    myMap[val.pos.x][val.pos.y].addLast(val);                   // add agents to the end of cell's linked list
-	else
-	    myMap[val.pos.x][val.pos.y].addFirst(val);			// add all other objects to the front of list
+	    myMap[val.pos.x][val.pos.y] = new LinkedListGOB(); // if cell is null, create new linked list
+	if (myMap[val.pos.x][val.pos.y] != null){
+	    if ( val.printChar() == 'A' || val.printChar() == 'H' )
+		myMap[val.pos.x][val.pos.y].addLast(val);               // add agents to the end of cell's linked list
+	    else
+		myMap[val.pos.x][val.pos.y].addFirst(val);		// add all other objects to the front of list
+	}
     }
 
     // remove a GridObject from the Grid
@@ -432,8 +434,8 @@ public class Grid
     public GridObject getTool(GOBAgent a, int x, int y, char tool) throws NoSuchElementException {
 	if ( myMap[x][y] != null && ! myMap[x][y].isEmpty() ){          //if cell is initialized and not empty, iterate through it
 	    GridObject gob;
-	    for (Iterator e = myMap[x][y].iterator(); e.hasNext(); ){
-		gob = (GridObject) e.next();
+	    for (Iterator<GridObject> e = myMap[x][y].iterator(); e.hasNext(); ){
+		gob =  e.next();
 		if ((true || gob.printChar() == '+' || gob.printChar() == 'K' || gob.printChar() == 'T')
 		    &&
 		    (gob.printChar() == tool))
@@ -457,8 +459,8 @@ public class Grid
 	if ((myMap[x][y] == null) || (myMap[x][y].size() == 0))
 	    return true;
 	else {
-	    for(Iterator i = myMap[x][y].iterator(); i.hasNext();) {
-		GridObject gObj = (GridObject) i.next(); 
+	    for(Iterator<GridObject> i = myMap[x][y].iterator(); i.hasNext();) {
+		GridObject gObj = i.next(); 
 		//if it is an obstacle or another base agent
 		if(!gObj.allowOtherGOB(gob)) {
 		    return false;

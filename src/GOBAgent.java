@@ -483,7 +483,7 @@ public class GOBAgent extends GridObject {
      */
     private void dieIfQuicksand(){
 	if (myGrid.myMap()[pos.x][pos.y] != null)
-	    for (Iterator i = myGrid.myMap()[pos.x][pos.y].iterator(); i.hasNext(); )
+	    for (Iterator i = (myGrid.myMap())[pos.x][pos.y].iterator(); i.hasNext(); )
 		if (((GridObject)i.next()).printChar() == 'Q'){
 		    send.println("die");                               //agent died
 		    status = 'd';
