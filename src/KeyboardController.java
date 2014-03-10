@@ -32,7 +32,7 @@ public class KeyboardController extends Frame {
     private static final int ry = 7;
     private static final int dashHeight=280;// height of panel for dashboard (apx 3.5 * number of items to display)
 
-    private LinkedList visField;                    // stores GOB's for painting the visual field
+    private LinkedList<GridObject> visField;        // stores GOB's for painting the visual field
     private GridDisplay gd;                         //for graphical display of map
     private Dashboard db;
     private boolean termOut = false;
@@ -46,7 +46,7 @@ public class KeyboardController extends Frame {
      */
     public KeyboardController(String h, int p) {
         registerWithGrid(h, p);      //connect to the grid server socket
-	visField = new LinkedList(); //the visual field contents will be held in linked list
+	visField = new LinkedList<GridObject>(); //the visual field contents will be held in linked list
 	setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 	iTrans = getInsets();
 	setTitle("Manual Agent: " + myID);                          //window title

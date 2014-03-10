@@ -225,7 +225,7 @@ public class GOBAgent extends GridObject {
 	return dy;
     }
     //public accessor for the Agent's inventory
-    public LinkedList inventory() {
+    public LinkedList<GridObject> inventory() {
 	return inventory;
     }
     //public accessor for Agent's amount of remaining energy;
@@ -437,8 +437,10 @@ public class GOBAgent extends GridObject {
 
     /** getToolChar: String, LinkedList -> Char
      * extract the argument (if any) from the command
+     * @param actString is the action command this agent want to perform
+     * @param items 
      */
-    private char getToolChar(String actString, LinkedList items){
+    private char getToolChar(String actString, LinkedList<GridObject> items){
 	char tool;
 	StringTokenizer actToks = new StringTokenizer(actString);
 	actToks.nextToken();	// eat up the main action and prepare for optional argument
@@ -446,7 +448,7 @@ public class GOBAgent extends GridObject {
 	    tool = Character.toUpperCase(actToks.nextToken().toCharArray()[0]); // print-char of item to
 	} else {
 	    if ( items.size() > 0 )
-		tool = ((GridObject)items.getFirst()).printChar();	// in the case of cell contents,
+		tool = items.getFirst().printChar();	// in the case of cell contents,
 									// Grid.addGOB() attempts (but does not guarantee)
 									// to NOT grab an agent self or other if other object present
 	    else
@@ -455,10 +457,10 @@ public class GOBAgent extends GridObject {
 	return tool;
     }
 
-    private GridObject getGOBbyPrintChar(char pc, LinkedList items) throws NoSuchElementException {
+    private GridObject getGOBbyPrintChar(char pc, LinkedList<GridObject> items) throws NoSuchElementException {
 	GridObject ldt;
-	for ( Iterator invIt = items.iterator(); invIt.hasNext(); ){ // find the object to drop
-	    ldt = (GridObject)invIt.next();
+	for ( Iterator<GridObject> invIt = items.iterator(); invIt.hasNext(); ){ // find the object to drop
+	    ldt = invIt.next();
 	    if ( ldt.printChar() == pc ) 
 		return ldt;
 	}
@@ -466,8 +468,12 @@ public class GOBAgent extends GridObject {
     }
 
     /** getGOBtool: String, LinkedList -> GridObject
+     * Obtain a pointer to the GridObject in LinkedList<GridObject> that is indicated by the command string.
+     * @param actString the action or command string for this agent
+     * @param items the collection of items (usually the inventory) in which to find the desired tool
+     * @return the tool indicated in the action string
      */
-    private GridObject getGOBtool(String actString, LinkedList items){
+    private GridObject getGOBtool(String actString, LinkedList<GridObject> items){
 	GridObject theTool = null;
 	char tool = getToolChar(actString, items);
 	try {
