@@ -5,7 +5,7 @@ import java.util.LinkedList;
  * The class is a wrapper to allow the creation of arrays of
  * homogeneous LinkedList of GridObject.
  * @author Wayne Iba
- * @version
+ * @version 20140309.1
  */
 public class LinkedListGOB extends LinkedList<GridObject> {
 }

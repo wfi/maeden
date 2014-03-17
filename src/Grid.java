@@ -1,3 +1,5 @@
+// package maeden;
+
 import java.lang.Math;
 import java.util.StringTokenizer;
 
@@ -15,7 +17,8 @@ import java.net.Socket;
 /**
  *@author:  Wayne Iba,
  *@author:  assistance from: Kristin Barquer, Cuyler Cannon, Josh Holm,
- *@author:  Brennan Johnson, Pablo Otoala, JB Schiller, Ryan Wisdom, CS116 Fall 2011, 
+ *@author:  Brennan Johnson, Pablo Otoala, JB Schiller, Ryan Wisdom,
+ *@outhor:  CS116 Fall 2011, especially Aaron Panchal Morgan Vigil, and Kelly Macdonald
  *@date:    3-12-2012
  *@version: Beta 0.5
  */
@@ -25,8 +28,6 @@ public class Grid
   extends Frame
 //maedengraphics*/
 {
-
-
 
     // window and grid variables
     private int xCols, yRows; // logical size of grid where yRows number of rows
@@ -105,20 +106,10 @@ public class Grid
 		case 'B':       /** AGENT **/
 		    // place the FoodCollector here
 		    GOBFoodCollect fc = new GOBFoodCollect(x,y,squareSize);
-		    //addGOB(fc);
-		    //System.out.println("(Grid Constr): wait for create an agent");
-		    //pa = gridspaceInputData.popPA();
-		    
-		    /* 09/10/2011
-		     * mvigil
-		     * This is the loop that needs to become
-		     * a separate thread in order that an 
-		     * unspecified number of agents can connect 
-		     * to the grid.
-		     */
-			    AgentListener al = new AgentListener(x,y,squareSize,this,gwServer,'W');
-			    al.start();
-			    //System.out.println("AgentListener just started");
+		    // start the AgentListener thread
+		    AgentListener al = new AgentListener(x,y,squareSize,this,gwServer,'W');
+		    al.start();
+		    //System.out.println("AgentListener just started");
 		    break;
 		case '+': //food
 		    food = new GOBFoodSupply(x,y,squareSize);
@@ -384,31 +375,37 @@ public class Grid
 
     // add a GridObject to the Grid
     public void addGOB(GridObject val){
-	gobs.addLast(val);                                              // add object to the last slot of the gobs linked list
+	synchronized (gobs){
+	    gobs.addLast(val); // add object to the last slot of the gobs linked list
+	}
 	if (myMap[val.pos.x][val.pos.y] == null)
 	    myMap[val.pos.x][val.pos.y] = new LinkedListGOB(); // if cell is null, create new linked list
 	if (myMap[val.pos.x][val.pos.y] != null){
-	    if ( val.printChar() == 'A' || val.printChar() == 'H' )
-		myMap[val.pos.x][val.pos.y].addLast(val);               // add agents to the end of cell's linked list
-	    else
-		myMap[val.pos.x][val.pos.y].addFirst(val);		// add all other objects to the front of list
+	    LinkedListGOB lgobs = myMap[val.pos.x][val.pos.y];
+	    synchronized (lgobs){
+		if ( val.printChar() == 'A' || val.printChar() == 'H' )
+		    lgobs.addLast(val);   // add agents to the end of cell's linked list
+		else
+		    lgobs.addFirst(val);  // add all other objects to the front of list
+	    }
 	}
     }
 
     // remove a GridObject from the Grid
     public void removeGOB(GridObject val) {
 	try {
-	    if ( gobs.contains(val) )          //if GridObject is in gobs, remove it
-		gobs.remove(val);
-	    else throw new NoSuchElementException();
-
+	    synchronized (gobs){
+		if ( gobs.contains(val) )          //if GridObject is in gobs, remove it
+		    gobs.remove(val);
+		else throw new NoSuchElementException();
+	    }
 	    if ( myMap[val.pos.x][val.pos.y] != null           //if GridObject is in cell, remove it
 		 && myMap[val.pos.x][val.pos.y].contains(val) )
-		myMap[val.pos.x][val.pos.y].remove(val);
+		synchronized (myMap[val.pos.x][val.pos.y]){
+		    myMap[val.pos.x][val.pos.y].remove(val);
+		}
 	    else throw new NoSuchElementException();
-	}
-	catch(NoSuchElementException e) { // If val not found, then we can assume the desired result
-	}
+	} catch(NoSuchElementException e) { } // If val not found, then we can assume the desired result 
     }
 	    
 
@@ -815,14 +812,19 @@ public class Grid
     		    if ( agents().size() < MAX_AGENTS ){	// if game not full, . . .
     		    	tSock = srvSock.accept();		// listen for connection, and
     		    	GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
-    		    	synchronized(agents){
-			    grid.addGOB(gagent);
+			grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
+			synchronized (agents) {
 			    agents.addLast(gagent);
-			    try { sendAgentSensations(); }
-			    catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
-    		    	}
-    		    } 
-    		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e); }
+			}
+			try { sendAgentSensations(); }
+			catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
+    		    }
+		    Thread.sleep(50);
+    		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
+		} catch (Exception e) {
+		    System.out.println("AgentListener.run(): some other exception: ");
+		    e.printStackTrace();
+		}
     	    }
     	}
     }
