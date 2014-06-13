@@ -739,7 +739,7 @@ public class Grid
     }
 
     /** Kicks everything off
-     * takes 1 required and 2 additional optional args from the command line:
+     * takes 3 optional args from the command line:
      * Arg1: String (World file name (defaults to "worlds/sampleWorld3.txt"))
      * Optional Args:
      * Arg2: boolean (true if graphical display is desired)
