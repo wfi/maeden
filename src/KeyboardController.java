@@ -21,9 +21,6 @@ import java.util.StringTokenizer;
 public class KeyboardController extends Frame {
     
     //private data field
-    private Socket gridSocket;				// socket for communicating w/ server
-    private PrintWriter gridOut;                        // takes care of output stream for sockets
-    private BufferedReader gridIn;			// bufferedreader for input reading
     private String myID;
     private static final int MAEDENPORT = 7237;         // uses port 1237 on localhost
     private Insets iTrans;
@@ -37,6 +34,7 @@ public class KeyboardController extends Frame {
     private Dashboard db;
     private boolean termOut = false;
     
+    protected GridClient gc;
 
     /**
      * KeyboardController constructor takes a string and an int
@@ -45,7 +43,7 @@ public class KeyboardController extends Frame {
      * POST: GridClient connects to Grid via network sockets
      */
     public KeyboardController(String h, int p) {
-        registerWithGrid(h, p);      //connect to the grid server socket
+	gc = new GridClient(h, p);
 	visField = new LinkedList<GridObject>(); //the visual field contents will be held in linked list
 	setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 	iTrans = getInsets();
@@ -55,40 +53,13 @@ public class KeyboardController extends Frame {
 	setSize(cx * cellSize + iTrans.left + iTrans.right,
 		ry * cellSize + dashHeight + iTrans.top + iTrans.bottom); //resize based on window cutoff
 	gd = new GridDisplay(cx, ry, cellSize);  //initialize the graphical display
-	db = new Dashboard(cx * cellSize, dashHeight, gridOut);
+	db = new Dashboard(cx * cellSize, dashHeight, gc.gridOut);
 	add(gd);
 	add(db);
 
 	setVisible(true);
     }
 
-    
-    /**
-     * registerWithGrid takes a string and an int
-     * and creates a socket with the specified network name and port number
-     * PRE: h is the name of the machine on the network, p is the port number of the server socket
-     * POST: socket connects with the server socket on the given host
-     */
-    public void registerWithGrid(String h, int p) {
-        try {
-	    // connects to h machine on port p
-            gridSocket = new Socket(h, p);
-
-	    // create output stream to communicate with grid
-            gridOut = new PrintWriter(gridSocket.getOutputStream(), true); 
-	    gridOut.println("base"); // send role to server
-
-	    //buffered reader reads from input stream from grid
-            gridIn = new BufferedReader(new InputStreamReader(gridSocket.getInputStream()));
-	    myID = gridIn.readLine(); // read this agent's ID number
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host: " + h);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: " + h);
-            System.exit(1);
-        }
-    }
  
     /**
      * sendEffectorCommand sends the specified command to the grid
@@ -97,58 +68,36 @@ public class KeyboardController extends Frame {
      * post: command is sent via the printwriter
      */
     public void sendEffectorCommand(String command) {
-	gridOut.println(command);
+	gc.gridOut.println(command);
     }
  
     /**
-     * getSensoryInfo gets the direcion to the food
-     * LINE0: # of lines to be sent or one of: die, success, or End
-     * LINE1: smell (food direction)
-     * LINE2: inventory
-     * LINE3: visual contents
-     * LINE4: ground contents
-     * LINE5: messages
-     * LINE6: remaining energy
-     * LINE7: lastActionStatus
-     * LINE8: world time
-     * pre: gridIn is initialized and connected to the grid server socket
-     * post: heading stores direction to the food f, b, l, r, or h
+     * getSensoryInfo via the GridClient component
      */
     public void getSensoryInfo() {
-	try {
-	    String status = gridIn.readLine().toLowerCase();
-	    if((status.equals("die") || status.equals("success")) || status.equals("end")) {
-		System.out.println("Final status: " + status);
-		System.exit(1);
-	    }
-	    if ( ! status.equals("8") ){
-		System.out.println("getSensoryInfo: Unexpected number of data lines - " + status);
-		System.exit(1);
-	    }
-	    // 1: get the smell info
-	    String heading = direction(gridIn.readLine().toCharArray()[0]);
-	    // 2: get the inventory
-	    String inventory = gridIn.readLine();
-	    // 3: get the visual info
-	    String info = gridIn.readLine();
-	    processRetinalField(info);
-	    // 4: get ground contents
-	    String ground = gridIn.readLine();
-	    // 5: get messages
-	    String message = gridIn.readLine(); //CHECKS MESSAGES ****CHANGE****
-	    // 6: energy
-	    String energy = gridIn.readLine();
-	    // 7: lastActionStatus
-	    String lastActionStatus = gridIn.readLine();
-	    // 8: world time
-	    String worldTime = gridIn.readLine();
-	    
+	SensoryPacket sp = new SensoryPacket(gc.gridIn);
+	String[] rawSenses = sp.getRawSenseData();
+	// 1: get the smell info
+	String heading = rawSenses[0];
+	// 2: get the inventory
+	String inventory = rawSenses[1];
+	// 3: get the visual info
+	String info = rawSenses[2];
+	processRetinalField(info);
+	// 4: get ground contents
+	String ground = rawSenses[3];
+	// 5: get messages
+	String messages = rawSenses[4]; //CHECKS MESSAGES ****CHANGE****
+	// 6: energy
+	String energy = rawSenses[5];
+	// 7: lastActionStatus
+	String lastActionStatus = rawSenses[6];
+	// 8: world time
+	String worldTime = rawSenses[7];
 
-	    // store or update according to the data just read. . . .
-	    gd.updateGDObjects(visField);
-	    db.updateLabels(heading, inventory, ground, energy, message, lastActionStatus, worldTime);
-	}
-	catch(Exception e) {}
+	// store or update according to the data just read. . . .
+	gd.updateGDObjects(visField);
+	db.updateLabels(heading, inventory, ground, messages, energy, lastActionStatus, worldTime);
     }
 
     /* processRetinalField: takes a string input from the Maeden server and converts it into the GridObjects
@@ -193,21 +142,6 @@ public class KeyboardController extends Frame {
 	}
     }
 
-    /**
-     * direction  and returns a string to display in the terminal
-     * pre: heading has char value f, b, l, r, or h
-     * post: corresponding string is returned
-     */
-    public String direction(char h) {
-	switch(h) {
-	case 'f': return "forward";
-	case 'b': return "back";
-	case 'l': return "left";
-	case 'r': return "right";
-	case 'h': return "here!";
-	}
-	return "error with the direction";
-    }
  
     /**
      * run iterates through program commands
@@ -216,7 +150,6 @@ public class KeyboardController extends Frame {
      */
     public void run() {
 	getSensoryInfo();
-      	//System.out.println("The food is " + heading + " " + direction());
 	while(true) {
 	    gd.repaint();
 	    getSensoryInfo();
@@ -362,12 +295,12 @@ public class KeyboardController extends Frame {
 	}
 
 	//, String h, String inv, String g, String e, String m) {
-	public void updateLabels(String h, String inv, String g, String e, String m, String res, String wt){
+	public void updateLabels(String h, String inv, String g, String m, String e, String res, String wt){
 	    foodHeading.setText(h);
 	    invObject.setText(inv);
 	    groundList.setText(g);
-	    energyNum.setText(e);
 	    msgInfo.setText(m);
+	    energyNum.setText(e);
 	    lastActStat.setText(res);
 	    worldTime.setText(wt);
 	    repaint();

@@ -30,16 +30,26 @@ public class SensoryPacket {
      * and performs some amount of preprocessing on that raw data.
      */
     public SensoryPacket(BufferedReader gridIn){
-	rawSenseData = getRawSenseData(gridIn);
+	rawSenseData = getRawSenseDataFromGrid(gridIn);
 	initPreProcessedFields(rawSenseData);
     }
 
     /**
-     * just read the raw data into an array of String.  Initialize the status field
+     * Just read the raw data into an array of String.  Initialize the status field from line 0
+     *
+     * LINE0: # of lines to be sent or one of: die, success, or End
+     * LINE1: smell (food direction)
+     * LINE2: inventory
+     * LINE3: visual contents
+     * LINE4: ground contents
+     * LINE5: messages
+     * LINE6: remaining energy
+     * LINE7: lastActionStatus
+     * LINE8: world time
      * @param gridIn the reader connected to the server
-     * @return the array of String representing the raw (unprocessed) sensory data
+     * @return the array of String representing the raw (unprocessed) sensory data starting with smell
      */
-    protected String[] getRawSenseData(BufferedReader gridIn){
+    protected String[] getRawSenseDataFromGrid(BufferedReader gridIn){
 	String[] result = new String[8];
 	try {
 	    String status = gridIn.readLine().toLowerCase();

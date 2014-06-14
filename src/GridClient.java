@@ -5,8 +5,7 @@ import java.net.*;
  * class GridClient : useful for any controller that wants to connect and interact with the Grid simulator
  *
  *@author:  Wayne Iba
- *@date:    3/4/2012
- *@version: Beta 0.4
+ *@version: 20140613
  */
 
 public class GridClient {
@@ -55,53 +54,11 @@ public class GridClient {
 	
     /**
      * sensoryGet : this should return an array of strings corresponding to lines read from
-     * the Grid.  This will centralize the format wrt future changes
-    /**
-     * getSensoryInfo gets the direcion to the food
-     * LINE0: # of lines to be sent or one of: die, success, or End
-     * LINE1: smell (food direction)
-     * LINE2: inventory
-     * LINE3: visual contents
-     * LINE4: ground contents
-     * LINE5: messages
-     * LINE6: remaining energy
-     * LINE7: lastActionStatus
-     * LINE8: world time
-     * pre: gridIn is initialized and connected to the grid server socket
-     * post: heading stores direction to the food f, b, l, r, or h
+     * the Grid.  
      */
     public String[] sensoryGet() {
-	String[] result = new String[8];
-	try {
-	    String status = gridIn.readLine().toLowerCase();
-	    if((status.equals("die") || status.equals("success")) || status.equals("end")) {
-		System.out.println("Final status: " + status);
-		System.exit(1);
-	    }
-	    if ( ! status.equals("8") ){
-		System.out.println("getSensoryInfo: Unexpected number of data lines - " + status);
-		System.exit(1);
-	    }
-	    // 1: get the smell info
-	    result[0] = gridIn.readLine();
-	    // 2: get the inventory
-	    result[1] = gridIn.readLine();
-	    // 3: get the visual info
-	    result[2] = gridIn.readLine();
-	    // 4: get ground contents
-	    result[3] = gridIn.readLine();
-	    // 5: get messages
-	    result[4] = gridIn.readLine(); //CHECKS MESSAGES ****CHANGE****
-	    // 6: energy
-	    result[5] = gridIn.readLine();
-	    // 7: lastActionStatus
-	    result[6] = gridIn.readLine();
-	    // 8: world time
-	    result[7] = gridIn.readLine();
-	}
-	catch(Exception e) {}
-
-	return result;
+	SensoryPacket sp = new SensoryPacket(gridIn);
+	return sp.getRawSenseData();
     }
 
 
