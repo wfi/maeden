@@ -127,7 +127,7 @@ public class SensoryPacket {
 		    if ( visualArray[i][j] != null )
 			visualArray[i][j].add(item);
 		    else
-			visualArray[i][j] = Arrays.asList(item);
+			visualArray[i][j] = new ArrayList<Character>((List<Character>)Arrays.asList(item));
 	    }
 	}
     }

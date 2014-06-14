@@ -105,6 +105,7 @@ public class KeyboardController extends Frame {
      * Post: visual raphical map is constructed
      */
     private void processRetinalField(String info) {
+	System.out.println(info);
 	StringTokenizer visTokens = new StringTokenizer(info, "(", true);
 	visTokens.nextToken();
 	visField.clear();
