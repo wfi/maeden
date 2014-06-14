@@ -198,10 +198,12 @@ public class SensoryPacket {
 			System.out.print(c);
 		    System.out.print(']');
 		} else {
-		    System.out.print("[]");
+		    System.out.print("[ ]");
 		}
 	    }
+	    System.out.println();
 	}
+	System.out.println();
     }
     
 }

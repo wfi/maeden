@@ -3,6 +3,7 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -76,14 +77,14 @@ public class KeyboardController extends Frame {
      */
     public void getSensoryInfo() {
 	SensoryPacket sp = new SensoryPacket(gc.gridIn);
+	//sp.printVisualArray();
 	String[] rawSenses = sp.getRawSenseData();
 	// 1: get the smell info
 	String heading = rawSenses[0];
 	// 2: get the inventory
 	String inventory = rawSenses[1];
-	// 3: get the visual info
-	String info = rawSenses[2];
-	processRetinalField(info);
+	// 3: get the currently visible objects info the visField list for display
+	processRetinalField(sp.getVisualArray());
 	// 4: get ground contents
 	String ground = rawSenses[3];
 	// 5: get messages
@@ -100,46 +101,36 @@ public class KeyboardController extends Frame {
 	db.updateLabels(heading, inventory, ground, messages, energy, lastActionStatus, worldTime);
     }
 
-    /* processRetinalField: takes a string input from the Maeden server and converts it into the GridObjects
-     * Pre: String info contains list of list of list of chars(?)
-     * Post: visual raphical map is constructed
+    /* processRetinalField: populate the display grid from the pre-processed visual field of a SensoryPacket
+     * @param visualArray preprocessed array of lists of character representing maeden objects
      */
-    private void processRetinalField(String info) {
-	StringTokenizer visTokens = new StringTokenizer(info, "(", true);
-	visTokens.nextToken();
+    void processRetinalField(List<Character>[][] visualArray){
 	visField.clear();
-	for (int i = 6; i >= 0; i--) {              //iterate backwards so character printout displays correctly
-	    visTokens.nextToken();
-	    for (int j=0; j <=4; j++) {             //iterate through the columns
-		visTokens.nextToken();
-		String visChars = visTokens.nextToken();
-		char[] visArray = visChars.toCharArray();
-		for(int x = 0; x < visChars.length(); x++) {
-		    char cellChar = visArray[x];
-		    switch(cellChar) {    //add the GridObjects for the graphical display
-		    case ' ': break;
-		    case '@': visField.addLast(new GOBRock(j, i, cellSize)); break;         //Rock
-		    case '+': visField.addLast(new GOBFood(j, i, cellSize)); break;         //Food
-		    case '#': visField.addLast(new GOBDoor(j, i, cellSize)); break;         //Door
-		    case '*': visField.addLast(new GOBWall(j, i, cellSize)); break;         //Wall
-		    case '=': visField.addLast(new GOBNarrows(j, i, cellSize)); break;      //Narrows
-		    case 'K': visField.addLast(new GOBKey(j, i, cellSize)); break;          //Key
-		    case 'T': visField.addLast(new GOBHammer(j, i, cellSize)); break;       //Hammer
-		    case 'Q': visField.addLast(new GOBQuicksand(j, i, cellSize)); break;    //Quicksand
-		    case 'O': visField.addLast(new GOBFoodCollect(j, i, cellSize)); break;  //Food Collection
-		    case '$': visField.addLast(new GOBGold(j, i, cellSize, gd)); break;   //Gold
-		    case 'R': visField.addLast(new GOBRobot(j, i, cellSize, gd)); break;  // Robot Monster
-		    case 'G': visField.addLast(new GOBRayGun(j, i, cellSize, gd)); break;  // Robot-Monster-Killing Ray-Gun
-		    default:
-			if(cellChar >= '0' && cellChar <= '9' && i == 5 && j == 2)
-			    visField.addLast(new GOBAgent(j, i, cellSize, 'N'));
-			else if((cellChar >= '0' && cellChar <= '9') || cellChar == 'H')
-			    visField.addLast(new GOBAgent(j, i, cellSize, '?'));
+	for (int r = 6; r >= 0; r--)
+	    for (int c = 0; c < 5; c++)
+		if (visualArray[r][c] != null)
+		    for (char item : visualArray[r][c]){
+			switch(item) {    //add the GridObjects for the graphical display
+			case ' ': break;
+			case '@': visField.add(new GOBRock(c, r, cellSize)); break;         //Rock
+			case '+': visField.add(new GOBFood(c, r, cellSize)); break;         //Food
+			case '#': visField.add(new GOBDoor(c, r, cellSize)); break;         //Door
+			case '*': visField.add(new GOBWall(c, r, cellSize)); break;         //Wall
+			case '=': visField.add(new GOBNarrows(c, r, cellSize)); break;      //Narrows
+			case 'K': visField.add(new GOBKey(c, r, cellSize)); break;          //Key
+			case 'T': visField.add(new GOBHammer(c, r, cellSize)); break;       //Hammer
+			case 'Q': visField.add(new GOBQuicksand(c, r, cellSize)); break;    //Quicksand
+			case 'O': visField.add(new GOBFoodCollect(c, r, cellSize)); break;  //Food Collection
+			case '$': visField.add(new GOBGold(c, r, cellSize, gd)); break;   //Gold
+			case 'R': visField.add(new GOBRobot(c, r, cellSize, gd)); break;  // Robot Monster
+			case 'G': visField.add(new GOBRayGun(c, r, cellSize, gd)); break;  // Robot-Monster-Killing Ray-Gun
+			default:
+			    if(item >= '0' && item <= '9' && r == 5 && c == 2)
+				visField.add(new GOBAgent(c, r, cellSize, 'N'));
+			    else if((item >= '0' && item <= '9') || item == 'H')
+				visField.add(new GOBAgent(c, r, cellSize, '?'));
+			}
 		    }
-		}
-		//System.out.println("i: " + i + " j: " + j);
-	    }
-	}
     }
 
  
