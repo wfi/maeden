@@ -47,7 +47,7 @@ public class KeyboardController extends Frame {
 	visField = new LinkedList<GridObject>(); //the visual field contents will be held in linked list
 	setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 	iTrans = getInsets();
-	setTitle("Manual Agent: " + myID);                          //window title
+	setTitle("Manual Agent: " + gc.myID);                          //window title
 	//setTitle("Agent View");                          //window title for generating figure for paper
 	System.out.println("left:" + iTrans.left + " right:" + iTrans.right + " top:" + iTrans.top + " bottom:" + iTrans.bottom);
 	setSize(cx * cellSize + iTrans.left + iTrans.right,
@@ -105,7 +105,6 @@ public class KeyboardController extends Frame {
      * Post: visual raphical map is constructed
      */
     private void processRetinalField(String info) {
-	System.out.println(info);
 	StringTokenizer visTokens = new StringTokenizer(info, "(", true);
 	visTokens.nextToken();
 	visField.clear();

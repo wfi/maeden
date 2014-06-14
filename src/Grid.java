@@ -7,6 +7,8 @@ import java.util.StringTokenizer;
 import java.awt.*;
 //maedengraphics*/
 import java.awt.Point;
+import java.util.Collections;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -47,9 +49,9 @@ public class Grid
     //maedengraphics*/
 
     // items
-    private LinkedList<ComSentence> msgs = new LinkedList<ComSentence>();   //holds agent messages
-    private LinkedList<GridObject> gobs = new LinkedList<GridObject>();   //holds world gridobjects
-    private LinkedList<GOBAgent> agents; //holds world agents
+    private List<ComSentence> msgs = Collections.synchronizedList(new LinkedList<ComSentence>());   //holds agent messages
+    private List<GridObject> gobs = Collections.synchronizedList(new LinkedList<GridObject>());   //holds world gridobjects
+    private List<GOBAgent> agents; //holds world agents
     private LinkedListGOB[][] myMap;                 //holds gridobjects
 
     // misc (possibly temporary) variables
@@ -63,21 +65,19 @@ public class Grid
 
     // Constructors
 
-    // initialize Grid from file: largely from Cuyler Cannon
+    /**
+     * Construct a Maeden server: read world definiton from file (largely from Cuyler Cannon),
+     * populate the grid with GridObjects as found in the world file,
+     * start the AgentListener thread for handling connection requests from clients,
+     * and display the window (if appropriate).
+     * @param filePath the filesystem path to the world definition file
+     * @param approxWidth the target size for the resulting window that displays the world
+     * @param showD whether or not to actually display the world
+     */
     public Grid(String filePath, int approxWidth, boolean showD) throws FileNotFoundException, IOException {
-
-	// Initialize ServerSocket to listen for controllers
-    	/* 09/10/11
-    	 * mvigil
-    	 * We may need to create a select channel
-    	 * in order to establish a non-blocking
-    	 * loop for the server to listen on.
-    	 */
-    	
 	try {
             gwServer = new ServerSocket(MAEDENPORT);	//create new server Socket on Maeden port
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             System.err.println("could not listen on port: " + MAEDENPORT);
 	    System.exit(1);   //exit if cannot use the port number
         }
@@ -90,7 +90,7 @@ public class Grid
 
 	// Initialize grid map now from read sizes
 	myMap = new LinkedListGOB[xCols][yRows]; // note: non-conventional order of columns, rows
-	agents = new LinkedList<GOBAgent>();
+	agents = Collections.synchronizedList(new LinkedList<GOBAgent>());
 
 	// set cell size from desired physical window width and logical size found in file
 	squareSize = approxWidth / xCols;
@@ -187,17 +187,17 @@ public class Grid
     }
 
     //public accessor for the gobs
-    public LinkedList<GridObject> gobs() {
+    public List<GridObject> gobs() {
 	return gobs;
     }
 
     //public accessor for the agents
-    public LinkedList<GOBAgent> agents() {
+    public List<GOBAgent> agents() {
 	return agents;
     }
 
     //public accessor for the messages
-    public LinkedList msgs() {
+    public List msgs() {
 	return msgs;
     }
 
@@ -342,18 +342,16 @@ public class Grid
      * Post: String is returned in form: ("cont1" "cont2" "cont3" ...)
      *       where cont is the individual contents of the cell
      */
-    public String groundContents(GOBAgent a, LinkedList thisCell) {
+    public String groundContents(GOBAgent a, List<GridObject> thisCell) {
 	if (thisCell != null && ! thisCell.isEmpty()) {
 	    //encapsulate contents within parentheses
 	    String ground = "(";
 	    //iterate through the cell, gather the print-chars
-	    for(Iterator i = thisCell.iterator(); i.hasNext();) {
-		GridObject gob = (GridObject) i.next();
+	    for(GridObject gob : thisCell){
 		//if the gob is an agent (and not the one passed in) get the agent id
-	        if((gob.printChar() == 'A' || gob.printChar() == 'H') && ((GOBAgent) gob != a)) {
+	        if ((gob.printChar() == 'A' || gob.printChar() == 'H') && ((GOBAgent) gob != a)) {
 		    ground = ground + "\"" + ((GOBAgent)gob).getAgentID() + "\" ";   // \" specifies the string "
-		}
-		else if(gob.printChar() != 'A' && gob.printChar() != 'H') {
+		} else if (gob.printChar() != 'A' && gob.printChar() != 'H') {
 		    ground += "\"" +  gob.printChar() + "\" ";
 		}
 	    }
@@ -376,7 +374,7 @@ public class Grid
     // add a GridObject to the Grid
     public void addGOB(GridObject val){
 	synchronized (gobs){
-	    gobs.addLast(val); // add object to the last slot of the gobs linked list
+	    gobs.add(val); // add object to the last slot of the gobs linked list
 	}
 	if (myMap[val.pos.x][val.pos.y] == null)
 	    myMap[val.pos.x][val.pos.y] = new LinkedListGOB(); // if cell is null, create new linked list
@@ -384,9 +382,9 @@ public class Grid
 	    LinkedListGOB lgobs = myMap[val.pos.x][val.pos.y];
 	    synchronized (lgobs){
 		if ( val.printChar() == 'A' || val.printChar() == 'H' )
-		    lgobs.addLast(val);   // add agents to the end of cell's linked list
+		    lgobs.add(val);   // add agents to the end of cell's linked list
 		else
-		    lgobs.addFirst(val);  // add all other objects to the front of list
+		    lgobs.add(0,val);  // add all other objects to the front of list
 	    }
 	}
     }
@@ -555,7 +553,7 @@ public class Grid
      * Pre: cellContents contains any and all gridobjects in a cell
      * Post: String ("cont1 cont2 cont3") is returned (where cont1-3 are gridobject printchars or agent IDs)
      */
-    private String visChar(LinkedList cellContents, Point heading){
+    private String visChar(List<GridObject> cellContents, Point heading){
 	String cellConts = "(";
 	//if there are any gridobjects in the cell iterate and collect them
 	if (cellContents != null && !cellContents.isEmpty()) {
@@ -603,7 +601,7 @@ public class Grid
     /**
      * mapRef: safe map reference checking for out-of-bounds
      */
-    private LinkedList mapRef(int x, int y){
+    private List<GridObject> mapRef(int x, int y){
 	if ( (x < 0) || (x >= xCols) || (y < 0) || (y >= yRows) ) return null;
 	else return myMap[x][y];
     }
@@ -616,7 +614,7 @@ public class Grid
 	for(Iterator<GOBAgent> e = agents.iterator(); e.hasNext();) {      //get all messages from all agents and store them
 	    GOBAgent a = e.next();
 	    if(a.hasMsg())                                       //if agent has message, store it
-		msgs.addLast(a.msg());
+		msgs.add(a.msg());
 	}
 
     }
@@ -814,7 +812,7 @@ public class Grid
     		    	GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
 			grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
 			synchronized (agents) {
-			    agents.addLast(gagent);
+			    agents.add(gagent);
 			}
 			try { sendAgentSensations(); }
 			catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
