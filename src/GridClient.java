@@ -56,9 +56,9 @@ public class GridClient {
      * sensoryGet : this should return an array of strings corresponding to lines read from
      * the Grid.  
      */
-    public String[] sensoryGet() {
+    public SensoryPacket getSensoryPacket() {
 	SensoryPacket sp = new SensoryPacket(gridIn);
-	return sp.getRawSenseData();
+	return sp;
     }
 
 

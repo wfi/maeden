@@ -76,7 +76,7 @@ public class KeyboardController extends Frame {
      * getSensoryInfo via the GridClient component
      */
     public void getSensoryInfo() {
-	SensoryPacket sp = new SensoryPacket(gc.gridIn);
+	SensoryPacket sp = gc.getSensoryPacket();
 	//sp.printVisualArray();
 	String[] rawSenses = sp.getRawSenseData();
 	// 1: get the smell info
