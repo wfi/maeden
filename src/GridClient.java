@@ -2,7 +2,8 @@ import java.io.*;
 import java.net.*;
 
 /**
- * class GridClient : useful for any controller that wants to connect and interact with the Grid simulator
+ * class GridClient : useful for any controller that wants to connect and interact with
+ * the Grid simulator
  *
  *@author:  Wayne Iba
  *@version: 20140613

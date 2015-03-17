@@ -35,8 +35,8 @@ public class GOBRobot extends GridObject {
     //maedengraphics*/
 
     /*
-     * door can be acted upon by a key
-     * if so, remove the door
+     * Robot can be acted upon by a RayGon
+     * if so, remove the Robot
      */
     public boolean actedOnBy(GridObject tool, Grid gw){
 	// if tool is a key, destroy self (destroy key in GOBAgent)
