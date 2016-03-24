@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 
@@ -39,7 +40,7 @@ public class GridDisplay extends Canvas {
     }
 
     //stores the gridObjects to be drawn and calls the paint GridDisplay's paint function
-    public void updateGDObjects(LinkedList<GridObject> gobs) {
+    public void updateGDObjects(List<GridObject> gobs) {
 	gridObjects.clear();
 	for (GridObject go : gobs) {
 	    gridObjects.addLast(go);

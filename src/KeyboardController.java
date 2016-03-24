@@ -4,9 +4,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
 import java.util.List;
-import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * class KeyboardController: Provides a Keyboard user-interface to a Grid world simulation.
@@ -30,7 +31,7 @@ public class KeyboardController extends Frame {
     private static final int ry = 7;
     private static final int dashHeight=280;// height of panel for dashboard (apx 3.5 * number of items to display)
 
-    private LinkedList<GridObject> visField;        // stores GOB's for painting the visual field
+    private ArrayList<GridObject> visField;        // stores GOB's for painting the visual field
     private GridDisplay gd;                         //for graphical display of map
     private Dashboard db;
     private boolean termOut = false;
@@ -45,7 +46,7 @@ public class KeyboardController extends Frame {
      */
     public KeyboardController(String h, int p) {
 	gc = new GridClient(h, p);
-	visField = new LinkedList<GridObject>(); //the visual field contents will be held in linked list
+	visField = new ArrayList<GridObject>(); //the visual field contents will be held in array list
 	setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 	iTrans = getInsets();
 	setTitle("Manual Agent: " + gc.myID);                          //window title
@@ -104,12 +105,12 @@ public class KeyboardController extends Frame {
     /* processRetinalField: populate the display grid from the pre-processed visual field of a SensoryPacket
      * @param visualArray preprocessed array of lists of character representing maeden objects
      */
-    void processRetinalField(List<Character>[][] visualArray){
+    void processRetinalField(ArrayList<ArrayList<Vector<Character>>> visualArray){
 	visField.clear();
 	for (int r = 6; r >= 0; r--)
 	    for (int c = 0; c < 5; c++)
-		if (visualArray[r][c] != null)
-		    for (char item : visualArray[r][c]){
+		if (visualArray.get(r).get(c) != null)
+		    for (char item : visualArray.get(r).get(c)){
 			switch(item) {    //add the GridObjects for the graphical display
 			case ' ': break;
 			case '@': visField.add(new GOBRock(c, r, cellSize)); break;         //Rock
@@ -261,23 +262,23 @@ public class KeyboardController extends Frame {
 	    add(worldTime);
 
 	    /*
-	    prompts.add(foodIs);
-	    vals.add(foodHeading);
-	    prompts.add(invIs);
-	    vals.add(invObject);
-	    prompts.add(groundIs);
-	    vals.add(groundList);
-	    prompts.add(energyIs);
-	    vals.add(energyNum);
-	    prompts.add(msgIs);
-	    vals.add(msgInfo);
-	    prompts.add(textIs);
-	    vals.add(text);
-	    prompts.add(lastActStatIs);
-	    vals.add(lastActStat);
+	      prompts.add(foodIs);
+	      vals.add(foodHeading);
+	      prompts.add(invIs);
+	      vals.add(invObject);
+	      prompts.add(groundIs);
+	      vals.add(groundList);
+	      prompts.add(energyIs);
+	      vals.add(energyNum);
+	      prompts.add(msgIs);
+	      vals.add(msgInfo);
+	      prompts.add(textIs);
+	      vals.add(text);
+	      prompts.add(lastActStatIs);
+	      vals.add(lastActStat);
 
-	    add(prompts);
-	    add(vals);
+	      add(prompts);
+	      add(vals);
 	    */
 
 	    //	    validate();
@@ -317,10 +318,7 @@ public class KeyboardController extends Frame {
 		text.setText("");
 		//System.out.println("SENT: " + text.getText().toLowerCase());
 	    }
-	    
 	}
-	
-		
     }
 
     public class CommandCheck {

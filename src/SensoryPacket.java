@@ -1,6 +1,6 @@
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Vector;
 import java.io.BufferedReader;
 import java.util.StringTokenizer;
 
@@ -17,7 +17,8 @@ public class SensoryPacket {
     String status;
     String smell;
     List<Character> inventory;
-    List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
+    //List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
+    ArrayList<ArrayList<Vector<Character>>> visualArray;
     List<Character> groundContents;
     String messages;
     int energy;
@@ -30,8 +31,33 @@ public class SensoryPacket {
      * and performs some amount of preprocessing on that raw data.
      */
     public SensoryPacket(BufferedReader gridIn){
+	visualArray = new ArrayList<ArrayList<Vector<Character>>>();
+	for (int row=0; row<7; row++){
+	    visualArray.add(row, new ArrayList<Vector<Character>>());
+	    for (int col=0; col<5; col++){
+		visualArray.get(row).add(col, new Vector<Character>());
+	    }
+	}
 	rawSenseData = getRawSenseDataFromGrid(gridIn);
 	initPreProcessedFields(rawSenseData);
+    }
+
+    /**
+     * another constructor takes in the sensory data as parametrs instead of using a BefferedReader
+     */
+    public SensoryPacket(String inptStatus, String inptSmell, List<Character> inptInventory,
+			 ArrayList<ArrayList<Vector<Character>>> inptVisualArray,
+			 List<Character> inptGroundContents, String inptMessages,
+			 Integer inptEnergy, Boolean inptLastActionStatus, Integer inptWorldTime){
+	status=inptStatus;
+	smell=inptSmell;
+	inventory=inptInventory;
+	visualArray=inptVisualArray;
+	groundContents=inptGroundContents;
+	messages=inptMessages;
+	energy=inptEnergy;
+	lastActionStatus=inptLastActionStatus;
+	worldTime=inptWorldTime;
     }
 
     /**
@@ -124,10 +150,7 @@ public class SensoryPacket {
 		visTokens.nextToken();
 		char[] visArray = visTokens.nextToken().replaceAll("[\\(\"\\)\\s]+","").toCharArray();
 		for(char item : visArray)
-		    if ( visualArray[i][j] != null )
-			visualArray[i][j].add(item);
-		    else
-			visualArray[i][j] = new ArrayList<Character>((List<Character>)Arrays.asList(item));
+		    visualArray.get(i).get(j).add(item);
 	    }
 	}
     }
@@ -152,7 +175,7 @@ public class SensoryPacket {
     /**
      * @return the array of lists of GridObjects that are currently within the field of view
      */
-    public List<Character>[][] getVisualArray(){ return visualArray; }
+    public ArrayList<ArrayList<Vector<Character>>> getVisualArray(){ return visualArray; }
 
     /**
      * @return the list of GridObjects on the ground where the agent is standing
@@ -190,8 +213,8 @@ public class SensoryPacket {
      * cells with more than one object
      */
     public void printVisualArray(){
-	for ( List<Character>[] row : visualArray ){
-	    for ( List<Character> cell : row ){
+	for ( ArrayList<Vector<Character>> row : visualArray ){
+	    for ( Vector<Character> cell : row ){
 		if ( cell != null ){
 		    System.out.print('[');
 		    for (Character c : cell)
