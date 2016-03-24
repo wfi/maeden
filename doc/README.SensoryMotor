@@ -131,17 +131,16 @@ They may move forward and back; turn left or right; grab, use or drop
 an object, or wait and do nothing. (In addition, agents may talk or
 shout as described in Inter-Agent Communication README.)  Actions are
 expressed as single characters followed by a newline character.  The
-three actions -- grab, use and drop -- accept an optional second
-argument.  Without this second argument, the first item available is
-selected (for grabbing, using or dropping).  Because more the one item
-may rest in a cell or be carried in the inventory, the second argument
-allows the agent to specify a particular item to grab, use or drop.
-Thus, to pick up the food if more than one item were present on the
-ground, the command "g +" would be sent (again, assuming the string is
-terminated with a newline).  Similarly, if an agent were trying to
-open a door and its inventory held: ("$" "+" "K" "$"), the agent would
-send the command "u K" in order to open a door that it was immediately
-facing.
+three actions -- grab, use and drop -- accept an optional argument.
+Without this argument, the first item available is selected (for
+grabbing, using or dropping).  Because more than one item may rest in
+a cell or be carried in the inventory, the optional argument allows
+the agent to specify a particular item to grab, use or drop.  Thus, to
+pick up the food if more than one item were present on the ground, the
+command "g +" would be sent (again, assuming the string is terminated
+with a newline).  Similarly, if an agent were trying to open a door
+and its inventory held: ("$" "+" "K" "$"), the agent would send the
+command "u K" in order to open a door that it was immediately facing.
 
 In summary, the valid actions are: f, b, r, l, g, u, d, and w for the
 commands forward, back, turn right, turn left, grab something, use
