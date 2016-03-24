@@ -15,7 +15,7 @@ import java.util.Iterator;
 public class GridDisplay extends Canvas {
 
     private int colX, rowY, dashHeight;           //ints for holding the number of rows and columns (y and x values)
-    private LinkedList gridObjects;   //container for holding gridobjects to be drawn
+    private LinkedList<GridObject> gridObjects;   //container for holding gridobjects to be drawn
     private int cellSize;             //for holding the size in pixels of one cell
     //private Dashboard dashboard;
 
@@ -30,7 +30,7 @@ public class GridDisplay extends Canvas {
 	colX = cx;
 	rowY = ry;
 	cellSize = cSize;
-	gridObjects = new LinkedList();
+	gridObjects = new LinkedList<GridObject>();
 	setSize(colX * cellSize, rowY * cellSize + dashHeight); //size of the window
 	setVisible(true);
 
@@ -39,13 +39,10 @@ public class GridDisplay extends Canvas {
     }
 
     //stores the gridObjects to be drawn and calls the paint GridDisplay's paint function
-    public void updateGDObjects(LinkedList gobs) {
-
-	//dashboard.updateLabels(h, inv, g, e, m);
-	
+    public void updateGDObjects(LinkedList<GridObject> gobs) {
 	gridObjects.clear();
-	for (Iterator i = gobs.iterator(); i.hasNext(); ) {
-	    gridObjects.addLast(i.next());
+	for (GridObject go : gobs) {
+	    gridObjects.addLast(go);
 	}
     }
 
