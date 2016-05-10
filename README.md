@@ -1,4 +1,4 @@
-# maeden
+# M&AElig;DEN
 
 ## Synopsis
 
@@ -27,8 +27,8 @@ this item may be obviated by previous item
 * create associative array to store action costs, indexed by action character
 * resolve conflict when two agents want to move into the same square
 * track down problem with stochastic failure giving incorrect status; 
-problem starts in processAgentActions() 
-where STOCHASTICISM/STOCHASTIC_RATE is sometimes exercised
+problem starts in `processAgentActions()`
+where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
 * create wrapper server that will fork a simulation in specified world 
 (do we really want this?)
 * upgrade documentation in Java sources to support javadoc
