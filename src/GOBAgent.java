@@ -33,7 +33,7 @@ public class GOBAgent extends GridObject {
     private double STOCHASTIC_RATE = 0.1;		// probability of unintended effect when STOCHASTICISM is true
     private Random randGenerator = new Random();
     private int ATTACK_LOSS = 100;			// amount of energy lost when get hit
-    private int INVENTORYCAPACITY = 1;
+    private int INVENTORYCAPACITY = 100;
 
     // OTHERS ....
     private ComSentence agentCom;      //for constructing messages
