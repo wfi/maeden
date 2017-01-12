@@ -78,13 +78,14 @@ public class WorldReader {
         
         char curSymbol;
         for (int h = 0; h < rows; h++) {
-            for (int w = 0; w < cols; w++) { // <= because of LF's
-                //curSymbol = dataFile.read();
-		curSymbol = (char)worldFileScanner.nextByte();
+	    String aLine = worldFileScanner.nextLine();
+            for (int w = 0; w < cols; w++) { 
+                curSymbol = aLine.charAt(w);
+		//System.out.print(curSymbol);
                 if (w < logWidth)
                     map[w][h] = curSymbol;
             }
-	    worldFileScanner.nextLine();
+	    //System.out.println();
         }
         
     }
