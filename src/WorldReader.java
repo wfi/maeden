@@ -25,7 +25,6 @@ import java.util.InputMismatchException;
 public class WorldReader {
     
     private Scanner worldFileScanner;
-    private LinkedList myPreAgents = new LinkedList();
     private String windowTitle;
     private int logWidth, logHeight;
     private char map [][];    // map[rows][columns]
@@ -50,18 +49,6 @@ public class WorldReader {
 	// Flush rest of second line
 	worldFileScanner.nextLine();
         
-	//System.out.println("Ready to read 3rd line:");
-        // Fetch agent information: (THIRD LINE)
-	//String thirdLine = readLine(dataFile);
-	//String[] aInfo = thirdLine.split("\\s");
-	//int numAgents = Integer.parseInt(aInfo[0]);
-	//int j = 1;
-	//for (int i = 0; i < numAgents; i++){
-	//    myPreAgents.addLast(new PreAgent(aInfo[j++].toCharArray()[0],
-	//				     Integer.parseInt(aInfo[j++]),
-	//				     Integer.parseInt(aInfo[j++])));
-	//}
-	    
         // Fetch map
         map = new char[logWidth][logHeight];
         readCharMap(logWidth, logHeight);
@@ -87,34 +74,11 @@ public class WorldReader {
             }
 	    //System.out.println();
         }
-        
     }
     
     public String windowTitle() { return windowTitle; }
     public int cols() { return logWidth; }
     public int rows() { return logHeight; }
-    //public char[][] map() { return map; }
     public char map(int x, int y) { return map[x][y]; }
     
-    /*
-    public PreAgent popPA(){
-	if (! myPreAgents.isEmpty() )
-	    return (PreAgent) myPreAgents.removeFirst();
-	System.out.println("Tried to pop pre-agent from empty list");
-	System.exit(-2);
-	return null;
-    }
-
-    public class PreAgent {
-	public char ihead;
-	public int xCol;
-	public int yRow;
-
-	public PreAgent(char h, int x, int y){
-	    ihead = h;
-	    xCol = x;
-	    yRow = y;
-	}
-    }
-    */
 }
