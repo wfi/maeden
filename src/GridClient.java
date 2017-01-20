@@ -54,8 +54,10 @@ public class GridClient {
     }
 	
     /**
-     * sensoryGet : this should return an array of strings corresponding to lines read from
-     * the Grid.  
+     * getSensoryPacket : this should return a SensoryPacket corresponding to lines read from
+     * the Grid.  Note: this drains the information available on the socket connecting to the Grid server,
+     * and thus, will block if the information has already been read since the agent controller's last action.
+     * @return the latest sensory information from the Grid server wrapped in a SensoryPacket
      */
     public SensoryPacket getSensoryPacket() {
 	SensoryPacket sp = new SensoryPacket(gridIn);

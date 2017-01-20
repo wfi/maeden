@@ -12,6 +12,8 @@ Details and documentation may be
 
 ## To Do
 
+* put everything into a Java package; the challenge, however, is for controllers and
+the simulator proper to live and play nicely together with a minimum of hassle
 * create an abstract agent-controller class that KeyboardController extends
 and that other classes could extend as well
 * when simulation ends 
