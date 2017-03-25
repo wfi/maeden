@@ -12,6 +12,8 @@ Details and documentation may be
 
 ## To Do
 
+* refactor into simulator proper and agent controller folders
+* catch error in server from faulty command input from controller and kill controller
 * put everything into a Java package; the challenge, however, is for controllers and
 the simulator proper to live and play nicely together with a minimum of hassle
 * create an abstract agent-controller class that KeyboardController extends
