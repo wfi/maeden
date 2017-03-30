@@ -20,7 +20,7 @@ import java.net.Socket;
  *@author:  Wayne Iba,
  *@author:  assistance from: Kristin Barquer, Cuyler Cannon, Josh Holm,
  *@author:  Brennan Johnson, Pablo Otoala, JB Schiller, Ryan Wisdom,
- *@outhor:  CS116 Fall 2011, especially Aaron Panchal Morgan Vigil, and Kelly Macdonald
+ *@author:  CS116 Fall 2011, especially Aaron Panchal Morgan Vigil, and Kelly Macdonald
  *@date:    3-12-2012
  *@version: Beta 0.5
  */
@@ -56,7 +56,6 @@ public class Grid
 
     // misc (possibly temporary) variables
     private GridObject food;                   //world goal
-    public static final int MAX_AGENTS = 10;
     public static final int MAEDENPORT = 7237; //host server port number
     private ServerSocket gwServer;	// server-socket for listening for connection requests
 
@@ -807,7 +806,6 @@ public class Grid
     	    Socket tSock;
     	    while (true) {
     		try {
-    		    if ( agents().size() < MAX_AGENTS ){	// if game not full, . . .
     		    	tSock = srvSock.accept();		// listen for connection, and
     		    	GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
 			grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
@@ -816,7 +814,6 @@ public class Grid
 			}
 			try { sendAgentSensations(); }
 			catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
-    		    }
 		    Thread.sleep(50);
     		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
 		} catch (Exception e) {
