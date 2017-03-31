@@ -12,32 +12,28 @@ Details and documentation may be
 
 ## To Do
 
-* refactor into simulator proper and agent controller folders
-* catch error in server from faulty command input from controller and kill controller
-* put everything into a Java package; the challenge, however, is for controllers and
+1. refactor into simulator proper and agent controller folders
+2. catch error in server from faulty command input from controller and kill controller
+3. put everything into a Java package; the challenge, however, is for controllers and
 the simulator proper to live and play nicely together with a minimum of hassle
-* create an abstract agent-controller class that KeyboardController extends
+4. create an abstract agent-controller class that KeyboardController extends
 and that other classes could extend as well
-* when simulation ends 
+5. when simulation ends 
 (in the case where eating the food is the ultimate goal),
 send disconnect signals to any other agents currently connected
-* in server loop, keep track of connected agents' energy 
-even if they are deliberating; 
-kill them if they run out of energy
-* adjust simulation time units to correspond to 'wait cost'
+6. in server's processAgentActions() loop, if no action sent by an agent, let nextCommand be "wait" (or whatever)
+7. adjust simulation time units to correspond to 'wait cost'
 and then deduct wait-cost every time-slice when agents do not act
-* action cost incurred should reflect cost of actual action selected by agent
-plus wait costs since the last action (or connection if first action);
-this item may be obviated by previous item
-* fix the foundBase and killGrid interaction that is happening in Grid.java
-* create associative array to store action costs, indexed by action character
-* resolve conflict when two agents want to move into the same square
-* track down problem with stochastic failure giving incorrect status; 
+8. fix the foundBase and killGrid interaction that is happening in Grid.java
+9. create map to store action costs, indexed by action character as key and associating energy cost as value
+10. resolve conflict when two agents want to move into the same square
+11. track down problem with stochastic failure giving incorrect status; 
 problem starts in `processAgentActions()`
 where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
-* create wrapper server that will fork a simulation in specified world 
+12. create wrapper server that will fork a simulation in specified world 
 (do we really want this?)
-* upgrade documentation in Java sources to support javadoc
-* modify assignment of agent IDs to re-use IDs that have been released
-* remove restriction of single-digit agent IDs (i.e., limit of 10 agents)
-* add shield object or armor or chain mail, etc.
+13. upgrade documentation in Java sources to support javadoc
+14. remove restriction of single-digit agent IDs (i.e., limit of 10 agents) -- check for consequences
+15. add shield object or armor or chain mail, etc.
+16. modify assignment of agent IDs to re-use IDs that have been released
+17. ~~make To Do list numbered instead of bullets~~
