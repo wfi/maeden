@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Maeden is a simulated grid-world environment
+M&aelig;den is a simulated grid-world environment
 designed to support multi-agent problem-solving.
 Agent controllers may be written in any language 
 that supports basic sockets.
