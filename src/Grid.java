@@ -557,34 +557,16 @@ public class Grid
 	//if there are any gridobjects in the cell iterate and collect them
 	if (cellContents != null && !cellContents.isEmpty()) {
 	    //iterate through cellContents, gather printchars or agent IDs
-	    for(Iterator i = cellContents.iterator(); i.hasNext();) {
-		//look at the next item in the cell
-		GridObject gObj = (GridObject) i.next(); 
-		if(gObj.printChar() == 'A') { 		//if it is a base agent
-		    if(((GOBAgent)gObj).getAgentID() < 10) {
-			//get the agent id
-			cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-		    }
-		    //if it is an agent, but bad ID, put 'A' as printchar
-		    else {
-			System.out.println("Agent ID is greater than 10, must be less than 10");
-			cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
-		    }
+	    for(GridObject gObj : cellContents) {
+		if(gObj.printChar() == 'A') { 		//if it is an agent
+		    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
 		}
+		// *** To Do: eliminate the base/helper distinction within the simulator
 		else if (gObj.printChar() == 'H') { // if it is a helper agent
-		    if(((GOBAgent)gObj).getAgentID() < 10) {
-			//get the agent id
-			cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-		    }
-		    //if it is an agent, but bad ID, put 'A' as printchar
-		    else {
-			System.out.println("Agent ID is greater than 10, must be less than 10");
-			cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
-		    }
-		}
-		//if gridobject is not an agent, return its print character
-		else
+		    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
+		} else {	//if gridobject is not an agent, return its print character
 		    cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
+		}
 	    }
 	    //trim leading and closing spaces
 	    cellConts = cellConts.trim() + ')';

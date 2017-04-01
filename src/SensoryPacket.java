@@ -18,7 +18,7 @@ public class SensoryPacket {
     String smell;
     List<Character> inventory;
     //List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
-    ArrayList<ArrayList<Vector<Character>>> visualArray;
+    ArrayList<ArrayList<Vector<String>>> visualArray;
     List<Character> groundContents;
     String messages;
     int energy;
@@ -31,11 +31,11 @@ public class SensoryPacket {
      * and performs some amount of preprocessing on that raw data.
      */
     public SensoryPacket(BufferedReader gridIn){
-	visualArray = new ArrayList<ArrayList<Vector<Character>>>();
+	visualArray = new ArrayList<ArrayList<Vector<String>>>();
 	for (int row=0; row<7; row++){
-	    visualArray.add(row, new ArrayList<Vector<Character>>());
+	    visualArray.add(row, new ArrayList<Vector<String>>());
 	    for (int col=0; col<5; col++){
-		visualArray.get(row).add(col, new Vector<Character>());
+		visualArray.get(row).add(col, new Vector<String>());
 	    }
 	}
 	rawSenseData = getRawSenseDataFromGrid(gridIn);
@@ -46,7 +46,7 @@ public class SensoryPacket {
      * another constructor takes in the sensory data as parametrs instead of using a BefferedReader
      */
     public SensoryPacket(String inptStatus, String inptSmell, List<Character> inptInventory,
-			 ArrayList<ArrayList<Vector<Character>>> inptVisualArray,
+			 ArrayList<ArrayList<Vector<String>>> inptVisualArray,
 			 List<Character> inptGroundContents, String inptMessages,
 			 Integer inptEnergy, Boolean inptLastActionStatus, Integer inptWorldTime){
 	status=inptStatus;
@@ -138,19 +138,37 @@ public class SensoryPacket {
 
     /**
      * Process the single string representing all the rows and column contents of the visual sensory data
-     * and convert it to a 2D array of character objects, null when the cell is empty
+     * and convert it to a 2D array of Vectors of Strings.
      * @param info the visual sensory data string (structered as parenthesized list of lists) from server
      */
     protected void processRetinalField(String info) {
+	boolean seeAgent;
 	StringTokenizer visTokens = new StringTokenizer(info, "(", true);
 	visTokens.nextToken();
 	for (int i = 6; i >= 0; i--) {              //iterate backwards so character printout displays correctly
 	    visTokens.nextToken();
 	    for (int j=0; j <=4; j++) {             //iterate through the columns
+		seeAgent = false;
+		int agentID = 0;
 		visTokens.nextToken();
 		char[] visArray = visTokens.nextToken().replaceAll("[\\(\"\\)\\s]+","").toCharArray();
-		for(char item : visArray)
-		    visualArray.get(i).get(j).add(item);
+		for(int k=0; k < visArray.length; k++){
+		    if (visArray[k] >= 0 && visArray[k] <= 9){  // we have a digit
+			if (seeAgent){ // we're already processing an agent ID with possibly more than one digit
+			    agentID = 10*agentID + (visArray[k] - '0');
+			} else {       // starting to process an agent ID
+			    seeAgent = true;
+			    agentID = (visArray[k] - '0');
+			}
+		    } else {                                    // we have a non-agent ID
+			if (seeAgent){ // just finished processing agent ID -- record it
+			    visualArray.get(i).get(j).add(String.valueOf(agentID));
+			    seeAgent = false;
+			    agentID = 0;
+			}
+			visualArray.get(i).get(j).add(String.valueOf(visArray[k])); // add the non-agent item
+		    }
+		}
 	    }
 	}
     }
@@ -175,7 +193,7 @@ public class SensoryPacket {
     /**
      * @return the array of lists of GridObjects that are currently within the field of view
      */
-    public ArrayList<ArrayList<Vector<Character>>> getVisualArray(){ return visualArray; }
+    public ArrayList<ArrayList<Vector<String>>> getVisualArray(){ return visualArray; }
 
     /**
      * @return the list of GridObjects on the ground where the agent is standing
@@ -213,12 +231,12 @@ public class SensoryPacket {
      * cells with more than one object
      */
     public void printVisualArray(){
-	for ( ArrayList<Vector<Character>> row : visualArray ){
-	    for ( Vector<Character> cell : row ){
+	for ( ArrayList<Vector<String>> row : visualArray ){
+	    for ( Vector<String> cell : row ){
 		if ( cell != null ){
 		    System.out.print('[');
-		    for (Character c : cell)
-			System.out.print(c);
+		    for (String s : cell)
+			System.out.print(s);
 		    System.out.print(']');
 		} else {
 		    System.out.print("[ ]");

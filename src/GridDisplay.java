@@ -3,7 +3,6 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.Iterator;
 
 
 /**************************************
@@ -47,9 +46,10 @@ public class GridDisplay extends Canvas {
 	}
     }
 
-    /*paint draws gridlines and draws all gridObjects for the current agent
+    /** paint draws gridlines and draws all gridObjects for the current agent
      * Pre: gridObjects is not empty and contains GridObjects
      * Post: all gridlines and gridobjects are drawn in the window
+     * @param g the current Graphics context
      */
     public void paint(Graphics g) {
 	//iTrans = getInsets();                                       //compensates for the frame cutoff
@@ -61,9 +61,7 @@ public class GridDisplay extends Canvas {
 	    g.drawLine((j * cellSize), 0, (j * cellSize), (rowY * cellSize));
 
 	if(gridObjects != null && gridObjects.size() != 0) {                    //paint the individual gridobjects
-	    for(Iterator i = gridObjects.iterator(); i.hasNext();) {
-		//all gridobjects in the visual field are stored in visField
-		GridObject obj = (GridObject) i.next();
+	    for(GridObject obj : gridObjects) {
 		obj.paint(g);
 	    }
 	}

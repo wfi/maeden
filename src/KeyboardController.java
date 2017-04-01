@@ -105,30 +105,35 @@ public class KeyboardController extends Frame {
     /* processRetinalField: populate the display grid from the pre-processed visual field of a SensoryPacket
      * @param visualArray preprocessed array of lists of character representing maeden objects
      */
-    void processRetinalField(ArrayList<ArrayList<Vector<Character>>> visualArray){
+    void processRetinalField(ArrayList<ArrayList<Vector<String>>> visualArray){
 	visField.clear();
 	for (int r = 6; r >= 0; r--)
 	    for (int c = 0; c < 5; c++)
 		if (visualArray.get(r).get(c) != null)
-		    for (char item : visualArray.get(r).get(c)){
-			switch(item) {    //add the GridObjects for the graphical display
-			case ' ': break;
-			case '@': visField.add(new GOBRock(c, r, cellSize)); break;         //Rock
-			case '+': visField.add(new GOBFood(c, r, cellSize)); break;         //Food
-			case '#': visField.add(new GOBDoor(c, r, cellSize)); break;         //Door
-			case '*': visField.add(new GOBWall(c, r, cellSize)); break;         //Wall
-			case '=': visField.add(new GOBNarrows(c, r, cellSize)); break;      //Narrows
-			case 'K': visField.add(new GOBKey(c, r, cellSize)); break;          //Key
-			case 'T': visField.add(new GOBHammer(c, r, cellSize)); break;       //Hammer
-			case 'Q': visField.add(new GOBQuicksand(c, r, cellSize)); break;    //Quicksand
-			case 'O': visField.add(new GOBFoodCollect(c, r, cellSize)); break;  //Food Collection
-			case '$': visField.add(new GOBGold(c, r, cellSize, gd)); break;   //Gold
-			case 'R': visField.add(new GOBRobot(c, r, cellSize, gd)); break;  // Robot Monster
-			case 'G': visField.add(new GOBRayGun(c, r, cellSize, gd)); break;  // Robot-Monster-Killing Ray-Gun
-			default:
-			    if(item >= '0' && item <= '9' && r == 5 && c == 2)
-				visField.add(new GOBAgent(c, r, cellSize, 'N'));
-			    else if((item >= '0' && item <= '9') || item == 'H')
+		    for (String item : visualArray.get(r).get(c)){
+			//add the GridObjects for the graphical display
+			if (item.length() == 1 && (item.charAt(0) < '0' || item.charAt(0) > '9')){
+			    // have a regular grid object or a single-digit agent ID
+			    switch(item.charAt(0)) {    
+			    case ' ': break;
+			    case '@': visField.add(new GOBRock(c, r, cellSize)); break;         //Rock
+			    case '+': visField.add(new GOBFood(c, r, cellSize)); break;         //Food
+			    case '#': visField.add(new GOBDoor(c, r, cellSize)); break;         //Door
+			    case '*': visField.add(new GOBWall(c, r, cellSize)); break;         //Wall
+			    case '=': visField.add(new GOBNarrows(c, r, cellSize)); break;      //Narrows
+			    case 'K': visField.add(new GOBKey(c, r, cellSize)); break;          //Key
+			    case 'T': visField.add(new GOBHammer(c, r, cellSize)); break;       //Hammer
+			    case 'Q': visField.add(new GOBQuicksand(c, r, cellSize)); break;    //Quicksand
+			    case 'O': visField.add(new GOBFoodCollect(c, r, cellSize)); break;  //Food Collection
+			    case '$': visField.add(new GOBGold(c, r, cellSize, gd)); break;   //Gold
+			    case 'R': visField.add(new GOBRobot(c, r, cellSize, gd)); break;  // Robot Monster
+			    case 'G': visField.add(new GOBRayGun(c, r, cellSize, gd)); break;  // Robot-Monster-Killing Ray-Gun
+			    default:
+			    }
+			} else { // have an agent ID
+			    if (r == 5 && c == 2)
+				visField.add(new GOBAgent(c, r, cellSize, 'N')); // always facing North in visfield
+			    else 
 				visField.add(new GOBAgent(c, r, cellSize, '?'));
 			}
 		    }
