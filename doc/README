@@ -1,4 +1,4 @@
-[v.2012.02.29.1]
+[v.2017.04.01]
 --------------------------------------------------------
 -------------------- Maeden README ---------------------
 --------------------------------------------------------
@@ -22,24 +22,21 @@ of a small number of itmes which may be manipulated in order to
 accomplish various tasks.  Users of Maeden may create their own worlds
 and tasks within them.  The default task is to locate and consume a
 food item.  The simulater comes with several sets of ready-made worlds
-provide a wide range of task difficulties.  In the default condition,
-the simulation ends once the food is eaten.  Thus, the simulator must
+providing a wide range of task difficulties.  In the default
+condition, the simulation ends once the food is eaten (controlled by
+EAT_FOOD_ENDS_IT flag in Grid.java).  Thus, the simulator must
 (currently) be started separately for each world.
 
-A run consists of the server process and one additional process for
-each agent.  The server should be started first, with command line
-arguments specifying the world to simulate.  For example:
+A run consists of the server process and an additional process for
+each agent.  The server should be started first, with optional
+command-line arguments specifying the world to simulate, whether or
+not to display graphics (default true), and the speed of the
+simulation (default 50msec).  For example:
 
-    $ java Grid worlds/tw03
+    $ java Grid 
 
-will initiate a simulation using the test-world numebr 3 with the
-graphical display enabled.  Optional arguments following the world
-include:
-- a boolean flag enabling/disabling the global graphical
-  display (useful for debugging agent behaviors), 
-- the number of agents that will be connecting to this simulation,
-- the number of milliseconds to wait between simulation time steps
-  (default 50 milliseconds).
+will initiate a simulation using the test-world worlds/miscX1 with the
+graphical display enabled.
 
 Once the server has been started as described, it begins listening for
 agent connection requests.  Agents can connect and disconnect at their
@@ -57,20 +54,20 @@ arguments are found in the source code for the server, Grid.java.  The
 controller(s) for any agents are started as separate processes in
 accordance with the languages used to implement them.  For a simple
 simulation involving a single agent controlled by a human, one would
-start the server one shell as described above and then start the
-Keyboard Controller
+start the server in one shell as described above and then start the
+Keyboard Controller in a second shell as:
 
     $ java KeyboardController
 
-in a second shell.  The KeyboardController provides an overhead view
-of what the agent sees, other sensory information in a dashboard, and
-an interface for submitting commands to the server.
+The KeyboardController provides an overhead view of what the agent
+sees, other sensory information in a dashboard, and an interface for
+submitting commands to the server.
 
 --------------------------------------------------------
 II.  Java Code Architecture
 
-A Grid class defines the overall simulation object.  Items that appear
-in a simulated world inherit from the GridObject class and by
+The Grid class defines the overall simulation object.  Items that
+appear in a simulated world inherit from the GridObject class and by
 convention have names such as GOBWall, GOBHammer, and GOBAgent.
 Objects and agents in the simulated world are represented as instances
 of classes that are managed by the Grid object.  An external agent
@@ -96,7 +93,7 @@ sensory-motor protocol, see Sensory-Motor Interface README.
 --------------------------------------------------------
 IV.  Inter-Agent Communication
 
-Agents in the Maeden simulator have the capability to talk to one
+Agents in the Maeden simulator have the ability to talk to one
 another.  In order to formulate a coherent message to be transmitted
 to other agents, it must be sent in the correct form.  To learn more
 see the Inter-Agent Communication README.
