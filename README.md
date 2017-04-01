@@ -12,7 +12,6 @@ Details and documentation may be
 
 ## To Do
 
-1. fix exception in KeyboardController when terminating (either from eating food or suicide)
 1. refactor into simulator proper and agent controller folders
 1. put everything into a Java package; the challenge, however, is for controllers and
 the simulator proper to live and play nicely together with a minimum of hassle
