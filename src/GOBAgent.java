@@ -37,7 +37,7 @@ public class GOBAgent extends GridObject {
 
     // OTHERS ....
     private ComSentence agentCom;      //for constructing messages
-    private static int idSequence = 9; // source for unique agent IDs
+    private static int idSequence = 0; // source for unique agent IDs
     ///*maedengraphics
     private static Color[] colorSet = { Color.cyan, Color.blue, Color.green, Color.orange };
     //maedengraphics*/
