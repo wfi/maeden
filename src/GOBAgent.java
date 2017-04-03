@@ -203,12 +203,12 @@ public class GOBAgent extends GridObject {
     public void getNextCommand() {
 	try {
 		// Only read in the next command if there is one
-		// if there is not, set nextCommand to null
+		// if there is not, set nextCommand to "w" (wait)
 		if(recv.ready()){
 	    nextCommand = recv.readLine();
 		}
 		else {
-			nextCommand = null;
+			nextCommand = "w";
 		}
 	} catch (Exception e) { System.out.println("getNextCommand: Failed to receive command from controller process " + e); }
     }
