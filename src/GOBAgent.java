@@ -4,6 +4,8 @@ import java.awt.*;
 //maedengraphics*/
 import java.awt.Point;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.net.Socket;
 import java.net.ServerSocket;
@@ -56,17 +58,21 @@ public class GOBAgent extends GridObject {
     private int dx, dy;                //heading x and y coor.
     public LinkedList<GridObject> inventory;
     private Grid myGrid;
-    private static final int forwardCost = 5;  //energy costs for various actions
-    private static final int backCost = 5;
-    private static final int turnCost = 3;
-    private static final int waitCost = 1;
-    private static final int grabCost = 2;
-    private static final int dropCost = 1;
-    private static final int useHammerCost = 15;
-    private static final int useKeyCost = 2;
-    private static final int talkCost = 2;
-    private static final int shoutCost = 4;
-    private static final int attackCost = 15;
+    private static final Map<String, Integer> costs;
+    static {
+    	costs = new HashMap<String,Integer>();
+    	costs.put("forward", 5);
+    	costs.put("back", 5);
+    	costs.put("turn", 3);
+    	costs.put("wait", 1);
+    	costs.put("grab", 2);
+    	costs.put("drop", 1);
+    	costs.put("useHammer", 15);
+    	costs.put("useKey", 2);
+    	costs.put("talk", 2);
+    	costs.put("shout", 4);
+    	costs.put("attack", 15);
+    }
     private int agentEnergy = 2000;
     //private int comPayment = 1000;
     ///*maedengraphics
@@ -276,7 +282,7 @@ public class GOBAgent extends GridObject {
 	    myGrid.addGOB(this);
 	} else
 	    lastActionFails();
-	agentEnergy -= forwardCost;           //subtract energy required to move forward
+	agentEnergy -= costs.get("forward");           //subtract energy required to move forward
 	dieIfNoEnergy();                      //agent dies if no energy left
     }
     
@@ -291,7 +297,7 @@ public class GOBAgent extends GridObject {
 	    myGrid.addGOB(this);
 	} else
 	    lastActionFails();
-	agentEnergy -= backCost;              //subtract energy required to move backward
+	agentEnergy -= costs.get("back");              //subtract energy required to move backward
 	dieIfNoEnergy();                      //agent dies if no energy left
     }
 
@@ -304,7 +310,7 @@ public class GOBAgent extends GridObject {
 	dieIfQuicksand();
 	int tmp = dx;
 	dx = dy; dy = - tmp;
-	agentEnergy -= turnCost;              //subtract energy required to turn
+	agentEnergy -= costs.get("turn");              //subtract energy required to turn
 	dieIfNoEnergy();                      //agent dies if no energy left
     }
 
@@ -317,7 +323,7 @@ public class GOBAgent extends GridObject {
 	dieIfQuicksand();
 	int tmp = dx;
 	dx = - dy; dy = tmp;
-	agentEnergy -= turnCost;              //subtract energy required to turn
+	agentEnergy -= costs.get("turn");              //subtract energy required to turn
 	dieIfNoEnergy();                      //agent dies if no energy left
     }
 
@@ -337,7 +343,7 @@ public class GOBAgent extends GridObject {
 		attackee.setAgentEnergy(attackee.energy() - ATTACK_LOSS);
 	    } catch (NoSuchElementException e) { agentEnergy -= 5; } // penalty for attacking when nothing there to hit
 	}
-	agentEnergy -= attackCost;
+	agentEnergy -= costs.get("attack");
 	dieIfNoEnergy();
     }
 
@@ -365,7 +371,7 @@ public class GOBAgent extends GridObject {
 	    System.out.println("grab: myGrid.cellHasTool returns false for tool '" + tool + "'");
 	    lastActionFails();
 	}
-	agentEnergy -= grabCost;                    //subtract energy required to grab an object
+	agentEnergy -= costs.get("grab");                    //subtract energy required to grab an object
 	dieIfNoEnergy();                            //agent dies if no energy is left
     }
 
@@ -385,7 +391,7 @@ public class GOBAgent extends GridObject {
 	} else {
 	    lastActionFails();
 	}
-	agentEnergy -= dropCost;              //subtract amount of energy required to drop an object
+	agentEnergy -= costs.get("drop");              //subtract amount of energy required to drop an object
 	dieIfNoEnergy();                      //agent dies if he has no energy left
     }
 
@@ -423,15 +429,15 @@ public class GOBAgent extends GridObject {
 		lastActionFails();
 	    if (gob.printChar() == '#' && useTool.printChar() == 'K') {
 		inventory.remove(useTool);                      // destroy key
-		agentEnergy -= useKeyCost;                      // subtract energy required to turn a key
+		agentEnergy -= costs.get("useKey");                      // subtract energy required to turn a key
 	    }
 	} else {
 	    lastActionFails();
-	    agentEnergy -= waitCost;                            //agent hasn't done anything, so just subtract wait energy
+	    agentEnergy -= costs.get("wait");                            //agent hasn't done anything, so just subtract wait energy
 	}
 
 	if(useTool != null && useTool.printChar() == 'T')
-	    agentEnergy -= useHammerCost;                       //subtract energy required to swing a hammer
+	    agentEnergy -= costs.get("useHammer");                       //subtract energy required to swing a hammer
 	dieIfNoEnergy();                                        //if out of energy, agent dies
     }
 
@@ -569,7 +575,7 @@ public class GOBAgent extends GridObject {
 	    break;
 	case 'g': grab(action);  //grab command
 	    break;
-	case 'w': agentEnergy -= waitCost; dieIfNoEnergy(); dieIfQuicksand(); // wait command
+	case 'w': agentEnergy -= costs.get("wait"); dieIfNoEnergy(); dieIfQuicksand(); // wait command
 	    break;
 	case 't': communicate(action);         //talk command
 	    break;
@@ -602,9 +608,9 @@ public class GOBAgent extends GridObject {
 
 	//subtract appropriate amount of energy
 	if(vol.equalsIgnoreCase("shout"))
-	    agentEnergy -= shoutCost;
+	    agentEnergy -= costs.get("shout");
 	else
-	    agentEnergy -= talkCost;
+	    agentEnergy -= costs.get("talk");
 
 	String cat = aTokenizer.nextToken();        //category is second token
 
