@@ -59,6 +59,8 @@ public class GOBAgent extends GridObject {
     public LinkedList<GridObject> inventory;
     private Grid myGrid;
     private static final Map<String, Integer> costs;
+    //can't currently change keys to action characters
+    //same character for "useKey" and "useHammer"
     static {
     	costs = new HashMap<String,Integer>();
     	costs.put("forward", 5);
