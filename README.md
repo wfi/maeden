@@ -28,14 +28,14 @@ use something such as XML or other that is more readily parsed by all languages
 1. track down problem with stochastic failure giving incorrect status; 
 problem starts in `processAgentActions()`
 where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
-1. create wrapper server that will fork a simulation in specified world 
-(do we really want this?)
 1. upgrade documentation in Java sources to support javadoc
 1. add shield object or armor or chain mail, etc.
-1. modify assignment of agent IDs to re-use IDs that have been released
 1. eliminate base/helper distinction
 1. replace iterator with for-each loops
 1. add command-line argument to control EAT_FOOD_ENDS_IT
+1. create wrapper server that will fork a simulation in specified world 
+(do we really want this?)
+1. modify assignment of agent IDs to re-use IDs that have been released
 1. ~~create map to store action costs, indexed by action character as key and associating energy cost as value~~
 1. ~~in server's processAgentActions() loop, if no action sent by an agent, let nextCommand be "wait" (or whatever)~~
 1. ~~adjust simulation time units to correspond to 'wait cost'
