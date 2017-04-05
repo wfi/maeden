@@ -21,11 +21,8 @@ and that other classes could extend as well
 1. when simulation ends 
 (in the case where eating the food is the ultimate goal),
 send disconnect signals to any other agents currently connected
-1. in server's processAgentActions() loop, if no action sent by an agent, let nextCommand be "wait" (or whatever)
 1. for sending visual info from the server to agent-controllers,
 use something such as XML or other that is more readily parsed by all languages
-1. adjust simulation time units to correspond to 'wait cost'
-and then deduct wait-cost every time-slice when agents do not act
 1. fix the foundBase and killGrid interaction that is happening in Grid.java
 1. create map to store action costs, indexed by action character as key and associating energy cost as value
 1. resolve conflict when two agents want to move into the same square
@@ -40,5 +37,8 @@ where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
 1. eliminate base/helper distinction
 1. replace iterator with for-each loops
 1. add command-line argument to control EAT_FOOD_ENDS_IT
+1. ~~in server's processAgentActions() loop, if no action sent by an agent, let nextCommand be "wait" (or whatever)~~
+1. ~~adjust simulation time units to correspond to 'wait cost'
+and then deduct wait-cost every time-slice when agents do not act~~
 1. ~~remove restriction of single-digit agent IDs (i.e., limit of 10 agents)~~
 1. ~~make To Do list numbered instead of bullets~~
