@@ -16,9 +16,8 @@ import java.util.Vector;
  * with the Grid simulation.  Other agents in field of view appear as a four-pointed star
  * since the heading is not reported by the server.
  * 
- *@author:  Josh Holm, Wayne Iba
- *@date:    2-25-12
-  @version: Beta 0.2
+ * @author:  Josh Holm, Wayne Iba
+ * @date:    2-25-12
  */
 public class KeyboardController extends Frame {
     
@@ -306,8 +305,9 @@ public class KeyboardController extends Frame {
 
 	class GridDisplayListener implements ActionListener{
 	    
-	    PrintWriter gridOut;
-	    TextField text;
+	    private PrintWriter gridOut;
+	    private TextField text;
+	    private String commandString;   //stores the string that is entered by the user
 	    
 	    public GridDisplayListener(PrintWriter pw, TextField tf){
 		gridOut=pw;
@@ -316,63 +316,50 @@ public class KeyboardController extends Frame {
 	    }
 
 	    public void actionPerformed(ActionEvent e){
-		CommandCheck check = new CommandCheck();
-		String command = text.getText();
-		command = check.validateCommand(command);
-		gridOut.println(command);
+		commandString = text.getText().toLowerCase();
+		if (invalidCommand(commandString)){
+		    printHelp();
+		} else {
+		    gridOut.println(commandString);
+		    //System.out.println("SENT: " + text.getText().toLowerCase());
+		}
 		text.setText("");
-		//System.out.println("SENT: " + text.getText().toLowerCase());
 	    }
-	}
-    }
-
-    public class CommandCheck {
-	    
-	private String commandString;   //stores the string that is sent in by the user
-	    	   
-	private void printHelp() {
-	    System.out.println("Maeden help information");
-	    System.out.println("Allowable commands are:");
-	    System.out.println("f: move forward");
-	    System.out.println("b: move backward");
-	    System.out.println("r: turn right");
-	    System.out.println("l: turn left");
-	    System.out.println("g: grab an object in the current spot");
-	    System.out.println("d: drop an object currently being carried");
-	    System.out.println("u: apply a carried object (tool or food)");
-	    System.out.println("a: attack an agent ahead");
-	    System.out.println("w: wait");
-	    System.out.println("k: remove yourself from world");
-	    System.out.println("?: print this help information");
-	}
+	    	    	   
+	    private void printHelp() {
+		System.out.println("Maeden help information");
+		System.out.println("Allowable commands are:");
+		System.out.println("f: move forward");
+		System.out.println("b: move backward");
+		System.out.println("r: turn right");
+		System.out.println("l: turn left");
+		System.out.println("g: grab an object in the current spot");
+		System.out.println("d: drop an object currently being carried");
+		System.out.println("u: apply a carried object (tool or food)");
+		System.out.println("a: attack an agent ahead");
+		System.out.println("w: wait");
+		System.out.println("k: remove yourself from world");
+		System.out.println("?: print this help information");
+	    }
 	
-	/**
-	 * invalidCommand: string -> boolean
-	 * In general, a command is invalid if its length is 0 (the user just pressed enter),
-	 * or the command starts with an invalid letter (one that's not fbrldguwst).
-	 * If the first letter of the command is g, if additional requirments are not met the command
-	 * is invalid. A valid "g command" is of the form "g [item]" where [item] begins with +, k or t.   
-	 */
-	public boolean invalidCommand(String commandString)
-	{
-	    return (commandString.length() == 0
-		    || "fbrldguwstka?".indexOf(commandString.substring(0,1)) < 0);
-	}
-
-	public String validateCommand(String commandString) {
-	    try {
-		    
-		commandString=commandString.toLowerCase();
-		while ( invalidCommand(commandString) )
-		    {
-			printHelp();
-			return null;
-		    }
+	    /**
+	     * invalidCommand: string -> boolean
+	     * In general, a command is invalid if its length is 0 (the user just pressed enter),
+	     * or the command starts with an invalid letter (one that's not fbrldguwstka?).
+	     * If the first letter of the command is g, if additional requirments are not met the command
+	     * is invalid. A valid "g command" is of the form "g [item]" where [item] begins with +, k or t.   
+	     * @param commandString the (already lower-cased) string entered by the user
+	     * @return true if the entered text is an invalid command
+	     */
+	    public boolean invalidCommand(String commandString)
+	    {
+		// note: this is not yet checking validity of possible args to either grab, drop, use, or shout/talk
+		return (commandString.length() == 0
+			|| "fbrldguwstka?".indexOf(commandString.substring(0,1)) < 0);
 	    }
-	    catch(Exception e) {System.out.println("validateCommand: " + e);}
-	    return commandString;
-	}
-    }
 
+	}
+
+    }
 
 }
