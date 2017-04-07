@@ -1,5 +1,10 @@
+package org.maeden.controller;
+
+
 import java.io.*;
 import java.net.*;
+
+import org.maeden.simulator.SensoryPacket;
 
 /**
  * class GridClient : useful for any controller that wants to connect and interact with

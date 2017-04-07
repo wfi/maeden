@@ -1,3 +1,4 @@
+package org.maeden.simulator;
 ///*maedengraphics
 import java.awt.Color;
 import java.awt.Graphics;

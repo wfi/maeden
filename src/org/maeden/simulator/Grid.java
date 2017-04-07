@@ -1,4 +1,4 @@
-// package maeden;
+package org.maeden.simulator;
 
 import java.lang.Math;
 import java.util.StringTokenizer;

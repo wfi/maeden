@@ -1,3 +1,4 @@
+package org.maeden.simulator;
 import java.util.NoSuchElementException;
 ///*maedengraphics
 import java.awt.*;

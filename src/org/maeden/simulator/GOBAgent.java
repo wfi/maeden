@@ -1,3 +1,5 @@
+package org.maeden.simulator;
+
 import java.lang.Math;
 ///*maedengraphics
 import java.awt.*;

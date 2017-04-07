@@ -1,3 +1,4 @@
+package org.maeden.simulator;
 
 import java.awt.Point;
 
