@@ -26,7 +26,6 @@ import org.maeden.simulator.GOBRock;
 import org.maeden.simulator.GOBWall;
 import org.maeden.simulator.GridDisplay;
 import org.maeden.simulator.GridObject;
-import org.maeden.simulator.SensoryPacket;
 
 /**
  * class KeyboardController: Provides a Keyboard user-interface to a Grid world simulation.

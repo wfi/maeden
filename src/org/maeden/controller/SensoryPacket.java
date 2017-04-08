@@ -1,4 +1,4 @@
-package org.maeden.simulator;
+package org.maeden.controller;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -44,7 +44,7 @@ public class SensoryPacket {
     }
 
     /**
-     * another constructor takes in the sensory data as parametrs instead of using a BefferedReader
+     * another constructor takes in the sensory data as parameters instead of using a BufferedReader
      */
     public SensoryPacket(String inptStatus, String inptSmell, List<Character> inptInventory,
 			 ArrayList<ArrayList<Vector<String>>> inptVisualArray,
