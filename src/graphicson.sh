@@ -1,5 +1,4 @@
-for javafile in *.java ;
+for javafile in org/maeden/simulator/*.java ;
 do
-  cat $javafile | sed -e 's/\/\*maedengraphics/\/\/\/\*maedengraphics/' | sed -e 's/maedengraphics\*\//\/\/maedengraphics\*\//' > $javafile.tmp;
-  mv -f $javafile.tmp $javafile; 
-  done
+    sed -i -e 's/\/\*maedengraphics/\/\/\/\*maedengraphics/; s/maedengraphics\*\//\/\/maedengraphics\*\//' $javafile;
+done
