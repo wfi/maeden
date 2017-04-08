@@ -26,7 +26,7 @@ public class GOBRock extends GridObject {
      * if so, remove this rock
      */
     public boolean actedOnBy(GridObject tool, Grid gw){
-	if ( tool.getClass().getName().equals("GOBHammer") ){
+	if ( tool.printChar() == 'T' ){
 	    gw.removeGOB(this);
 	    return true;
 	}

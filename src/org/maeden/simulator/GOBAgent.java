@@ -73,6 +73,7 @@ public class GOBAgent extends GridObject {
     	costs.put("drop", 1);
     	costs.put("useT", 15);
     	costs.put("useK", 2);
+	costs.put("useG", 2);
     	costs.put("talk", 2);
     	costs.put("shout", 4);
     	costs.put("attack", 15);
@@ -422,19 +423,19 @@ public class GOBAgent extends GridObject {
 		    ! myGrid.myMap()[fSpot.x][fSpot.y].isEmpty() ){
 	    // assume a single object that is being acted upon (door or rock)
 	    GridObject gob = (GridObject) myGrid.myMap()[fSpot.x][fSpot.y].getLast();
+	    System.out.println("tool class is: " + useTool.getClass().getName() + " and target is: " + gob.getClass().getName());
 	    boolean result = gob.actedOnBy(useTool, myGrid);
 	    if (!result)
 		lastActionFails();
+	    else
+		agentEnergy -= costs.get("use" + useTool.printChar());
 	    if (gob.printChar() == '#' && useTool.printChar() == 'K') {
 		inventory.remove(useTool);                      // destroy key
-		agentEnergy -= costs.get("useK");               // subtract energy required to turn a key
 	    }
 	} else {
 	    lastActionFails();
 	    agentEnergy -= costs.get("wait");                   //agent hasn't done anything, so just subtract wait energy
 	}
-	if(useTool != null && useTool.printChar() == 'T')
-	    agentEnergy -= costs.get("useT");                   //subtract energy required to swing a hammer
 	dieIfNoEnergy();                                        //if out of energy, agent dies
     }
 

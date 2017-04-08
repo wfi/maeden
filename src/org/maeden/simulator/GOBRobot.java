@@ -36,12 +36,11 @@ public class GOBRobot extends GridObject {
     //maedengraphics*/
 
     /*
-     * Robot can be acted upon by a RayGon
+     * Robot can be acted upon by a RayGun
      * if so, remove the Robot
      */
     public boolean actedOnBy(GridObject tool, Grid gw){
-	// if tool is a key, destroy self (destroy key in GOBAgent)
-	if ( tool.getClass().getName().equals("GOBRayGun") ){
+	if ( tool.printChar() == 'G' ){
 	    gw.removeGOB(this);
 	    return true;
 	}
