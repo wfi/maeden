@@ -1,7 +1,4 @@
-package org.maeden.controller;
-
-import org.maeden.simulator.GOBAgent;
-import org.maeden.simulator.Grid;
+package org.maeden.simulator;
 
 interface Senses {
 
