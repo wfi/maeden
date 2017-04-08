@@ -246,6 +246,9 @@ public class Grid
 			a.processAction(a.nextCommand());
 			a.setNeedUpdate(true);
 		    }
+		else {
+			a.processAction("w");
+		}
 	    }
 	} catch (Exception e) { System.out.println("Failed processing the next command just read: " + e);}
 	//System.out.println("About to collect messages");
