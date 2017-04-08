@@ -421,16 +421,15 @@ public class GOBAgent extends GridObject {
 	    }
 	} else if ( useTool != null && myGrid.myMap()[fSpot.x][fSpot.y] != null &&
 		    ! myGrid.myMap()[fSpot.x][fSpot.y].isEmpty() ){
-	    // assume a single object that is being acted upon (door or rock)
+	    // assume a single object that is being acted upon
 	    GridObject gob = (GridObject) myGrid.myMap()[fSpot.x][fSpot.y].getLast();
-	    System.out.println("tool class is: " + useTool.getClass().getName() + " and target is: " + gob.getClass().getName());
 	    boolean result = gob.actedOnBy(useTool, myGrid);
 	    if (!result)
 		lastActionFails();
 	    else
 		agentEnergy -= costs.get("use" + useTool.printChar());
 	    if (gob.printChar() == '#' && useTool.printChar() == 'K') {
-		inventory.remove(useTool);                      // destroy key
+		inventory.remove(useTool);                      // key gets consumed
 	    }
 	} else {
 	    lastActionFails();

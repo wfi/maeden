@@ -27,7 +27,7 @@ public class GOBDoor extends GridObject {
      */
     public boolean actedOnBy(GridObject tool, Grid gw){
 	// if tool is a key, destroy self (destroy key in GOBAgent)
-	if ( tool.printChar() == 'K' ) ){
+	if ( tool.printChar() == 'K' ){
 	    gw.removeGOB(this);
 	    return true;
 	}

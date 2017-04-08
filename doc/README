@@ -31,9 +31,11 @@ A run consists of the server process and an additional process for
 each agent.  The server should be started first, with optional
 command-line arguments specifying the world to simulate, whether or
 not to display graphics (default true), and the speed of the
-simulation (default 50msec).  For example:
+simulation (default 50msec).  For example, in the root of the source
+tree (i.e., org.maeden.etc) do the following:
 
-    $ java Grid 
+    $ javac org/maeden/simulator/Grid.java
+    $ java org.maeden.simulator.Grid 
 
 will initiate a simulation using the test-world worlds/miscX1 with the
 graphical display enabled.
@@ -57,7 +59,8 @@ simulation involving a single agent controlled by a human, one would
 start the server in one shell as described above and then start the
 Keyboard Controller in a second shell as:
 
-    $ java KeyboardController
+    $ javac org/maeden/controller/KeyboardController.java
+    $ java org.maeden.controller.KeyboardController
 
 The KeyboardController provides an overhead view of what the agent
 sees, other sensory information in a dashboard, and an interface for

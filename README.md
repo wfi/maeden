@@ -12,9 +12,6 @@ Details and documentation may be
 
 ## To Do
 
-1. refactor into simulator proper and agent controller folders
-1. put everything into a Java package; the challenge, however, is for controllers and
-the simulator proper to live and play nicely together with a minimum of hassle
 1. catch error in server from faulty command input from controller and kill controller
 1. create an abstract agent-controller class that KeyboardController extends
 and that other classes could extend as well
@@ -36,6 +33,9 @@ where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
 1. create wrapper server that will fork a simulation in specified world 
 (do we really want this?)
 1. modify assignment of agent IDs to re-use IDs that have been released
+1. ~~refactor into simulator proper and agent controller folders~~
+1. ~~put everything into a Java package; the challenge, however, is for controllers and
+the simulator proper to live and play nicely together with a minimum of hassle~~
 1. ~~create map to store action costs, indexed by action character as key and associating energy cost as value~~
 1. ~~in server's processAgentActions() loop, if no action sent by an agent, let nextCommand be "wait" (or whatever)~~
 1. ~~adjust simulation time units to correspond to 'wait cost'
