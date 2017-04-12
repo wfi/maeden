@@ -13,8 +13,6 @@ Details and documentation may be
 ## To Do
 
 1. catch error in server from faulty command input from controller and kill controller
-1. create an abstract agent-controller class that KeyboardController extends
-and that other classes could extend as well
 1. when simulation ends 
 (in the case where eating the food is the ultimate goal),
 send disconnect signals to any other agents currently connected
@@ -33,6 +31,8 @@ where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
 1. create wrapper server that will fork a simulation in specified world 
 (do we really want this?)
 1. modify assignment of agent IDs to re-use IDs that have been released
+1. ~~create an abstract agent-controller class that KeyboardController extends
+and that other classes could extend as well~~
 1. ~~refactor into simulator proper and agent controller folders~~
 1. ~~put everything into a Java package; the challenge, however, is for controllers and
 the simulator proper to live and play nicely together with a minimum of hassle~~
