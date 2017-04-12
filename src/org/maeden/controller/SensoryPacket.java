@@ -1,4 +1,5 @@
 package org.maeden.controller;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -8,12 +9,14 @@ import java.util.StringTokenizer;
 /**
  * Simple class for representing 'pre-processed' sensory packets.
  * Agents can bypass the low-level 'raw' sensory data and especially the problem of parsing
- * the contents of the visual field by accessing an array of Lists of GridObjects.
+ * the contents of the visual field by accessing an 2D array of Lists of GridObjects.
  *
  * @author: Wayne Iba
  * @version: 20140613
  */
 public class SensoryPacket {
+
+    public static final String NUMLINES = "8";
 
     String status;
     String smell;
@@ -77,14 +80,14 @@ public class SensoryPacket {
      * @return the array of String representing the raw (unprocessed) sensory data starting with smell
      */
     protected String[] getRawSenseDataFromGrid(BufferedReader gridIn){
-	String[] result = new String[8];
+	String[] result = new String[Integer.parseInt(NUMLINES)];
 	try {
 	    String status = gridIn.readLine().toLowerCase();
 	    if((status.equals("die") || status.equals("success")) || status.equals("end")) {
 		System.out.println("Final status: " + status);
 		System.exit(1);
 	    }
-	    if ( ! status.equals("8") ){
+	    if ( ! status.equals(NUMLINES) ){
 		System.out.println("getSensoryInfo: Unexpected number of data lines - " + status);
 		System.exit(1);
 	    }

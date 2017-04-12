@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
 import java.util.List;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -119,7 +118,7 @@ public class KeyboardController extends Frame {
 	db.updateLabels(heading, inventory, ground, messages, energy, lastActionStatus, worldTime);
     }
 
-    /* processRetinalField: populate the display grid from the pre-processed visual field of a SensoryPacket
+    /** processRetinalField: populate the display grid from the pre-processed visual field of a SensoryPacket
      * @param visualArray preprocessed array of lists of character representing maeden objects
      */
     void processRetinalField(ArrayList<ArrayList<Vector<String>>> visualArray){

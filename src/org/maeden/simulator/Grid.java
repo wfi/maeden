@@ -230,16 +230,14 @@ public class Grid
      * to be processed, get them and do whatever needs to be done.
      */
     public void processAgentActions() {
-	GOBAgent a;
 	try {
-	    for (Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ){ // TODO: genericize Iterator
-		a = i.next();
+	    for (GOBAgent a : agents) {
 		a.getNextCommand();           //have current agent get next command from controller process
+		//System.out.println("processing agent " + a.getAgentID() + " with action: " + a.nextCommand());
 	    }
 	} catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
 	try {
-	    for (Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ){    //process and perform each agent's action
-		a = i.next();
+	    for (GOBAgent a : agents) {    //process and perform each agent's action
 		//Process the action only if there is a next command
 		if(a.nextCommand() != null)
 		    {
@@ -250,7 +248,10 @@ public class Grid
 			a.processAction("w");
 		}
 	    }
-	} catch (Exception e) { System.out.println("Failed processing the next command just read: " + e);}
+	} catch (Exception e) {
+	    System.out.println("Failed processing the next command just read");
+	    e.printStackTrace();
+	}
 	//System.out.println("About to collect messages");
 	try {
 	    getAgentMessages();             //places any messages generated from agent actions inside msgs linked list
@@ -258,8 +259,8 @@ public class Grid
 	//System.out.println("Messages collected");
 	boolean foundBase = false;
 	try {
-	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext();) {          //remove any dead agents
-		a = i.next();
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {          //remove any dead agents
+		GOBAgent a = i.next();
 		switch(a.status()) {
 		case 'c':                        //agent is alive, hasn't found the food
 		    if ( (a.getAgentRole()).equals("base") ){ foundBase = true; }
