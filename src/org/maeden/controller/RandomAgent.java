@@ -22,12 +22,14 @@ public class RandomAgent extends AbstractAgentController {
 	this("localhost", MAEDENPORT);
     }
 
+    /** A degenerate sense/think/act cycle with no real thinking
+     */
     public void run() {
-	getSensoryInfo();
+	getSensoryInfo();	// sense
 	while (currentSensePacket.getStatus().equals(SensoryPacket.NUMLINES)) {
-	    int randomAct = myRand.nextInt(possibleActions.length());
-	    sendEffectorCommand(possibleActions.substring(randomAct, randomAct + 1));
-	    getSensoryInfo();
+	    int randomAct = myRand.nextInt(possibleActions.length());			// 'think'
+	    sendEffectorCommand(possibleActions.substring(randomAct, randomAct + 1));	//  act
+	    getSensoryInfo();								//  sense
 	}
     }
 

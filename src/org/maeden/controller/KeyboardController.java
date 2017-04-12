@@ -36,11 +36,10 @@ import org.maeden.simulator.GridObject;
  * @author:  Josh Holm, Wayne Iba
  * @date:    2-25-12
  */
-public class KeyboardController extends Frame {
+public class KeyboardController extends AbstractAgentController {
     
     //private data field
-    private String myID;
-    private static final int MAEDENPORT = 7237;         // uses port 1237 on localhost
+    private Frame myWin;
     private Insets iTrans;
     private static final int cellSize = 60;             // sets the width and height of individual visual cells
     private static final int cx = 5;                    //sets size for the visual array
@@ -52,7 +51,6 @@ public class KeyboardController extends Frame {
     private Dashboard db;
     private boolean termOut = false;
     
-    protected GridClient gc;
 
     /**
      * KeyboardController constructor takes a string and an int
@@ -61,39 +59,29 @@ public class KeyboardController extends Frame {
      * POST: GridClient connects to Grid via network sockets
      */
     public KeyboardController(String h, int p) {
-	gc = new GridClient(h, p);
+	myWin = new Frame();
 	visField = new ArrayList<GridObject>(); //the visual field contents will be held in array list
-	setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-	iTrans = getInsets();
-	setTitle("Manual Agent: " + gc.myID);                          //window title
+	myWin.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+	iTrans = myWin.getInsets();
+	myWin.setTitle("Manual Agent: " + gc.myID);                          //window title
 	//setTitle("Agent View");                          //window title for generating figure for paper
 	System.out.println("left:" + iTrans.left + " right:" + iTrans.right + " top:" + iTrans.top + " bottom:" + iTrans.bottom);
-	setSize(cx * cellSize + iTrans.left + iTrans.right,
-		ry * cellSize + dashHeight + iTrans.top + iTrans.bottom); //resize based on window cutoff
+	myWin.setSize(cx * cellSize + iTrans.left + iTrans.right,
+		      ry * cellSize + dashHeight + iTrans.top + iTrans.bottom); //resize based on window cutoff
 	gd = new GridDisplay(cx, ry, cellSize);  //initialize the graphical display
 	db = new Dashboard(cx * cellSize, dashHeight, gc.gridOut);
-	add(gd);
-	add(db);
+	myWin.add(gd);
+	myWin.add(db);
 
-	setVisible(true);
+	myWin.setVisible(true);
     }
 
  
     /**
-     * sendEffectorCommand sends the specified command to the grid
-     * *NOTE: GOBAgent only looks at first letter of command string unless talk or shout is sent*
-     * pre: command is either f, b, l, r, g, u, d, "talk" + message, or "shout" + message
-     * post: command is sent via the printwriter
+     * processSensoryInfo via the currentSensePacket or currentRawSenseData
      */
-    public void sendEffectorCommand(String command) {
-	gc.gridOut.println(command);
-    }
- 
-    /**
-     * getSensoryInfo via the GridClient component
-     */
-    public void getSensoryInfo() {
-	SensoryPacket sp = gc.getSensoryPacket();
+    public void processSensoryInfo() {
+	SensoryPacket sp = currentSensePacket;
 	//sp.printVisualArray();
 	String[] rawSenses = sp.getRawSenseData();
 	// 1: get the smell info
@@ -163,10 +151,11 @@ public class KeyboardController extends Frame {
      */
     public void run() {
 	getSensoryInfo();
+	processSensoryInfo();
 	while(true) {
 	    gd.repaint();
 	    getSensoryInfo();
-
+	    processSensoryInfo();
         }
     }
 
@@ -206,29 +195,6 @@ public class KeyboardController extends Frame {
 	//private Panel vals;
 
 	public Dashboard(int width, int height, PrintWriter pw){
-	    /*
-	    //setFont(new Font("GENEVA", Font.BOLD, 14));
-	    setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-	    prompts = new Panel(new GridLayout(0, 1));
-	    vals =  new Panel(new GridLayout(0, 1));
-	    //setLayout(new GridLayout(0, 2));//note: rows expand as components added
-	    setSize(width, height);
-	    foodIs = new Label("The food is:");
-	    foodHeading = new Label(" ", Label.LEFT);
-	    invIs = new Label("Inventory:");
-	    invObject= new Label(" ", Label.LEFT);
-	    groundIs= new Label("Ground:");
-	    groundList= new Label(" ", Label.LEFT);
-	    energyIs= new Label("Energy:");
-	    energyNum= new Label(" ", Label.LEFT);
-	    msgIs= new Label ("Message:");
-	    msgInfo= new Label (" ", Label.LEFT);
-	    textIs= new Label("Command:");
-	    text = new TextField(30);
-	    lastActStatIs = new Label("Prev result:");
-	    lastActStat = new Label(" ", Label.LEFT);
-	    text.addActionListener(new GridDisplayListener(pw, text));
-	    */
 
 	    //setFont(new Font("GENEVA", Font.BOLD, 14));
 	    setLayout(new GridLayout(0, 2, 0, 0));//note: rows expand as components added
@@ -282,28 +248,7 @@ public class KeyboardController extends Frame {
 	    add(worldTimeIs);
 	    add(worldTime);
 
-	    /*
-	      prompts.add(foodIs);
-	      vals.add(foodHeading);
-	      prompts.add(invIs);
-	      vals.add(invObject);
-	      prompts.add(groundIs);
-	      vals.add(groundList);
-	      prompts.add(energyIs);
-	      vals.add(energyNum);
-	      prompts.add(msgIs);
-	      vals.add(msgInfo);
-	      prompts.add(textIs);
-	      vals.add(text);
-	      prompts.add(lastActStatIs);
-	      vals.add(lastActStat);
-
-	      add(prompts);
-	      add(vals);
-	    */
-
 	    //	    validate();
-	    
 	    //	    System.out.println(foodIs.getWidth() + " " + foodIs.getHeight());
 	}
 
