@@ -717,45 +717,50 @@ public class Grid
 	System.exit(4);  //exit
     }
 
+    /** print the proper usage of the program
+     */
+    public static void useage() {
+	System.out.println("Usage: java org.maeden.simulator.Grid [world-string] [display-bool] [simspeed-int] [eatfoodends-bool]\n"
+			   + "where\n"
+			   + "    world-string: is the path to the world file\n"
+			   + "    display-bool: is true/false whether you want the world displayed\n"
+			   + "    simspeed-int: number of milliseconds per simulation step\n"
+			   + "    eatfoodends-bool: true/false whether any agent eating the food ends the simulation");
+    }
+
     /** Kicks everything off
      * takes 3 optional args from the command line:
      * Arg1: String (World file name (defaults to "worlds/sampleWorld3.txt"))
      * Optional Args:
      * Arg2: boolean (true if graphical display is desired)
      * Arg3: int (number of milliseconds to sleep between simulation steps.  Default=50)
-     * Arg4: [to do: control EAT_FOOD_ENDS_IT flag]
+     * Arg4: control EAT_FOOD_ENDS_IT flag
      * ***Note: args must appear in this order, main looks at first arg as world file name, 2nd as boolean, and 3rd as num of agents***
+     * @param args array of String command-line arguments
      */
-    public static void main(String[] a){
+    public static void main(String[] args){
 	int windowWidth = 600;
-	Grid myGrid;
+	Grid myGrid = null;
 	boolean showD = true;
 
 	// populate world from file
 	try {
-	    if(a.length > 0) {
-		if(a.length >= 2) {
-		    if(a[1].equalsIgnoreCase("false"))  //if 2nd arg is false, don't show graphical display
-		      showD = false;
-		}
-		myGrid = new Grid(a[0], windowWidth, showD);
-		if(a.length >= 3) {
-		    myGrid.WORLD_CYCLE_TIME = Integer.parseInt(a[2]); // cycle time for simulation
-		}
-		/* TO DO: Control EAT_FOOD_ENDS_IT
-		if(a.length >= 4) {
-		}
-		*/
-	    } 
-	    else {
-		myGrid = new Grid("worlds/miscX1", windowWidth,showD);
+	    switch ( args.length ) {
+	    case 0: myGrid = new Grid("worlds/miscX1", windowWidth, showD); break;
+	    case 1: myGrid = new Grid(args[0], windowWidth, showD); break;
+	    case 2: myGrid = new Grid(args[0], windowWidth, args[1].equalsIgnoreCase("true")); break;
+	    case 3: myGrid = new Grid(args[0], windowWidth, args[1].equalsIgnoreCase("true"));
+		myGrid.WORLD_CYCLE_TIME = Integer.parseInt(args[2]); break;
+	    case 4: myGrid = new Grid(args[0], windowWidth, args[1].equalsIgnoreCase("true"));
+		myGrid.WORLD_CYCLE_TIME = Integer.parseInt(args[2]);
+		myGrid.EAT_FOOD_ENDS_IT = args[3].equalsIgnoreCase("true"); break;
+	    default: useage();
 	    }
 	    ///*maedengraphics
 	    //if(showD)  //if graphical display is desired, show the window
 	    //   myGrid.setVisible(true);
 	    //maedengraphics*/
-	    myGrid.run();  //run the simulation
-	    
+	    if (myGrid != null) myGrid.run();  //run the simulation
 	}
 	catch (FileNotFoundException e) { System.out.println("Could not find file"); }
 	catch (Exception e) { System.out.println("Some exception: " + e); }

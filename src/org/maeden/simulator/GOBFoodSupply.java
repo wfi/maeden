@@ -19,7 +19,7 @@ public class GOBFoodSupply extends GOBFood {
 
     private int amountSupplied = 0;
     private int lastSupplyTime = Integer.MIN_VALUE;
-    private int FOOD_YIELD_INTERVAL = 10; // number cycles through Grid.run loop, each having WORLD_CYCLE_TIME duration
+    protected int FOOD_YIELD_INTERVAL = 5; // number cycles through Grid.run loop, each having WORLD_CYCLE_TIME duration
 
     //Constructor stes printchar, color
     public GOBFoodSupply(int ix, int iy, int s){

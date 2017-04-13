@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 
 public class GOBFood extends GridObject {
 
-    private int FOODINC = 500;
+    private int FOODINC = 1000;
 
     //Constructor stes printchar, color
     public GOBFood(int ix, int iy, int s){
