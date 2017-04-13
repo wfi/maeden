@@ -25,10 +25,10 @@ where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
 1. upgrade documentation in Java sources to support javadoc
 1. add shield object or armor or chain mail, etc.
 1. eliminate base/helper distinction
-1. replace iterator with for-each loops
 1. create wrapper server that will fork a simulation in specified world 
 (do we really want this?)
 1. modify assignment of agent IDs to re-use IDs that have been released
+1. ~~replace iterator with for-each loops~~
 1. ~~add command-line argument to control EAT_FOOD_ENDS_IT~~
 1. ~~fix the foundBase and killGrid interaction that is happening in Grid.java~~
 1. ~~create an abstract agent-controller class that KeyboardController extends

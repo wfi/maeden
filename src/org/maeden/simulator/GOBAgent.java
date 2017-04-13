@@ -8,7 +8,6 @@ import java.awt.Point;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.io.PrintWriter;
@@ -270,6 +269,12 @@ public class GOBAgent extends GridObject {
 	agentEnergy = newValue;
     }
 
+    /** 
+     */
+    public void decrEnergyWait() {
+	agentEnergy -= costs.get("wait");
+    }
+
     // AGENT ACTIONS
 
     /* moveForward checks to see if the cell in front of agent is passable.  If it is, agent moves to cell, otherwise does nothing
@@ -495,11 +500,12 @@ public class GOBAgent extends GridObject {
      */
     private void dieIfQuicksand(){
 	if (myGrid.myMap()[pos.x][pos.y] != null)
-	    for (Iterator i = (myGrid.myMap())[pos.x][pos.y].iterator(); i.hasNext(); )
-		if (((GridObject)i.next()).printChar() == 'Q'){
-		    send.println("die");                               //agent died
+	    for (GridObject go : (myGrid.myMap())[pos.x][pos.y]) {
+		if ( go.printChar() == 'Q' ){
+		    send.println("die");
 		    status = 'd';
 		}
+	    }
     }
 
     /** dieIfNoEnergy determines if agent has energy left.  Call this function for every action
@@ -574,7 +580,8 @@ public class GOBAgent extends GridObject {
 	    break;
 	case 'g': grab(action);  //grab command
 	    break;
-	case 'w': agentEnergy -= costs.get("wait"); dieIfNoEnergy(); dieIfQuicksand(); // wait command
+	case 'w': // wait command
+	    agentEnergy -= costs.get("wait"); dieIfNoEnergy(); dieIfQuicksand();
 	    break;
 	case 't': communicate(action);         //talk command
 	    break;

@@ -245,7 +245,7 @@ public class Grid
 			a.setNeedUpdate(true);
 		    }
 		else {
-			a.processAction("w");
+		    a.decrEnergyWait(); // otherwise, deduct the wait cost from agent's energy
 		}
 	    }
 	} catch (Exception e) {
@@ -277,7 +277,7 @@ public class Grid
     }
     
     /**
-     * sendAgentSensations: for each agent, send their sensory information
+     * sendAgentSensations: for each agent that is read for it, send their sensory information
      * LINE1: The number of lines that are going to be sent (excluding this line) *could also be d, e, or s (die, end, success)*
      * LINE2: smell direction to food
      * LINE3: inventory in form ("inv-char")
@@ -288,9 +288,7 @@ public class Grid
      * LINE8: last action's result status (ok or fail)
      */
     public void sendAgentSensations() {
-	GOBAgent a;
-	for (Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ){  //for each agent do this
-	    a = (GOBAgent)i.next();
+	for (GOBAgent a : agents) {  //for each agent do this
 	    if (a.getNeedUpdate()) {
 		// 0. Maeden Directive
 		a.send().println("8");             //number of subsequent lines about to be sent to agent controller
@@ -302,8 +300,8 @@ public class Grid
 		String inv = "(";
 		if (a.inventory().size() > 0){
 		    //a.send().println("(\"" + a.inventory().printChar() + "\")");  //encapsulate inventory in (" ")
-		    for (Iterator invItr = a.inventory().iterator(); invItr.hasNext(); ){
-			inv += "\"" + ((GridObject)invItr.next()).printChar() + "\" ";
+		    for (GridObject gob : a.inventory()) {
+			inv += "\"" + gob.printChar() + "\" ";
 		    }
 		}
 		inv = inv.trim() + ")";
@@ -330,7 +328,6 @@ public class Grid
 	    }
 	    a.setNeedUpdate(false);
 	}
-
 	msgs.clear();              //once messages are sent, they don't need to be saved any longer
     }
 
@@ -408,12 +405,9 @@ public class Grid
 
     // determine if spot has a tool
     public boolean cellHasTool(int x, int y, char tool){
-
 	// if cell is initialized and is not empty, iterate through and see if sought item is here
 	if ( myMap[x][y] != null && ! myMap[x][y].isEmpty() ){
-	    GridObject gob;
-	    for (Iterator e = myMap[x][y].iterator(); e.hasNext(); ){
-		gob = (GridObject) e.next();
+	    for (GridObject gob : myMap[x][y]) {
 		if ("+kKtT$G".indexOf(Character.toString(gob.printChar())) >= 0
 		    // (gob.printChar() == '+' || gob.printChar() == 'K' || gob.printChar() == 'T')
 		    &&
@@ -427,9 +421,7 @@ public class Grid
     // returns the first tool in the indicated cell, throws noSuchElement exception if none
     public GridObject getTool(GOBAgent a, int x, int y, char tool) throws NoSuchElementException {
 	if ( myMap[x][y] != null && ! myMap[x][y].isEmpty() ){          //if cell is initialized and not empty, iterate through it
-	    GridObject gob;
-	    for (Iterator<GridObject> e = myMap[x][y].iterator(); e.hasNext(); ){
-		gob =  e.next();
+	    for (GridObject gob : myMap[x][y]) {
 		if ((true || gob.printChar() == '+' || gob.printChar() == 'K' || gob.printChar() == 'T')
 		    &&
 		    (gob.printChar() == tool))
@@ -453,8 +445,7 @@ public class Grid
 	if ((myMap[x][y] == null) || (myMap[x][y].size() == 0))
 	    return true;
 	else {
-	    for(Iterator<GridObject> i = myMap[x][y].iterator(); i.hasNext();) {
-		GridObject gObj = i.next(); 
+	    for(GridObject gObj : myMap[x][y]) {
 		//if it is an obstacle or another base agent
 		if(!gObj.allowOtherGOB(gob)) {
 		    return false;
@@ -592,12 +583,10 @@ public class Grid
      *Post: all messages are stored in msgs linkedlist
      */
     public void getAgentMessages() {
-	for(Iterator<GOBAgent> e = agents.iterator(); e.hasNext();) {      //get all messages from all agents and store them
-	    GOBAgent a = e.next();
-	    if(a.hasMsg())                                       //if agent has message, store it
+	for(GOBAgent a : agents) {			//get all messages from all agents and store them
+	    if(a.hasMsg())                                      //if agent has message, store it
 		msgs.add(a.msg());
 	}
-
     }
 
     /*sendAgentMessages sends any and all relevant messages to the passed in agent
@@ -612,9 +601,7 @@ public class Grid
 	int msgDist;
 	String newMsg = "";
 	//iterate through the messages
-        for(Iterator x = msgs.iterator(); x.hasNext();) {
-	    //get the next message
-	    ComSentence thisMsg = (ComSentence) x.next();
+        for(ComSentence thisMsg : msgs) {
 	    //if it was not sent by the current agent, check to see if agent should hear message
 	    if(!(thisMsg.ID() == ag.getAgentID())) {
 		//if volume is shout, set msgDist to the shout distance, otherwise to talkDist
@@ -625,8 +612,7 @@ public class Grid
 		//check distance from sender
 		if(Math.abs(ag.pos.x - thisMsg.origin().x) < msgDist && Math.abs(ag.pos.y - thisMsg.origin().y) < msgDist) {
 		    //get direction from sender to receiver
-		    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext();) {
-			GOBAgent thisAgent = i.next();
+		    for(GOBAgent thisAgent : agents) {
 			if(thisAgent.getAgentID() == thisMsg.ID()) {
 			    Point agHeading = new Point(ag.dx(), ag.dy());
 			    thisMsg.setDir(relDirToPt(ag.pos, agHeading, thisAgent.pos));
@@ -676,8 +662,8 @@ public class Grid
 	    g.drawLine((j*squareSize),0,(j*squareSize),(yRows*squareSize));
 
 	// draw the objects
-	for(Iterator e = gobs.iterator(); e.hasNext(); ){
-	    ((GridObject)e.next()).paint(g);   //each gridobject paints itself
+	for(GridObject gob : gobs) {
+	    gob.paint(g);   //each gridobject paints itself
 	}
 	g.translate(-iTrans.left, -iTrans.top);
 	
@@ -694,7 +680,6 @@ public class Grid
 
     /** cleanClose provides a way to cleanly close all buffers and sockets and exit the grid
      * calls the cleanDie method for each agent which closes their buffers and sockets, then shuts down serversocket
-     * Only called when an agent eats the food, or when there are no agents still living in grid
      * POST: buffers and sockets closed, grid exits
      */
     public void cleanClose() {
@@ -702,16 +687,15 @@ public class Grid
 	//try {Thread.sleep(20000);} catch (Exception e) {System.out.println("error with sleeping"); }
 	// *** remove **********************************
 	if( agents != null && !agents.isEmpty() ) {  //if there are agents on the grid still
-	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext();) {  //iterate through and close their connections
-		GOBAgent g =  i.next();
+	    for(GOBAgent g : agents) {  //iterate through and close their connections
 		g.printstats();
 		g.send().println("End");              //Other agent got food, simulation ended
 		g.cleanDie();
-		i.remove();                        //remove agent
 	    }
+	    agents.clear();
 	}
 	try {
-	    // gwServer.close();                     //close server
+	    gwServer.close();                     //close server
 	}
 	catch(Exception e) {System.out.println("error closing server socket");}
 	System.exit(4);  //exit
