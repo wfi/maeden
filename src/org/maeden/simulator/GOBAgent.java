@@ -51,7 +51,7 @@ public class GOBAgent extends GridObject {
     private String nextCommand;        //string to hold agent command
     private String lastActionStatus = "ok";
     private boolean haveMsg = false;
-    private char status = 'c';
+    private char status = 'c';		// continuing (?)
     private boolean needUpdate = true; // flag for indetifying if an agent acts and needs updated sensor info
     
     private int myID;                  // used to distinguish this agent from others

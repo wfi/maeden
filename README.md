@@ -18,7 +18,6 @@ Details and documentation may be
 send disconnect signals to any other agents currently connected
 1. for sending visual info from the server to agent-controllers,
 use something such as XML or other that is more readily parsed by all languages
-1. fix the foundBase and killGrid interaction that is happening in Grid.java
 1. resolve conflict when two agents want to move into the same square
 1. track down problem with stochastic failure giving incorrect status; 
 problem starts in `processAgentActions()`
@@ -31,6 +30,7 @@ where `STOCHASTICISM`/`STOCHASTIC_RATE` is sometimes exercised
 1. create wrapper server that will fork a simulation in specified world 
 (do we really want this?)
 1. modify assignment of agent IDs to re-use IDs that have been released
+1. ~~fix the foundBase and killGrid interaction that is happening in Grid.java~~
 1. ~~create an abstract agent-controller class that KeyboardController extends
 and that other classes could extend as well~~
 1. ~~refactor into simulator proper and agent controller folders~~

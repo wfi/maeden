@@ -257,27 +257,23 @@ public class Grid
 	    getAgentMessages();             //places any messages generated from agent actions inside msgs linked list
 	} catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
 	//System.out.println("Messages collected");
-	boolean foundBase = false;
 	try {
 	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {          //remove any dead agents
 		GOBAgent a = i.next();
 		switch(a.status()) {
-		case 'c':                        //agent is alive, hasn't found the food
-		    if ( (a.getAgentRole()).equals("base") ){ foundBase = true; }
-		    break;
-		case 'd':
+		case 'd':			// die: agent died from lack of energy or quicksand
 		    while ( a.inventory().size() > 0 )
-			a.drop("drop");             //drop all items from inventory
-		    a.cleanDie(); i.remove();   //agent died from lack of energy or quicksand
+			a.drop("drop");         // drop all items from inventory before removing agent
+		    a.cleanDie(); i.remove();
 		    break;
-		case 's': killGrid = true;		//agent found the food, end the simulation
+		case 's': killGrid = true;	// success: agent found the food, end the simulation
 		    break;
+		case 'c':                       // continuing: agent is alive, hasn't found the food
 		default: 
 		    break;
 		}
 	    }
 	} catch (Exception e) { System.out.println("Failed in final processing: " + e);} 
-	//**** need to fix this ****  .... if (!foundBase) killGrid = true;
     }
     
     /**
