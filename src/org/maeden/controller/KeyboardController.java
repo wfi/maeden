@@ -28,13 +28,15 @@ import org.maeden.simulator.GridObject;
 
 /**
  * class KeyboardController: Provides a Keyboard user-interface to a Grid world simulation.
- * Currently, only provides smell direction to the food, agent inventory, visual picture,
- * and ground contents of current location.  Accepts commands from the keyboard and communicates
- * with the Grid simulation.  Other agents in field of view appear as a four-pointed star
- * since the heading is not reported by the server.
+ * Connects to a running Grid simulation via AbstractAgentController, and then
+ * accepts user commands from the keyboard and interacts with the Grid simulation,
+ * sending those commands and displaying resulting sensory information.
+ * Other agents in field of view appear as a four-pointed star
+ * since the heading is not reported by the server in the sensory information.
  * 
  * @author:  Josh Holm, Wayne Iba
  * @date:    2-25-12
+ * @version: 2017090901
  */
 public class KeyboardController extends AbstractAgentController {
     

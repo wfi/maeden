@@ -1,27 +1,64 @@
-[v.2010.11.18.1]
+[v.2017.09.09.1]
 ----------------------------------------------------------
 ---------------- Maeden Java Class Overview --------------
 ----------------------------------------------------------
 
-The Grid class is where the main simulation occurs.  The Grid stores
-all objects that exist in the world and takes care of determining how
-agents interact with (sense and manipulate) the world.  Grid uses each
-agent's socket connections to read movement or manipulation commands
-from controllers, and to send the appropriate agent-relative sensory
-information (see README.senses) to the respective agent controllers.
-Grid also manages the graphic behavior for the global-view of the
-simulation (note, not the view perceived by an agent).
+The repository is divided into documentation (doc) and source code
+(src), the latter of which is divided into code for the simulator
+proper and for agent controllers.
+
+Simulator proper (src/org/maeden/simulator)
+
+The Grid class is where the main simulation occurs.  On start up, the
+Grid reads a world specification file (see "Creating custom worlds" in
+main README file), stores all specified objects in the grid-world and
+then enters a continuous loop that determines how agents interact with
+(sense and manipulate) the world.  While agents operate within a
+sense-think-act loop, the server does the inverse; the server loop
+consists of waiting for action commands from agents, determining the
+outcomes of those actions, and providing to the agents new sensory
+information that reflects the actions performed.  Agents operate
+asynchronously so the server periodically polls agents for action
+commands to be performed.
+
+The Grid uses socket connections (established with agent-controllers
+when they first connect) to read movement or manipulation commands
+from controllers, as well as to send the appropriate agent-relative
+sensory information (see README.senses) to the respective
+agent-controllers.  Grid also manages the graphic behavior for the
+global-view of the simulation (note, not the view perceived by an
+agent).
 
 The GridObject class is the parent class for all objects that exist
-within the grid-world.  (Do not confuse a GridObject instance with a
-Grid object which is an instance of the Grid class.)  All objects
-extend this class under the naming convention GOB<type>, where <type>
-is the specific grid-object being implemented.  Users who wish to
-extend the types of objects found in the world will extend GridObject
-and implement the necessary methods so as to achieve the desired
-behavior of the simulated object type.
+within the simulated grid-world.  (Do not confuse a GridObject
+instance with a Grid object which is an instance of the Grid class.)
+All world objects extend from the GridObject class under the naming
+convention GOB<type>, where <type> is the specific grid-object being
+implemented.  Users who wish to extend the types of objects found in
+the world will extend GridObject and implement the necessary methods
+so as to achieve the desired behavior of the simulated object type.
 
-GOBAgent is the simulation-side class for communicating with agent
-controllers.  Instances of this class maintains the socket connections
+GOBAgent is the simulator-side class for communicating with agent
+controllers.  Instances of this class maintain the socket connections
 with the respective agent's controller process and sends sesory info
 to the agent and receives actions attempted by the agent.
+
+Agent controller (src/org/maeden/controller)
+
+The AbstractAgentController handles connections to the simulator.
+Custom agent controllers should extend AbstractAgentController and
+provide their own sensory-processing and action-deliberation schemes.
+The intended analogy with humans is that we have sensory perception,
+which is the raw data provided by the simulator (world), and then
+agents are responsible for processing that data into percepts, which
+can in turn be used to guide behavior.
+
+The raw sensory data is packaged in the SensoryPacket class.  This
+class provides public accessors to individual sensory components.  In
+the case of visual information, the class provides access to
+individual cells as well as to the entire raw visual string
+(pre-parsed).
+
+The GridClient class handles the registration with the simulator and
+manages the socket connection for sending and receiving information to
+and from the simulator.  
