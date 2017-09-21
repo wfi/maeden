@@ -18,14 +18,7 @@ agent to server (see Sensory-Motor Interface README).  Agent
 controllers are given ID's starting with 0 according to the order in
 which they contact the server.
 
-Initial Handshake.  When first establishing a socket connection, the
-agent controller must first "sign in" as either a client "base" agent
-or as a "helper" agent.  (It is assumed that helper agents do not
-attempt to use the food, thereby terminating the simulation.  However,
-this distinction will be eliminated as a future action-item.)  To sign
-in, each agent sends the string either "base" or "helper", followed by
-a newline character.  (All communications over the socket are
-terminated by newlines.)  After receiving the agent's role, the Grid
+Initial Handshake.  When first establishing a socket connection, the Grid
 server sends the agent's ID on a single line (newline terminated).
 Having completed the initial handshake/registration, the server makes
 the first sensory packet available and the agent controller should
