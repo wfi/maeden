@@ -30,6 +30,7 @@ public class RandomAgent extends AbstractAgentController {
 	    int randomAct = myRand.nextInt(possibleActions.length());			// 'think'
 	    sendEffectorCommand(possibleActions.substring(randomAct, randomAct + 1));	//  act
 	    getSensoryInfo();								//  sense
+        //try {Thread.sleep(20000);} catch (Exception e) {system.out.println ("sleep error");}
 	}
     }
 

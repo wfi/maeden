@@ -694,12 +694,14 @@ public class Grid
 	    }
 	    agents.clear();
 	}
-	try {
-	    gwServer.close();                     //close server
+	/*try {
+	    gwServer.close();
 	}
-	catch(Exception e) {System.out.println("error closing server socket");}
+	catch(Exception e) {System.out.println("error closing server socket");}*/
 	System.exit(4);  //exit
     }
+    //socket.Shutdown(SocketShutdown.Both);
+    //socket.Close();
 
     /** print the proper usage of the program
      */
@@ -786,6 +788,12 @@ public class Grid
 			try { sendAgentSensations(); }
 			catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
 		    Thread.sleep(50);
+                if (killGrid) {
+                    try {
+                        gwServer.close();
+                    }
+                    catch(Exception e) {System.out.println("error closing server socket");}
+                }
     		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
 		} catch (Exception e) {
 		    System.out.println("AgentListener.run(): some other exception: ");
