@@ -112,27 +112,27 @@ public class GOBAgent extends GridObject {
      *Post:GOBAgent Object is created
      */
     public GOBAgent(int ix, int iy, int s, Grid mg, Socket sock, char heading){
-	super(ix, iy, s);
-	myID = idSequence++;
-	myGrid = mg;
-	conn = sock;
-	///*maedengraphics
-	myColor = colorSet[myID%colorSet.length];
-	//maedengraphics*/
-	setAgentHeading(heading);
-	try {
-	    send = new PrintWriter(conn.getOutputStream(), true);
-	    recv = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-	} catch(IOException e) {
-	    System.out.println("GOBAgent constructor: Accept failed on port: " + myGrid.MAEDENPORT);
-	    System.exit(-1);
-	}
-	send.println(myID);
-    ///*maedengraphics
-    myColor = Color.green;
-    //maedengraphics*/
-    newPrintChar('A');   //Agent's printchar is A
-	inventory = new LinkedList<GridObject>();
+		super(ix, iy, s);
+		myID = idSequence++;
+		myGrid = mg;
+		conn = sock;
+		///*maedengraphics
+		myColor = colorSet[myID%colorSet.length];
+		//maedengraphics*/
+		setAgentHeading(heading);
+		try {
+		    send = new PrintWriter(conn.getOutputStream(), true);
+		    recv = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		} catch(IOException e) {
+		    System.out.println("GOBAgent constructor: Accept failed on port: " + myGrid.MAEDENPORT);
+		    System.exit(-1);
+		}
+		send.println(myID);
+	    ///*maedengraphics
+	    myColor = Color.green;
+	    //maedengraphics*/
+	    newPrintChar('A');   //Agent's printchar is A
+		inventory = new LinkedList<GridObject>();
     }
 
 
