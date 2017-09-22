@@ -275,9 +275,22 @@ public class Grid
 	    }
 	} catch (Exception e) { System.out.println("Failed in final processing: " + e);} 
     }
+
+    /**
+     * sendAgentSensations: check each agent and, when necessary based on getNeedUpdate(),
+     * send the appropriate sensory data
+     */
+    public void sendAgentSensations(){
+	for (GOBAgent a : agents) {
+	    if (a.getNeedUpdate())
+		sendSensationsToAgent(a);
+	}
+	//**** WARNING: review this logic -- since not all agents may receive sensory updates
+	msgs.clear();              //once messages are sent, they don't need to be saved any longer
+    }
     
     /**
-     * sendAgentSensations: for each agent that is read for it, send their sensory information
+     * sendSensationsToAgent: for each agent that is read for it, send their sensory information
      * LINE1: The number of lines that are going to be sent (excluding this line) *could also be d, e, or s (die, end, success)*
      * LINE2: smell direction to food
      * LINE3: inventory in form ("inv-char")
@@ -287,48 +300,43 @@ public class Grid
      * LINE7: Agent's energy
      * LINE8: last action's result status (ok or fail)
      */
-    public void sendAgentSensations() {
-	for (GOBAgent a : agents) {  //for each agent do this
-	    if (a.getNeedUpdate()) {
-		// 0. Maeden Directive
-		a.send().println("8");             //number of subsequent lines about to be sent to agent controller
+    public void sendSensationsToAgent(GOBAgent a) {
+	// 0. Maeden Directive
+	a.send().println("8");             //number of subsequent lines about to be sent to agent controller
 	
-		// 1. send smell
-		a.send().println(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos));
+	// 1. send smell
+	a.send().println(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos));
 	
-		// 2. send inventory
-		String inv = "(";
-		if (a.inventory().size() > 0){
-		    //a.send().println("(\"" + a.inventory().printChar() + "\")");  //encapsulate inventory in (" ")
-		    for (GridObject gob : a.inventory()) {
-			inv += "\"" + gob.printChar() + "\" ";
-		    }
-		}
-		inv = inv.trim() + ")";
-		a.send().println(inv); 
-	
-		// 3. send visual info
-		a.send().println(visField(a.pos, new Point(a.dx(), a.dy())));
-		//System.out.println(visField(a.pos, new Point(a.dx(), a.dy())));
-	
-		// 4. send ground contents of current location
-		a.send().println(groundContents(a, myMap[a.pos.x][a.pos.y]));
-	
-		// 5. send any messages that may be heard by the agent
-		sendAgentMessages(a);
-	
-		// 6. send agent's energy
-		a.send().println(a.energy());
-	
-		// 7. send last-action status
-		a.send().println(a.lastActionStatus());
-		    
-		// 8. send world time
-		a.send().println(worldTime);
+	// 2. send inventory
+	String inv = "(";
+	if (a.inventory().size() > 0){
+	    //a.send().println("(\"" + a.inventory().printChar() + "\")");  //encapsulate inventory in (" ")
+	    for (GridObject gob : a.inventory()) {
+		inv += "\"" + gob.printChar() + "\" ";
 	    }
-	    a.setNeedUpdate(false);
 	}
-	msgs.clear();              //once messages are sent, they don't need to be saved any longer
+	inv = inv.trim() + ")";
+	a.send().println(inv); 
+	
+	// 3. send visual info
+	a.send().println(visField(a.pos, new Point(a.dx(), a.dy())));
+	//System.out.println(visField(a.pos, new Point(a.dx(), a.dy())));
+	
+	// 4. send ground contents of current location
+	a.send().println(groundContents(a, myMap[a.pos.x][a.pos.y]));
+	
+	// 5. send any messages that may be heard by the agent
+	sendAgentMessages(a);
+	
+	// 6. send agent's energy
+	a.send().println(a.energy());
+	
+	// 7. send last-action status
+	a.send().println(a.lastActionStatus());
+		    
+	// 8. send world time
+	a.send().println(worldTime);
+	a.setNeedUpdate(false);
     }
 
     /*
@@ -783,7 +791,7 @@ public class Grid
 			synchronized (agents) {
 			    agents.add(gagent);
 			}
-			try { sendAgentSensations(); }
+			try { sendSensationsToAgent(gagent); }
 			catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
 		    Thread.sleep(50);
     		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
