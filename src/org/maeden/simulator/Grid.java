@@ -91,8 +91,7 @@ public class Grid
 	// Initialize grid map now from read sizes
 	myMap = new LinkedListGOB[xCols][yRows]; // note: non-conventional order of columns, rows
 	agents = Collections.synchronizedList(new LinkedList<GOBAgent>());
-	shuffled_agents = agents;
-	Collections.shuffle(shuffled_agents);//shuffle agents to avoid initial bias
+	Collections.shuffle(agents);//shuffle agents to avoid initial bias
 	
 	// set cell size from desired physical window width and logical size found in file
 	squareSize = approxWidth / xCols;
@@ -235,13 +234,13 @@ public class Grid
     public void processAgentActions() {
 
     	try {
-	    for (GOBAgent a : shuffled_agents) { // used shuffled_agents instead of agents to avoid collision bias
+	    for (GOBAgent a : agents) { // used shuffled_agents instead of agents to avoid collision bias
 		a.getNextCommand(); //have current agent get next command from controller process
 		//System.out.println("processing agent " + a.getAgentID() + " with action: " + a.nextCommand());
 	    }
 	} catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
 	try {
-	    for (GOBAgent a : shuffled_agents) {    //process and perform each agent's action using shuffled_agents
+	    for (GOBAgent a : agents) {    //process and perform each agent's action using shuffled_agents
 		//Process the action only if there is a next command
 		if(a.nextCommand() != null)
 		    {
@@ -262,7 +261,7 @@ public class Grid
 	} catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
 	//System.out.println("Messages collected");
 	try {
-	    for(Iterator<GOBAgent> i = shuffled_agents.iterator(); i.hasNext(); ) {   //remove any dead agents using shuffled_agents
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {   //remove any dead agents using shuffled_agents
 		GOBAgent a = i.next();
 		switch(a.status()) {
 		case 'd':			// die: agent died from lack of energy or quicksand
@@ -462,7 +461,7 @@ public class Grid
 	    for(GridObject gObj : myMap[x][y]) {
 		//if it is an obstacle or another base agent
 		if(!gObj.allowOtherGOB(gob)) {
-			Collections.shuffle(shuffled_agents); //Shuffles list "shuffled_agents" to unbias agent-
+			Collections.shuffle(agents); //Shuffles list "shuffled_agents" to unbias agent-
 			                                      //collisions in the ProccessAgentAction class.
 			return false;
 		}
