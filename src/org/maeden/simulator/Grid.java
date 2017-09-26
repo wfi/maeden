@@ -61,7 +61,7 @@ public class Grid
     private ServerSocket gwServer;	// server-socket for listening for connection requests
 
     public boolean EAT_FOOD_ENDS_IT = true;	// control if eating food terminates sim (true) or increases energy (false)
-    public int WORLD_CYCLE_TIME = 2000;	// replaces sleepTime to control wall-time length of simulation cycle
+    public int WORLD_CYCLE_TIME = 50;	// replaces sleepTime to control wall-time length of simulation cycle
 
     // Constructors
 
