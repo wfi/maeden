@@ -54,7 +54,6 @@ public class GOBAgent extends GridObject {
     private boolean needUpdate = true; // flag for indetifying if an agent acts and needs updated sensor info
     
     private int myID;                  // used to distinguish this agent from others
-    private String myRole;             // base, helper, etc.
 
     private int dx, dy;                //heading x and y coor.
     public LinkedList<GridObject> inventory;
@@ -113,41 +112,27 @@ public class GOBAgent extends GridObject {
      *Post:GOBAgent Object is created
      */
     public GOBAgent(int ix, int iy, int s, Grid mg, Socket sock, char heading){
-	super(ix, iy, s);
-	myID = idSequence++;
-	myGrid = mg;
-	conn = sock;
-	///*maedengraphics
-	myColor = colorSet[myID%colorSet.length];
-	//maedengraphics*/
-	setAgentHeading(heading);
-	try {
-	    send = new PrintWriter(conn.getOutputStream(), true);
-	    recv = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-	} catch(IOException e) {
-	    System.out.println("GOBAgent constructor: Accept failed on port: " + myGrid.MAEDENPORT);
-	    System.exit(-1);
-	}
-	try{
-	    myRole= recv().readLine().toLowerCase();
-	}
-	catch (Exception e) { System.out.println("Couldn't read role from agent " + myID);}
-	if (!myRole.equals("base") && !myRole.equals("helper")){
-	    System.out.println("Role was: " + myRole);
-	    System.out.println("Error: Role wasn't base or helper, check connection handshake protocol");
-	    System.exit(-1);
-	}
-	send.println(myID);
-	//System.out.println(myRole);
-	if (myRole.equals("base")) {
+		super(ix, iy, s);
+		myID = idSequence++;
+		myGrid = mg;
+		conn = sock;
+		///*maedengraphics
+		myColor = colorSet[myID%colorSet.length];
+		//maedengraphics*/
+		setAgentHeading(heading);
+		try {
+		    send = new PrintWriter(conn.getOutputStream(), true);
+		    recv = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		} catch(IOException e) {
+		    System.out.println("GOBAgent constructor: Accept failed on port: " + myGrid.MAEDENPORT);
+		    System.exit(-1);
+		}
+		send.println(myID);
 	    ///*maedengraphics
 	    myColor = Color.green;
 	    //maedengraphics*/
 	    newPrintChar('A');   //Agent's printchar is A
-	} else {
-	    newPrintChar('H');
-	}
-	inventory = new LinkedList<GridObject>();
+		inventory = new LinkedList<GridObject>();
     }
 
 
@@ -163,17 +148,6 @@ public class GOBAgent extends GridObject {
 	//maedengraphics*/
 	setAgentHeading(heading);
 	inventory = new LinkedList<GridObject>();
-    }
-
-    /** Override the default allowOtherGOB to check for agent's role type.
-     * Helper agents may share any other agent's type, but base agents
-     * only share with helper agents.
-     */
-    public boolean allowOtherGOB(GridObject otherGOB){
-	if (myRole.equals("helper") || ((GOBAgent)otherGOB).getAgentRole().equals("helper"))
-	    return true;
-	else
-	    return false;
     }
 
     public void printstats(){
@@ -248,11 +222,6 @@ public class GOBAgent extends GridObject {
     // ID accessor
     public int getAgentID(){ 
 	return myID;
-    }
-
-    // role accessor
-    public String getAgentRole(){
-	return myRole;
     }
 
     // Grid simulation time accessor via agent
