@@ -52,8 +52,7 @@ public class Grid
     private List<ComSentence> msgs = Collections.synchronizedList(new LinkedList<ComSentence>());   //holds agent messages
     private List<GridObject> gobs = Collections.synchronizedList(new LinkedList<GridObject>());   //holds world gridobjects
     private List<GOBAgent> agents; //holds world agents
-    private List<GOBAgent> shuffled_agents; //list used in "proccessAgentActions" to resolve bias in  agent collisions
-    private LinkedListGOB[][] myMap;                 //holds gridobjects
+    private LinkedListGOB[][] myMap;                 
 
     // misc (possibly temporary) variables
     private GridObject food;                   //world goal
@@ -234,13 +233,13 @@ public class Grid
     public void processAgentActions() {
 
     	try {
-	    for (GOBAgent a : agents) { // used shuffled_agents instead of agents to avoid collision bias
+	    for (GOBAgent a : agents) {
 		a.getNextCommand(); //have current agent get next command from controller process
 		//System.out.println("processing agent " + a.getAgentID() + " with action: " + a.nextCommand());
 	    }
 	} catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
 	try {
-	    for (GOBAgent a : agents) {    //process and perform each agent's action using shuffled_agents
+	    for (GOBAgent a : agents) {    //process and perform each agent's action using agents list
 		//Process the action only if there is a next command
 		if(a.nextCommand() != null)
 		    {
@@ -261,7 +260,7 @@ public class Grid
 	} catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
 	//System.out.println("Messages collected");
 	try {
-	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {   //remove any dead agents using shuffled_agents
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {   //remove any dead agents using agents
 		GOBAgent a = i.next();
 		switch(a.status()) {
 		case 'd':			// die: agent died from lack of energy or quicksand
@@ -451,12 +450,28 @@ public class Grid
      * we can check an arbitrary object since either they are all shareable
      * or there can only be one.
      * 
-     * When passable is called, the agents list is shuffled to reduce 'unfairness'
-     * in the case of two agents attempting to occupy one location on the Grid
+     * @param p point of contention between agents - point to be occupied
+     * @param gob reference to object in question - can it occupy the point
+     * @return go/nogo for grid object to occupy point in question
      */
     public boolean passable(Point p, GridObject gob){
-	return passable(p.x, p.y, gob);
+    	return passable(p.x, p.y, gob);
     }
+    /**
+     * When passable is called, the agents list is shuffled to reduce 'unfairness'
+     * in the case of two agents attempting to occupy one location on the Grid
+     * Line 482 shuffles 'agents' list to unbias collisions when the 
+     * proccessAgentActions method is called.
+	 *
+     * Before this fix, whenever processAgentActions ran, the first player in the 
+     * 'agents' list was given priority in occupying a game space - inherently unbalancing gameplay.
+     * Now with every game-tick update, the shuffling ensures a modicum of random 'fairness'.  
+     * 
+     * @param x x-coord for grid spot in question - compared to gob
+     * @param y y-coord for grid spot in question - compared to gob
+     * @param gob reference to grid object in question - internal coords compared to intended x/y coord locations
+     * @return allows shuffled agents to occupy space in question 
+     */
     public boolean passable(int x, int y, GridObject gob){
 	if ((myMap[x][y] == null) || (myMap[x][y].size() == 0))
 	    return true;
@@ -466,16 +481,7 @@ public class Grid
 		if(!gObj.allowOtherGOB(gob)) {
 			Collections.shuffle(agents); 
 			return false;
-			/**
-			* Line 466 shuffles 'agents' list to unbias collisions when the 
-			* proccessAgentActions method is called.
-			* 
-            * Before this fix, whenever processAgentActions ran, the first player in the 
-            * 'agents' list was given priority in occupying a game space - inherently unbalancing gameplay.
-		   	* Now with every game-tick update, the shuffling ensures a modicum of random 'fairness'.  
-		   	*  
-			*/
-		}
+			}
 	    }
 	}
 	return true;
