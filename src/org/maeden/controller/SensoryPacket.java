@@ -9,10 +9,10 @@ import java.util.StringTokenizer;
 /**
  * Simple class for representing 'pre-processed' sensory packets.
  * Agents can bypass the low-level 'raw' sensory data and especially the problem of parsing
- * the contents of the visual field by accessing an 2D array of Lists of GridObjects.
+ * the contents of the visual field by accessing an 2D array of Lists of world objects.
  *
  * @author: Wayne Iba
- * @version: 20140613
+ * @version: 2017090901
  */
 public class SensoryPacket {
 
@@ -195,12 +195,12 @@ public class SensoryPacket {
     public List<Character> getInventory(){ return inventory; }
 
     /**
-     * @return the array of lists of GridObjects that are currently within the field of view
+     * @return the array of lists of strings representing what is currently within the field of view
      */
     public ArrayList<ArrayList<Vector<String>>> getVisualArray(){ return visualArray; }
 
     /**
-     * @return the list of GridObjects on the ground where the agent is standing
+     * @return the list of characters on the ground where the agent is standing
      */
     public List<Character> getGroundContents(){ return groundContents; }
 
