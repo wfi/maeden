@@ -449,7 +449,10 @@ public class Grid
      * a spot will either be empty, in which case it is passable
      * or it will contain one or more objects
      * we can check an arbitrary object since either they are all shareable
-     * or there can only be one
+     * or there can only be one.
+     * 
+     * When passable is called, the agents list is shuffled to reduce 'unfairness'
+     * in the case of two agents attempting to occupy one location on the Grid
      */
     public boolean passable(Point p, GridObject gob){
 	return passable(p.x, p.y, gob);
@@ -461,9 +464,17 @@ public class Grid
 	    for(GridObject gObj : myMap[x][y]) {
 		//if it is an obstacle or another base agent
 		if(!gObj.allowOtherGOB(gob)) {
-			Collections.shuffle(agents); //Shuffles list "shuffled_agents" to unbias agent-
-			                                      //collisions in the ProccessAgentAction class.
+			Collections.shuffle(agents); 
 			return false;
+			/**
+			* Line 466 shuffles 'agents' list to unbias collisions when the 
+			* proccessAgentActions method is called.
+			* 
+            * Before this fix, whenever processAgentActions ran, the first player in the 
+            * 'agents' list was given priority in occupying a game space - inherently unbalancing gameplay.
+		   	* Now with every game-tick update, the shuffling ensures a modicum of random 'fairness'.  
+		   	*  
+			*/
 		}
 	    }
 	}
