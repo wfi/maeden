@@ -1,5 +1,6 @@
 package org.maeden.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -16,102 +17,87 @@ import java.util.StringTokenizer;
  */
 public class SensoryPacket {
 
-    public static final String NUMLINES = "8";
+	public static final String NUMLINES = "8";
 
-    String status;
-    String smell;
-    List<Character> inventory;
-    //List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
-    ArrayList<ArrayList<Vector<String>>> visualArray;
-    List<Character> groundContents;
-    String messages;
-    int energy;
-    boolean lastActionStatus;
-    int worldTime;
-    String[] rawSenseData;
+	String status;
+	String smell;
+	List<Character> inventory;
+	//List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
+	ArrayList<ArrayList<Vector<String>>> visualArray;
+	List<Character> groundContents;
+	String messages;
+	int energy;
+	boolean lastActionStatus;
+	int worldTime;
+	String[] rawSenseData;
 
-    /**
-     * constructor that reads the raw data from the server via the provided BufferedReader
-     * and performs some amount of preprocessing on that raw data.
-     */
-    public SensoryPacket(BufferedReader gridIn){
-	visualArray = new ArrayList<ArrayList<Vector<String>>>();
-	for (int row=0; row<7; row++){
-	    visualArray.add(row, new ArrayList<Vector<String>>());
-	    for (int col=0; col<5; col++){
-		visualArray.get(row).add(col, new Vector<String>());
-	    }
+	/**
+	 * constructor that reads the raw data from the server via the provided BufferedReader
+	 * and performs some amount of preprocessing on that raw data.
+	 */
+	public SensoryPacket(BufferedReader gridIn) {
+		visualArray = new ArrayList<ArrayList<Vector<String>>>();
+		for (int row = 0; row < 7; row++) {
+			visualArray.add(row, new ArrayList<Vector<String>>());
+			for (int col = 0; col < 5; col++) {
+				visualArray.get(row).add(col, new Vector<String>());
+			}
+		}
+		rawSenseData = getRawSenseDataFromGrid(gridIn);
+		initPreProcessedFields(rawSenseData);
 	}
-	rawSenseData = getRawSenseDataFromGrid(gridIn);
-	initPreProcessedFields(rawSenseData);
-    }
 
-    /**
-     * another constructor takes in the sensory data as parameters instead of using a BufferedReader
-     */
-    public SensoryPacket(String inptStatus, String inptSmell, List<Character> inptInventory,
-			 ArrayList<ArrayList<Vector<String>>> inptVisualArray,
-			 List<Character> inptGroundContents, String inptMessages,
-			 Integer inptEnergy, Boolean inptLastActionStatus, Integer inptWorldTime){
-	status=inptStatus;
-	smell=inptSmell;
-	inventory=inptInventory;
-	visualArray=inptVisualArray;
-	groundContents=inptGroundContents;
-	messages=inptMessages;
-	energy=inptEnergy;
-	lastActionStatus=inptLastActionStatus;
-	worldTime=inptWorldTime;
-    }
-
-    /**
-     * Just read the raw data into an array of String.  Initialize the status field from line 0
-     *
-     * LINE0: # of lines to be sent or one of: die, success, or End
-     * LINE1: smell (food direction)
-     * LINE2: inventory
-     * LINE3: visual contents
-     * LINE4: ground contents
-     * LINE5: messages
-     * LINE6: remaining energy
-     * LINE7: lastActionStatus
-     * LINE8: world time
-     * @param gridIn the reader connected to the server
-     * @return the array of String representing the raw (unprocessed) sensory data starting with smell
-     */
-    protected String[] getRawSenseDataFromGrid(BufferedReader gridIn){
-	String[] result = new String[Integer.parseInt(NUMLINES)];
-	try {
-	    String status = gridIn.readLine().toLowerCase();
-	    if((status.equals("die") || status.equals("success")) || status.equals("end")) {
-		System.out.println("Final status: " + status);
-		System.exit(1);
-	    }
-	    if ( ! status.equals(NUMLINES) ){
-		System.out.println("getSensoryInfo: Unexpected number of data lines - " + status);
-		System.exit(1);
-	    }
-	    this.status = status;
-	    // 1: get the smell info
-	    result[0] = gridIn.readLine();
-	    // 2: get the inventory
-	    result[1] = gridIn.readLine();
-	    // 3: get the visual info
-	    result[2] = gridIn.readLine();
-	    // 4: get ground contents
-	    result[3] = gridIn.readLine();
-	    // 5: get messages
-	    result[4] = gridIn.readLine(); //CHECKS MESSAGES ****CHANGE****
-	    // 6: energy
-	    result[5] = gridIn.readLine();
-	    // 7: lastActionStatus
-	    result[6] = gridIn.readLine();
-	    // 8: world time
-	    result[7] = gridIn.readLine();
+	/**
+	 * another constructor takes in the sensory data as parameters instead of using a BufferedReader
+	 */
+	public SensoryPacket(String inptStatus, String inptSmell, List<Character> inptInventory,
+						 ArrayList<ArrayList<Vector<String>>> inptVisualArray,
+						 List<Character> inptGroundContents, String inptMessages,
+						 Integer inptEnergy, Boolean inptLastActionStatus, Integer inptWorldTime) {
+		status = inptStatus;
+		smell = inptSmell;
+		inventory = inptInventory;
+		visualArray = inptVisualArray;
+		groundContents = inptGroundContents;
+		messages = inptMessages;
+		energy = inptEnergy;
+		lastActionStatus = inptLastActionStatus;
+		worldTime = inptWorldTime;
 	}
-	catch(Exception e) { e.printStackTrace(); }
-	return result;
-    }
+
+	/**
+	 * Just read the raw data into an array of String.  Initialize the status field from line 0
+	 * <p>
+	 * LINE0: # of lines to be sent or one of: die, success, or End
+	 * LINE1: smell (food direction)
+	 * LINE2: inventory
+	 * LINE3: visual contents
+	 * LINE4: ground contents
+	 * LINE5: messages
+	 * LINE6: remaining energy
+	 * LINE7: lastActionStatus
+	 * LINE8: world time
+	 *
+	 * @param gridIn the reader connected to the server
+	 * @return the array of String representing the raw (unprocessed) sensory data starting with smell
+	 */
+	protected String[] getRawSenseDataFromGrid(BufferedReader gridIn) {
+		String[] result = new String[Integer.parseInt(NUMLINES)];
+		try {
+			// Read the JsonArray.
+			String jsonString = gridIn.readLine().replaceAll("\"", "").replaceAll("\\\\", "\"");
+			if ((jsonString.equals("die") || jsonString.equals("success")) || jsonString.equals("end")) {
+				System.out.println("Final status: " + jsonString);
+				System.exit(1);
+			}
+			result = jsonString.substring(1, jsonString.length() - 1).split(","); // set JsonArray to result
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
 
     /**
      * Perform any pre-processing, especially on the visual data
