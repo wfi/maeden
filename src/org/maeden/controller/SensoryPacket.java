@@ -1,13 +1,6 @@
 package org.maeden.controller;
-
-import com.oracle.javafx.jmx.json.JSONReader;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;

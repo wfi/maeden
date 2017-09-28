@@ -2,11 +2,7 @@ package org.maeden.simulator;
 
 import java.lang.Math;
 import java.util.StringTokenizer;
-
-///*maedengraphics
 import java.awt.*;
-
-//maedengraphics*/
 import java.awt.Point;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +14,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.json.simple.JSONArray;
 
-
 /**
  *@author:  Wayne Iba,
  *@author:  assistance from: Kristin Barquer, Cuyler Cannon, Josh Holm,
@@ -28,12 +23,9 @@ import org.json.simple.JSONArray;
  *@version: Beta 0.5
  */
 
-public class Grid
-///*maedengraphics
-		extends Frame
+public class Grid extends Frame
 //maedengraphics*/
 {
-
 	// window and grid variables
 	private int xCols, yRows; // logical size of grid where yRows number of rows
 	private int squareSize;   //size in pixels of one side of a cell
@@ -291,7 +283,6 @@ public class Grid
 	 * LINE8: last action's result status (ok or fail)
 	 */
 	public void sendAgentSensations() {
-
 		// agents is a list. Thus, we need a for loop to access all this information.
 		for (GOBAgent a : agents) {  //for each agent do this
 			if (a.getNeedUpdate()) {
@@ -619,7 +610,6 @@ public class Grid
 		//  group2 changed this because we want to be able to add the massges to a Sting Object.
 		return newMsg;
 	}
-
 
 	/** Draw the grid lines and then draw any objects.
 	 *  Someday, should make the gridlines drawn only initially and then
