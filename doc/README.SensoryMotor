@@ -1,22 +1,39 @@
-[v.2017.04.01]
+[v.2017.09.28]
 --------------------------------------------------------------
 ----------  Maeden Sensory-Motor Interface Protocol  ---------
 --------------------------------------------------------------
 
 SENSORY INFORMATION
 
-Sensory information is sent to each agent controller on each cycle.
-before each action.  The senses are sent as nine (9) lines of text.
+Sensory information is sent as a JSON Array. The reasons for this change is
+because we want to 1) Send the data faster 2) send the data in
+one object(instead of separate Strings) 3) allow any programing language
+to access the Sensory information since it is sent as a JsonArray.
 
-0.  Maeden Directive: The number of lines to follow (8), or one of the
-words: DIE, SUCCESS, or END.  DIE is sent when the agent runs out of
-energy.  SUCCESS is sent when the agent eats the food.  (In the
-non-default simulator mode, eating an item of food simply increases
-the agent's energy by a set amount; this increase is reflected in the
-next sensory packet sent to the agent.)  END is sent when some other
-agent eats the food.  Although multiple food objects may exist in the
-world, in the default mode as soon as one agent eats the food the
-simulation ends.
+The senses to be sent as a JSON Array are packaged in the
+"sendAgentSensations" method of the Grid class. Each of the following
+senses, numbered 1 through 8, is converted to a string, and then
+entered in to the JSON Array. After all senses have been added to the
+array, the array is sent to the SensoryPacket class, more specifically the
+getRawSenseDataFromGrid method, which unpacks the information.
+
+The "getRawSenseDataFromGrid" method of the SensoryPacket class
+unpacks the JSON Array sent from the Grid class. A JSONParser object
+unpacks the JSON Array and puts the information stored in it into a
+separate array. The elements of that array are then each converted to
+strings and stored in an array "result". "result" is then returned by
+the method getRawSenseDataFromGrid, as if the senses were initially
+sent from Grid as a series of strings.
+
+If the agent status is "die" or "success" or "end",
+then the JsonArray will be null. Thus, the KeyboardController will exist.
+DIE is sent when the agent runs out of energy.  SUCCESS is sent
+when the agent eats the food.  (In the non-default simulator mode,
+eating an item of food simply increases the agent's energy by a set
+amount; this increase is reflected in the next sensory packet sent to
+the agent.)  END is sent when some other agent eats the food.  Although
+multiple food objects may exist in the world, in the default mode as
+soon as one agent eats the food the simulation ends.
 
 1.  The "smell" direction to the food source.  This is sent as the
 direction to the food-source relative to the agent's current heading.
