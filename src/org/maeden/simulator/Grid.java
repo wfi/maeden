@@ -289,7 +289,6 @@ public class Grid extends Frame
 				JSONArray jsonArray = new JSONArray();
 				// We added String.valueOf to make sure that everything that is send is a String.
 				jsonArray.add(String.valueOf(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. send smell
-
 				String inv = "(";
 				if (a.inventory().size() > 0){
 					for (GridObject gob : a.inventory()) {
