@@ -214,7 +214,7 @@ public class Grid
 	    updateWorldTime();
 	    // sleep time controls the speed of the simulation
 	    try {Thread.sleep(WORLD_CYCLE_TIME);} catch (Exception e) {System.out.println("error with sleeping"); }
-	   
+
 	    if(killGrid)
 		cleanClose();
 	    ///*maedengraphics
@@ -224,7 +224,7 @@ public class Grid
 	    //maedengraphics*/
 	}
     }
-    
+
     /**
      * processAgentActions: for each of the agents, if they have actions
      * to be processed, get them and do whatever needs to be done.
@@ -269,15 +269,28 @@ public class Grid
 		case 's': killGrid = true;	// success: agent found the food, end the simulation
 		    break;
 		case 'c':                       // continuing: agent is alive, hasn't found the food
-		default: 
+		default:
 		    break;
 		}
 	    }
-	} catch (Exception e) { System.out.println("Failed in final processing: " + e);} 
+	} catch (Exception e) { System.out.println("Failed in final processing: " + e);}
     }
-    
+
     /**
-     * sendAgentSensations: for each agent that is read for it, send their sensory information
+     * sendAgentSensations: check each agent and, when necessary based on getNeedUpdate(),
+     * send the appropriate sensory data
+     */
+    public void sendAgentSensations(){
+	for (GOBAgent a : agents) {
+	    if (a.getNeedUpdate())
+		sendSensationsToAgent(a);
+	}
+	//**** WARNING: review this logic -- since not all agents may receive sensory updates
+	msgs.clear();              //once messages are sent, they don't need to be saved any longer
+    }
+
+    /**
+     * sendSensationsToAgent: for each agent that is read for it, send their sensory information
      * LINE1: The number of lines that are going to be sent (excluding this line) *could also be d, e, or s (die, end, success)*
      * LINE2: smell direction to food
      * LINE3: inventory in form ("inv-char")
@@ -287,48 +300,43 @@ public class Grid
      * LINE7: Agent's energy
      * LINE8: last action's result status (ok or fail)
      */
-    public void sendAgentSensations() {
-	for (GOBAgent a : agents) {  //for each agent do this
-	    if (a.getNeedUpdate()) {
-		// 0. Maeden Directive
-		a.send().println("8");             //number of subsequent lines about to be sent to agent controller
-	
-		// 1. send smell
-		a.send().println(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos));
-	
-		// 2. send inventory
-		String inv = "(";
-		if (a.inventory().size() > 0){
-		    //a.send().println("(\"" + a.inventory().printChar() + "\")");  //encapsulate inventory in (" ")
-		    for (GridObject gob : a.inventory()) {
-			inv += "\"" + gob.printChar() + "\" ";
-		    }
-		}
-		inv = inv.trim() + ")";
-		a.send().println(inv); 
-	
-		// 3. send visual info
-		a.send().println(visField(a.pos, new Point(a.dx(), a.dy())));
-		//System.out.println(visField(a.pos, new Point(a.dx(), a.dy())));
-	
-		// 4. send ground contents of current location
-		a.send().println(groundContents(a, myMap[a.pos.x][a.pos.y]));
-	
-		// 5. send any messages that may be heard by the agent
-		sendAgentMessages(a);
-	
-		// 6. send agent's energy
-		a.send().println(a.energy());
-	
-		// 7. send last-action status
-		a.send().println(a.lastActionStatus());
-		    
-		// 8. send world time
-		a.send().println(worldTime);
+    public void sendSensationsToAgent(GOBAgent a) {
+	// 0. Maeden Directive
+	a.send().println("8");             //number of subsequent lines about to be sent to agent controller
+
+	// 1. send smell
+	a.send().println(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos));
+
+	// 2. send inventory
+	String inv = "(";
+	if (a.inventory().size() > 0){
+	    //a.send().println("(\"" + a.inventory().printChar() + "\")");  //encapsulate inventory in (" ")
+	    for (GridObject gob : a.inventory()) {
+		inv += "\"" + gob.printChar() + "\" ";
 	    }
-	    a.setNeedUpdate(false);
 	}
-	msgs.clear();              //once messages are sent, they don't need to be saved any longer
+	inv = inv.trim() + ")";
+	a.send().println(inv);
+
+	// 3. send visual info
+	a.send().println(visField(a.pos, new Point(a.dx(), a.dy())));
+	//System.out.println(visField(a.pos, new Point(a.dx(), a.dy())));
+
+	// 4. send ground contents of current location
+	a.send().println(groundContents(a, myMap[a.pos.x][a.pos.y]));
+
+	// 5. send any messages that may be heard by the agent
+	sendAgentMessages(a);
+
+	// 6. send agent's energy
+	a.send().println(a.energy());
+
+	// 7. send last-action status
+	a.send().println(a.lastActionStatus());
+
+	// 8. send world time
+	a.send().println(worldTime);
+	a.setNeedUpdate(false);
     }
 
     /*
@@ -365,7 +373,7 @@ public class Grid
 	// update local book keeping: time, energy(?), ...
 	worldTime++;
     }
-	
+
 
     // add a GridObject to the Grid
     public void addGOB(GridObject val){
@@ -399,9 +407,9 @@ public class Grid
 		    myMap[val.pos.x][val.pos.y].remove(val);
 		}
 	    else throw new NoSuchElementException();
-	} catch(NoSuchElementException e) { } // If val not found, then we can assume the desired result 
+	} catch(NoSuchElementException e) { } // If val not found, then we can assume the desired result
     }
-	    
+
 
     // determine if spot has a tool
     public boolean cellHasTool(int x, int y, char tool){
@@ -430,7 +438,7 @@ public class Grid
 	}
 	throw new NoSuchElementException();  //otherwise no tool is in cell
     }
-	
+
 
     /**
      * a spot will either be empty, in which case it is passable
@@ -454,7 +462,7 @@ public class Grid
 	}
 	return true;
     }
-	    
+
 
     /**
      * relDirToPt: compute the relative direction to a given point
@@ -509,7 +517,7 @@ public class Grid
                parens encapsulate three things: the whole string
 	                                        the row
 						the individual cells
-	       quotes encapsulate individual cell contents				
+	       quotes encapsulate individual cell contents
 	       (string (row1 ("cell5") ("cell4")...)(row2 ("cell5")...)...)
      * The row behind the agent is given first followed by its current row and progressing away from the agent
      * with characters left-to-right in visual field.
@@ -591,7 +599,7 @@ public class Grid
 
     /*sendAgentMessages sends any and all relevant messages to the passed in agent
      * If an agent is within hearing distance of a message,
-     * add that message to the rest of the messages that 
+     * add that message to the rest of the messages that
      * can be heard by the agent and send them all
      ***Note: It is assumed that an agent can only send one message at a time, but can receive multiple messages***
      ***Note: The messages are bound inside parentheses in form : (Message1 Message2...MessageN) ***
@@ -646,10 +654,10 @@ public class Grid
 
 	Graphics g = offscreen.getGraphics();
 	//System.out.println("image dimension: " + d.width + "x" + d.height);
-	
+
 	g.setColor(getBackground());
 	g.fillRect(0, 0, d.width, d.height);
-    
+
 	iTrans = getInsets();             //window margins
 	g.translate(iTrans.left, iTrans.top); //compensates for window margins
 	g.setColor(Color.gray.brighter());          //set the color
@@ -666,7 +674,7 @@ public class Grid
 	    gob.paint(g);   //each gridobject paints itself
 	}
 	g.translate(-iTrans.left, -iTrans.top);
-	
+
 	if ( ! rg.drawImage(offscreen, 0, 0, null) )
 	    System.out.println("Didn't finish loading, . . .");
 	g.dispose();
@@ -694,12 +702,14 @@ public class Grid
 	    }
 	    agents.clear();
 	}
-	try {
-	    gwServer.close();                     //close server
+	/*try {
+	    gwServer.close();
 	}
-	catch(Exception e) {System.out.println("error closing server socket");}
+	catch(Exception e) {System.out.println("error closing server socket");}*/
 	System.exit(4);  //exit
     }
+    //socket.Shutdown(SocketShutdown.Both);
+    //socket.Close();
 
     /** print the proper usage of the program
      */
@@ -749,7 +759,7 @@ public class Grid
 	catch (FileNotFoundException e) { System.out.println("Could not find file"); }
 	catch (Exception e) { System.out.println("Some exception: " + e); }
     }
-    
+
     /**
      * AgentListener
      * private inner class that listens for connection requests from agent controllers
@@ -771,7 +781,7 @@ public class Grid
     	    grid = mg;
     	    head = heading;
     	}
-    	
+
     	// the run method for this thread gets called by start()
     	public void run() {
     	    Socket tSock;
@@ -783,9 +793,15 @@ public class Grid
 			synchronized (agents) {
 			    agents.add(gagent);
 			}
-			try { sendAgentSensations(); }
+			try { sendSensationsToAgent(gagent); }
 			catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
 		    Thread.sleep(50);
+                if (killGrid) {
+                    try {
+                        gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
+                    }
+                    catch(Exception e) {System.out.println("error closing server socket");}
+                }
     		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
 		} catch (Exception e) {
 		    System.out.println("AgentListener.run(): some other exception: ");
@@ -795,5 +811,3 @@ public class Grid
     	}
     }
 }
- 
- 
