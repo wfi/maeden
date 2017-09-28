@@ -24,7 +24,6 @@ compiled
 *.dmg
 *.gz
 *.iso
-*.jar
 *.rar
 *.zip
 *.egg
