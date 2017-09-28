@@ -26,7 +26,6 @@ compiled
 *.iso
 *.jar
 *.rar
-*.tar
 *.zip
 *.egg
 *.egg-info

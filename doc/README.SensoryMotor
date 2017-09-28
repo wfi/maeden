@@ -6,17 +6,16 @@
 SENSORY INFORMATION
 
 Sensory information is sent to each agent controller on each cycle.
-before each action.  The senses are sent as nine (9) lines of text.
+before each action.  The senses are sent as a JSON Array.
 
-0.  Maeden Directive: The number of lines to follow (8), or one of the
-words: DIE, SUCCESS, or END.  DIE is sent when the agent runs out of
-energy.  SUCCESS is sent when the agent eats the food.  (In the
-non-default simulator mode, eating an item of food simply increases
-the agent's energy by a set amount; this increase is reflected in the
-next sensory packet sent to the agent.)  END is sent when some other
-agent eats the food.  Although multiple food objects may exist in the
-world, in the default mode as soon as one agent eats the food the
-simulation ends.
+0.  Maeden Directive: Empty, or one of the words: DIE, SUCCESS, or
+END.  DIE is sent when the agent runs out of energy.  SUCCESS is sent
+when the agent eats the food.  (In the non-default simulator mode,
+eating an item of food simply increases the agent's energy by a set
+amount; this increase is reflected in the next sensory packet sent to
+the agent.)  END is sent when some other agent eats the food.  Although
+multiple food objects may exist in the world, in the default mode as
+soon as one agent eats the food the simulation ends.
 
 1.  The "smell" direction to the food source.  This is sent as the
 direction to the food-source relative to the agent's current heading.

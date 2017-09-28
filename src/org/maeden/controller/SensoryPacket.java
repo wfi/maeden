@@ -1,6 +1,13 @@
 package org.maeden.controller;
 
+import com.oracle.javafx.jmx.json.JSONReader;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -84,46 +91,47 @@ public class SensoryPacket {
 	protected String[] getRawSenseDataFromGrid(BufferedReader gridIn) {
 		String[] result = new String[Integer.parseInt(NUMLINES)];
 		try {
-			// Read the JsonArray.
-			String jsonString = gridIn.readLine().replaceAll("\"", "").replaceAll("\\\\", "\"");
-			if ((jsonString.equals("die") || jsonString.equals("success")) || jsonString.equals("end")) {
-				System.out.println("Final status: " + jsonString);
-				System.exit(1);
+			JSONParser jsonParser = new JSONParser();
+			Object object = jsonParser.parse(gridIn.readLine()); // unpack the JsonArray.
+			JSONArray jsonArray = (JSONArray) object;
+			for (int i = 0; i < jsonArray.size(); i++) {
+				result[i] = jsonArray.get(i).toString(); // fill the the reasultArray with the information.
 			}
-			result = jsonString.substring(1, jsonString.length() - 1).split(","); // set JsonArray to result
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e){
+			e.getMessage();
+			System.exit(1); // exist if all the elements in the JsonArray are null.
 		}
 		return result;
 	}
-
-
 
     /**
      * Perform any pre-processing, especially on the visual data
      * @param rawSenseData the raw unprocessed sense data
      */
     protected void initPreProcessedFields(String[] rawSenseData){
-	// smell
-	this.smell = rawSenseData[0];
-	// process inventory
-	this.inventory = new ArrayList<Character>();
-	for(char item : rawSenseData[1].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
-	    this.inventory.add(item);
-	// visual field
-	processRetinalField(rawSenseData[2]);
-	// ground contents
-	this.groundContents = new ArrayList<Character>();
-	for(char item : rawSenseData[3].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
-	    this.groundContents.add(item);
-	// messages: *** Revisit this!! ***
-	this.messages = rawSenseData[4];
-	// energy
-	this.energy = Integer.parseInt(rawSenseData[5]);
-	// lastActionStatus
-	this.lastActionStatus = rawSenseData[6].equalsIgnoreCase("ok");
-	// world Time
-	this.worldTime = Integer.parseInt(rawSenseData[7]);
+    	try {
+			// smell
+			this.smell = rawSenseData[0];
+			// process inventory
+			this.inventory = new ArrayList<Character>();
+			for(char item : rawSenseData[1].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
+				this.inventory.add(item);
+			// visual field
+			processRetinalField(rawSenseData[2]);
+			// ground contents
+			this.groundContents = new ArrayList<Character>();
+			for(char item : rawSenseData[3].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
+				this.groundContents.add(item);
+			// messages: *** Revisit this!! ***
+			this.messages = rawSenseData[4];
+			// energy
+			this.energy = Integer.parseInt(rawSenseData[5]);
+			// lastActionStatus
+			this.lastActionStatus = rawSenseData[6].equalsIgnoreCase("ok");
+			// world Time
+			this.worldTime = Integer.parseInt(rawSenseData[7]);
+		}catch (NullPointerException e){ e.getMessage(); }
+
     }
 
     /**
@@ -214,7 +222,8 @@ public class SensoryPacket {
     /**
      * @return the array of Strings representing the raw sensory data
      */
-    public String[] getRawSenseData(){ return rawSenseData; }
+    public String[] getRawSenseData(){
+    	return rawSenseData; }
 
     /**
      * Renders the visual information as semi-formatted string, making no allowances for

@@ -296,7 +296,8 @@ public class Grid
 		for (GOBAgent a : agents) {  //for each agent do this
 			if (a.getNeedUpdate()) {
 				JSONArray jsonArray = new JSONArray();
-				jsonArray.add(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos)); // 0. send smell
+				// We added String.valueOf to make sure that everything that is send is a String.
+				jsonArray.add(String.valueOf(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. send smell
 
 				String inv = "(";
 				if (a.inventory().size() > 0){
@@ -305,13 +306,13 @@ public class Grid
 					}
 				}
 				inv = inv.trim() + ")";
-				jsonArray.add(inv); // 1. send inventory
-				jsonArray.add(visField(a.pos, new Point(a.dx(), a.dy()))); // 2. send visual info
-				jsonArray.add(groundContents(a, myMap[a.pos.x][a.pos.y]));  // 3.send contents of current location
-				jsonArray.add(sendAgentMessages(a));  // 4. send any messages that may be heard by the agent
-				jsonArray.add(a.energy());  // 5. send agent's energy
-				jsonArray.add(a.lastActionStatus());// 6. send last-action status
-				jsonArray.add(worldTime); // 7. send world time
+				jsonArray.add(String.valueOf(inv)); // 2. send inventory
+				jsonArray.add(String.valueOf(visField(a.pos, new Point(a.dx(), a.dy())))); // 3. send visual info
+				jsonArray.add(String.valueOf(groundContents(a, myMap[a.pos.x][a.pos.y])));  // 4.send contents of current location
+				jsonArray.add(String.valueOf(sendAgentMessages(a)));  // 5. send any messages that may be heard by the agent
+				jsonArray.add(String.valueOf(a.energy()));  // 6. send agent's energy
+				jsonArray.add(String.valueOf(a.lastActionStatus()));// 7. send last-action status
+				jsonArray.add(String.valueOf(worldTime)); // 8. send world time
 				a.send().println(jsonArray); // send JsonArray
 			}
 			a.setNeedUpdate(false);
