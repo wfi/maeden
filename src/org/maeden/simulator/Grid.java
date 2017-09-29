@@ -52,7 +52,7 @@ public class Grid
     private List<ComSentence> msgs = Collections.synchronizedList(new LinkedList<ComSentence>());   //holds agent messages
     private List<GridObject> gobs = Collections.synchronizedList(new LinkedList<GridObject>());   //holds world gridobjects
     private List<GOBAgent> agents; //holds world agents
-    private LinkedListGOB[][] myMap;                 //holds gridobjects
+    private LinkedListGOB[][] myMap;                 
 
     // misc (possibly temporary) variables
     private GridObject food;                   //world goal
@@ -90,7 +90,8 @@ public class Grid
 	// Initialize grid map now from read sizes
 	myMap = new LinkedListGOB[xCols][yRows]; // note: non-conventional order of columns, rows
 	agents = Collections.synchronizedList(new LinkedList<GOBAgent>());
-
+	Collections.shuffle(agents);//shuffle agents to avoid initial bias
+	
 	// set cell size from desired physical window width and logical size found in file
 	squareSize = approxWidth / xCols;
 	approxWidth = squareSize * xCols;
@@ -230,14 +231,15 @@ public class Grid
      * to be processed, get them and do whatever needs to be done.
      */
     public void processAgentActions() {
-	try {
+
+    	try {
 	    for (GOBAgent a : agents) {
-		a.getNextCommand();           //have current agent get next command from controller process
+		a.getNextCommand(); //have current agent get next command from controller process
 		//System.out.println("processing agent " + a.getAgentID() + " with action: " + a.nextCommand());
 	    }
 	} catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
 	try {
-	    for (GOBAgent a : agents) {    //process and perform each agent's action
+	    for (GOBAgent a : agents) {    //process and perform each agent's action using agents list
 		//Process the action only if there is a next command
 		if(a.nextCommand() != null)
 		    {
@@ -258,7 +260,7 @@ public class Grid
 	} catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
 	//System.out.println("Messages collected");
 	try {
-	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {          //remove any dead agents
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {   //remove any dead agents using agents
 		GOBAgent a = i.next();
 		switch(a.status()) {
 		case 'd':			// die: agent died from lack of energy or quicksand
@@ -288,6 +290,8 @@ public class Grid
 	//**** WARNING: review this logic -- since not all agents may receive sensory updates
 	msgs.clear();              //once messages are sent, they don't need to be saved any longer
     }
+    
+   
     
     /**
      * sendSensationsToAgent: for each agent that is read for it, send their sensory information
@@ -444,11 +448,30 @@ public class Grid
      * a spot will either be empty, in which case it is passable
      * or it will contain one or more objects
      * we can check an arbitrary object since either they are all shareable
-     * or there can only be one
+     * or there can only be one.
+     * 
+     * @param p point of contention between agents - point to be occupied
+     * @param gob reference to object in question - can it occupy the point
+     * @return go/nogo for grid object to occupy point in question
      */
     public boolean passable(Point p, GridObject gob){
-	return passable(p.x, p.y, gob);
+    	return passable(p.x, p.y, gob);
     }
+    /**
+     * When passable is called, the agents list is shuffled to reduce 'unfairness'
+     * in the case of two agents attempting to occupy one location on the Grid
+     * Line 482 shuffles 'agents' list to unbias collisions when the 
+     * proccessAgentActions method is called.
+	 *
+     * Before this fix, whenever processAgentActions ran, the first player in the 
+     * 'agents' list was given priority in occupying a game space - inherently unbalancing gameplay.
+     * Now with every game-tick update, the shuffling ensures a modicum of random 'fairness'.  
+     * 
+     * @param x x-coord for grid spot in question - compared to gob
+     * @param y y-coord for grid spot in question - compared to gob
+     * @param gob reference to grid object in question - internal coords compared to intended x/y coord locations
+     * @return allows shuffled agents to occupy space in question 
+     */
     public boolean passable(int x, int y, GridObject gob){
 	if ((myMap[x][y] == null) || (myMap[x][y].size() == 0))
 	    return true;
@@ -456,8 +479,9 @@ public class Grid
 	    for(GridObject gObj : myMap[x][y]) {
 		//if it is an obstacle or another base agent
 		if(!gObj.allowOtherGOB(gob)) {
-		    return false;
-		}
+			Collections.shuffle(agents); 
+			return false;
+			}
 	    }
 	}
 	return true;
