@@ -357,9 +357,9 @@ public class Grid
 	    //iterate through the cell, gather the print-chars
 	    for(GridObject gob : thisCell){
 		//if the gob is an agent (and not the one passed in) get the agent id
-	        if ((gob.printChar() == 'A' || gob.printChar() == 'H') && ((GOBAgent) gob != a)) {
+	        if ((gob.printChar() == 'A') && ((GOBAgent) gob != a)) {
 		    ground = ground + "\"" + ((GOBAgent)gob).getAgentID() + "\" ";   // \" specifies the string "
-		} else if (gob.printChar() != 'A' && gob.printChar() != 'H') {
+		} else if (gob.printChar() != 'A') {
 		    ground += "\"" +  gob.printChar() + "\" ";
 		}
 	    }
@@ -389,7 +389,7 @@ public class Grid
 	if (myMap[val.pos.x][val.pos.y] != null){
 	    LinkedListGOB lgobs = myMap[val.pos.x][val.pos.y];
 	    synchronized (lgobs){
-		if ( val.printChar() == 'A' || val.printChar() == 'H' )
+		if ( val.printChar() == 'A')
 		    lgobs.add(val);   // add agents to the end of cell's linked list
 		else
 		    lgobs.add(0,val);  // add all other objects to the front of list
@@ -582,10 +582,6 @@ public class Grid
 	    //iterate through cellContents, gather printchars or agent IDs
 	    for(GridObject gObj : cellContents) {
 		if(gObj.printChar() == 'A') { 		//if it is an agent
-		    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-		}
-		// *** To Do: eliminate the base/helper distinction within the simulator
-		else if (gObj.printChar() == 'H') { // if it is a helper agent
 		    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
 		} else {	//if gridobject is not an agent, return its print character
 		    cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
