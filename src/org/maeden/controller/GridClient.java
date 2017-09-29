@@ -42,7 +42,6 @@ public class GridClient {
 
 	    // create output stream to communicate with grid
             gridOut = new PrintWriter(gridSocket.getOutputStream(), true); 
-	    gridOut.println("base"); // send role to server
 
 	    //buffered reader reads from input stream from grid
             gridIn = new BufferedReader(new InputStreamReader(gridSocket.getInputStream()));

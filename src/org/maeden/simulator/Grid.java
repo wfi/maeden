@@ -43,37 +43,135 @@ public class Grid extends Frame
 	//private Graphics g;
 	//maedengraphics*/
 
-	// items
-	private List<ComSentence> msgs = Collections.synchronizedList(new LinkedList<ComSentence>());   //holds agent messages
-	private List<GridObject> gobs = Collections.synchronizedList(new LinkedList<GridObject>());   //holds world gridobjects
-	private List<GOBAgent> agents; //holds world agents
-	private LinkedListGOB[][] myMap;                 //holds gridobjects
+    // window and grid variables
+    private int xCols, yRows; // logical size of grid where yRows number of rows
+    private int squareSize;   //size in pixels of one side of a cell
+    public int worldTime;     //the world time, a clock reflecting n * WORLD_CYCLE_TIME for n cycles through the run loop
+    private ComSentence comMsg;  //
+    private StringTokenizer msgTokenizer;
+    private int talkDist = Integer.MAX_VALUE;  //distance in cells a message with volume talk will travel
+    private int shoutDist = Integer.MAX_VALUE; //distance in cells a message with volume shout will travel
+    public boolean killGrid = false;     //grid will exit if true
+    ///*maedengraphics
+    private Insets iTrans;
+    private boolean showDisplay = true;  //set true if a graphical display is desired, false otherwise
+    private Image offscreen;
+    private int physWid, physHt;
+    //private Graphics g;
+    //maedengraphics*/
 
-	// misc (possibly temporary) variables
-	private GridObject food;                   //world goal
-	public static final int MAEDENPORT = 7237; //host server port number
-	private ServerSocket gwServer;	// server-socket for listening for connection requests
+    // items
+    private List<ComSentence> msgs = Collections.synchronizedList(new LinkedList<ComSentence>());   //holds agent messages
+    private List<GridObject> gobs = Collections.synchronizedList(new LinkedList<GridObject>());   //holds world gridobjects
+    private List<GOBAgent> agents; //holds world agents
+    private LinkedListGOB[][] myMap;                 
 
-	public boolean EAT_FOOD_ENDS_IT = true;	// control if eating food terminates sim (true) or increases energy (false)
-	public int WORLD_CYCLE_TIME = 50;	// replaces sleepTime to control wall-time length of simulation cycle
+    // misc (possibly temporary) variables
+    private GridObject food;                   //world goal
+    public static final int MAEDENPORT = 7237; //host server port number
+    private ServerSocket gwServer;	// server-socket for listening for connection requests
 
-	// Constructors
+    public boolean EAT_FOOD_ENDS_IT = true;	// control if eating food terminates sim (true) or increases energy (false)
+    public int WORLD_CYCLE_TIME = 50;	// replaces sleepTime to control wall-time length of simulation cycle
 
-	/**
-	 * Construct a Maeden server: read world definiton from file (largely from Cuyler Cannon),
-	 * populate the grid with GridObjects as found in the world file,
-	 * start the AgentListener thread for handling connection requests from clients,
-	 * and display the window (if appropriate).
-	 * @param filePath the filesystem path to the world definition file
-	 * @param approxWidth the target size for the resulting window that displays the world
-	 * @param showD whether or not to actually display the world
-	 */
-	public Grid(String filePath, int approxWidth, boolean showD) throws FileNotFoundException, IOException {
-		try {
-			gwServer = new ServerSocket(MAEDENPORT);	//create new server Socket on Maeden port
-		} catch(IOException e) {
-			System.err.println("could not listen on port: " + MAEDENPORT);
-			System.exit(1);   //exit if cannot use the port number
+    // Constructors
+
+    /**
+     * Construct a Maeden server: read world definiton from file (largely from Cuyler Cannon),
+     * populate the grid with GridObjects as found in the world file,
+     * start the AgentListener thread for handling connection requests from clients,
+     * and display the window (if appropriate).
+     * @param filePath the filesystem path to the world definition file
+     * @param approxWidth the target size for the resulting window that displays the world
+     * @param showD whether or not to actually display the world
+     */
+    public Grid(String filePath, int approxWidth, boolean showD) throws FileNotFoundException, IOException {
+	try {
+            gwServer = new ServerSocket(MAEDENPORT);	//create new server Socket on Maeden port
+        } catch(IOException e) {
+            System.err.println("could not listen on port: " + MAEDENPORT);
+	    System.exit(1);   //exit if cannot use the port number
+        }
+
+        /** Parse Data File **/
+        WorldReader gridspaceInputData = new WorldReader(filePath);
+
+        xCols = gridspaceInputData.cols();                // get row and col sizes from world file
+        yRows = gridspaceInputData.rows();
+
+	// Initialize grid map now from read sizes
+	myMap = new LinkedListGOB[xCols][yRows]; // note: non-conventional order of columns, rows
+	agents = Collections.synchronizedList(new LinkedList<GOBAgent>());
+	Collections.shuffle(agents);//shuffle agents to avoid initial bias
+	
+	// set cell size from desired physical window width and logical size found in file
+	squareSize = approxWidth / xCols;
+	approxWidth = squareSize * xCols;
+
+        /** Read in the Character Map **/
+	for (int y = 0; y < yRows; y++)
+	    for (int x = 0; x < xCols; x++){
+		switch (gridspaceInputData.map(x,y)) {
+		case ' ':
+		    // ignore, for this represents the absence of an object
+		    break;
+		case 'B':       /** AGENT **/
+		    // place the FoodCollector here
+		    GOBFoodCollect fc = new GOBFoodCollect(x,y,squareSize);
+		    // start the AgentListener thread
+		    AgentListener al = new AgentListener(x,y,squareSize,this,gwServer,'W');
+		    al.start();
+		    //System.out.println("AgentListener just started");
+		    break;
+		case '+': //food
+		    food = new GOBFoodSupply(x,y,squareSize);
+		    addGOB(food);
+		    break;
+		case '*': //wall
+		    addGOB(new GOBWall(x,y,squareSize));
+		    break;
+		case '@': //rock
+		    addGOB(new GOBRock(x,y,squareSize));
+		    break;
+		case '#': //door
+		    addGOB(new GOBDoor(x,y,squareSize));
+		    break;
+		case '=': // narrows
+		    addGOB(new GOBNarrows(x,y,squareSize));
+		    break;
+		case 'K': //key
+		    addGOB(new GOBKey(x,y,squareSize));
+		    break;
+		case 'T': //hammer
+		    addGOB(new GOBHammer(x,y,squareSize));
+		    break;
+		case 'Q': //quicksand
+		    addGOB(new GOBQuicksand(x,y,squareSize));
+		    break;
+		case '$': //gold
+		    addGOB(new GOBGold(x,y,squareSize
+				       ///*maedengraphics
+				       , this
+				       //maedengraphics*/
+				       ));
+		    break;
+		case 'R': // robotMonster
+		    addGOB(new GOBRobot(x,y,squareSize
+					///*maedengraphics
+					, this
+					//maedengraphics*/
+					));
+		    break;
+		case 'G': // rayGun
+		    addGOB(new GOBRayGun(x,y,squareSize
+					///*maedengraphics
+					, this
+					//maedengraphics*/
+					));
+		    break;
+		default:
+		    System.out.println("Unrecognized symbol error at (" + x + "," + y + "): " + gridspaceInputData.map(x,y));
+		    return;
 		}
 
 		/** Parse Data File **/
@@ -196,29 +294,79 @@ public class Grid extends Frame
 	}
 
 
-	/**
-	 * run: run the world
-	 *
-	 */
-	public void run() {
-		while(true) {
-			try { processAgentActions(); }
-			catch (Exception e) {System.out.println("run: failure reading agent actions " + e); }
-			try { sendAgentSensations(); }
-			catch (Exception e) {System.out.println("run: failure sending sensations " + e); }
-			updateWorldTime();
-			// sleep time controls the speed of the simulation
-			try {Thread.sleep(WORLD_CYCLE_TIME);} catch (Exception e) {System.out.println("error with sleeping"); }
 
-			if(killGrid)
-				cleanClose();
-			///*maedengraphics
-			if(showDisplay){
-				repaint();
-			}
-			//maedengraphics*/
+    /**
+     * run: run the world
+     *
+     */
+    public void run() {
+	while(true) {
+	    try { processAgentActions(); }
+	    catch (Exception e) {System.out.println("run: failure reading agent actions " + e); }
+	    try { sendAgentSensations(); }
+	    catch (Exception e) {System.out.println("run: failure sending sensations " + e); }
+	    updateWorldTime();
+	    // sleep time controls the speed of the simulation
+	    try {Thread.sleep(WORLD_CYCLE_TIME);} catch (Exception e) {System.out.println("error with sleeping"); }
+	   
+	    if(killGrid)
+		cleanClose();
+	    ///*maedengraphics
+	    if(showDisplay){
+		repaint();
+	    }
+	    //maedengraphics*/
+	}
+    }
+    
+    /**
+     * processAgentActions: for each of the agents, if they have actions
+     * to be processed, get them and do whatever needs to be done.
+     */
+    public void processAgentActions() {
+
+    	try {
+	    for (GOBAgent a : agents) {
+		a.getNextCommand(); //have current agent get next command from controller process
+		//System.out.println("processing agent " + a.getAgentID() + " with action: " + a.nextCommand());
+	    }
+	} catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
+	try {
+	    for (GOBAgent a : agents) {    //process and perform each agent's action using agents list
+		//Process the action only if there is a next command
+		if(a.nextCommand() != null)
+		    {
+			a.processAction(a.nextCommand());
+			a.setNeedUpdate(true);
+		    }
+		else {
+		    a.decrEnergyWait(); // otherwise, deduct the wait cost from agent's energy
+
 		}
 	}
+	//System.out.println("About to collect messages");
+	try {
+	    getAgentMessages();             //places any messages generated from agent actions inside msgs linked list
+	} catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
+	//System.out.println("Messages collected");
+	try {
+	    for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {   //remove any dead agents using agents
+		GOBAgent a = i.next();
+		switch(a.status()) {
+		case 'd':			// die: agent died from lack of energy or quicksand
+		    while ( a.inventory().size() > 0 )
+			a.drop("drop");         // drop all items from inventory before removing agent
+		    a.cleanDie(); i.remove();
+		    break;
+		case 's': killGrid = true;	// success: agent found the food, end the simulation
+		    break;
+		case 'c':                       // continuing: agent is alive, hasn't found the food
+		default: 
+		    break;
+		}
+	    }
+	} catch (Exception e) { System.out.println("Failed in final processing: " + e);} 
+    }
 
 	/**
 	 * processAgentActions: for each of the agents, if they have actions
@@ -271,6 +419,7 @@ public class Grid extends Frame
 		} catch (Exception e) { System.out.println("Failed in final processing: " + e);}
 	}
 
+
 	/**
 	 * sendAgentSensations: for each agent that is read for it, send their sensory information
 	 * LINE1: The number of lines that are going to be sent (excluding this line) *could also be d, e, or s (die, end, success)*
@@ -317,21 +466,18 @@ public class Grid extends Frame
      * Post: String is returned in form: ("cont1" "cont2" "cont3" ...)
      *       where cont is the individual contents of the cell
      */
-	public String groundContents(GOBAgent a, List<GridObject> thisCell) {
-		if (thisCell != null && ! thisCell.isEmpty()) {
-			//encapsulate contents within parentheses
-			String ground = "(";
-			//iterate through the cell, gather the print-chars
-			for(GridObject gob : thisCell){
-				//if the gob is an agent (and not the one passed in) get the agent id
-				if ((gob.printChar() == 'A' || gob.printChar() == 'H') && ((GOBAgent) gob != a)) {
-					ground = ground + "\"" + ((GOBAgent)gob).getAgentID() + "\" ";   // \" specifies the string "
-				} else if (gob.printChar() != 'A' && gob.printChar() != 'H') {
-					ground += "\"" +  gob.printChar() + "\" ";
-				}
-			}
-			ground = ground.trim() + ')';  //trim any leading or ending spaces, close paren
-			return ground;
+
+    public String groundContents(GOBAgent a, List<GridObject> thisCell) {
+	if (thisCell != null && ! thisCell.isEmpty()) {
+	    //encapsulate contents within parentheses
+	    String ground = "(";
+	    //iterate through the cell, gather the print-chars
+	    for(GridObject gob : thisCell){
+		//if the gob is an agent (and not the one passed in) get the agent id
+	        if ((gob.printChar() == 'A') && ((GOBAgent) gob != a)) {
+		    ground = ground + "\"" + ((GOBAgent)gob).getAgentID() + "\" ";   // \" specifies the string "
+		} else if (gob.printChar() != 'A') {
+		    ground += "\"" +  gob.printChar() + "\" ";
 		}
 		return "()";
 	}
@@ -363,6 +509,7 @@ public class Grid extends Frame
 			}
 		}
 	}
+
 
 	// remove a GridObject from the Grid
 	public void removeGOB(GridObject val) {
@@ -409,29 +556,49 @@ public class Grid extends Frame
 		}
 		throw new NoSuchElementException();  //otherwise no tool is in cell
 	}
+	throw new NoSuchElementException();  //otherwise no tool is in cell
+    }
+	
 
-
-	/**
-	 * a spot will either be empty, in which case it is passable
-	 * or it will contain one or more objects
-	 * we can check an arbitrary object since either they are all shareable
-	 * or there can only be one
-	 */
-	public boolean passable(Point p, GridObject gob){
-		return passable(p.x, p.y, gob);
-	}
-	public boolean passable(int x, int y, GridObject gob){
-		if ((myMap[x][y] == null) || (myMap[x][y].size() == 0))
-			return true;
-		else {
-			for(GridObject gObj : myMap[x][y]) {
-				//if it is an obstacle or another base agent
-				if(!gObj.allowOtherGOB(gob)) {
-					return false;
-				}
+    /**
+     * a spot will either be empty, in which case it is passable
+     * or it will contain one or more objects
+     * we can check an arbitrary object since either they are all shareable
+     * or there can only be one.
+     * 
+     * @param p point of contention between agents - point to be occupied
+     * @param gob reference to object in question - can it occupy the point
+     * @return go/nogo for grid object to occupy point in question
+     */
+    public boolean passable(Point p, GridObject gob){
+    	return passable(p.x, p.y, gob);
+    }
+    /**
+     * When passable is called, the agents list is shuffled to reduce 'unfairness'
+     * in the case of two agents attempting to occupy one location on the Grid
+     * Line 482 shuffles 'agents' list to unbias collisions when the 
+     * proccessAgentActions method is called.
+	 *
+     * Before this fix, whenever processAgentActions ran, the first player in the 
+     * 'agents' list was given priority in occupying a game space - inherently unbalancing gameplay.
+     * Now with every game-tick update, the shuffling ensures a modicum of random 'fairness'.  
+     * 
+     * @param x x-coord for grid spot in question - compared to gob
+     * @param y y-coord for grid spot in question - compared to gob
+     * @param gob reference to grid object in question - internal coords compared to intended x/y coord locations
+     * @return allows shuffled agents to occupy space in question 
+     */
+    public boolean passable(int x, int y, GridObject gob){
+	if ((myMap[x][y] == null) || (myMap[x][y].size() == 0))
+	    return true;
+	else {
+	    for(GridObject gObj : myMap[x][y]) {
+		//if it is an obstacle or another base agent
+		if(!gObj.allowOtherGOB(gob)) {
+			Collections.shuffle(agents); 
+			return false;
 			}
-		}
-		return true;
+	    }
 	}
 
 
@@ -522,25 +689,17 @@ public class Grid extends Frame
      * Pre: cellContents contains any and all gridobjects in a cell
      * Post: String ("cont1 cont2 cont3") is returned (where cont1-3 are gridobject printchars or agent IDs)
      */
-	private String visChar(List<GridObject> cellContents, Point heading){
-		String cellConts = "(";
-		//if there are any gridobjects in the cell iterate and collect them
-		if (cellContents != null && !cellContents.isEmpty()) {
-			//iterate through cellContents, gather printchars or agent IDs
-			for(GridObject gObj : cellContents) {
-				if(gObj.printChar() == 'A') { 		//if it is an agent
-					cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-				}
-				// *** To Do: eliminate the base/helper distinction within the simulator
-				else if (gObj.printChar() == 'H') { // if it is a helper agent
-					cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-				} else {	//if gridobject is not an agent, return its print character
-					cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
-				}
-			}
-			//trim leading and closing spaces
-			cellConts = cellConts.trim() + ')';
-			return cellConts;
+
+    private String visChar(List<GridObject> cellContents, Point heading){
+	String cellConts = "(";
+	//if there are any gridobjects in the cell iterate and collect them
+	if (cellContents != null && !cellContents.isEmpty()) {
+	    //iterate through cellContents, gather printchars or agent IDs
+	    for(GridObject gObj : cellContents) {
+		if(gObj.printChar() == 'A') { 		//if it is an agent
+		    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
+		} else {	//if gridobject is not an agent, return its print character
+		    cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
 		}
 		//otherwise return a space representing no gridobject
 		else
