@@ -280,12 +280,12 @@ public class Grid
      * send their sensory information
      */
     public void sendAgentSensations() {
-	for (GOBAgent a : agents) {
-	    if (a.getNeedUpdate())
-		sendSensationsToAgent(a);
-	}
-	//**** WARNING: review this logic -- since not all agents may receive sensory updates
-	msgs.clear();              //once messages are sent, they don't need to be saved any longer
+        for (GOBAgent a : agents) {
+            if (a.getNeedUpdate())
+                sendSensationsToAgent(a);
+        }
+        //**** WARNING: review this logic -- since not all agents may receive sensory updates
+        msgs.clear();              //once messages are sent, they don't need to be saved any longer
     }
 
     /**
@@ -670,22 +670,22 @@ public class Grid
      * POST: buffers and sockets closed, grid exits
      */
     public void cleanClose() {
-	// *********** only for demo purposes *** remove
-	//try {Thread.sleep(20000);} catch (Exception e) {System.out.println("error with sleeping"); }
-	// *** remove **********************************
-	if( agents != null && !agents.isEmpty() ) {  //if there are agents on the grid still
-	    for(GOBAgent g : agents) {  //iterate through and close their connections
-		g.printstats();
-		g.send().println("End");              //Other agent got food, simulation ended
-		g.cleanDie();
-	    }
-	    agents.clear();
-	}
-	/*try {
+        // *********** only for demo purposes *** remove
+        //try {Thread.sleep(20000);} catch (Exception e) {System.out.println("error with sleeping"); }
+        // *** remove **********************************
+        if( agents != null && !agents.isEmpty() ) {  //if there are agents on the grid still
+            for(GOBAgent g : agents) {  //iterate through and close their connections
+                g.printstats();
+                g.send().println("End");              //Other agent got food, simulation ended
+                g.cleanDie();
+            }
+            agents.clear();
+        }
+        /*try {
           gwServer.close();
           }
           catch(Exception e) {System.out.println("error closing server socket");}*/
-	System.exit(4);  //exit
+        System.exit(4);  //exit
     }
     //socket.Shutdown(SocketShutdown.Both);
     //socket.Close();
@@ -745,28 +745,28 @@ public class Grid
      */
     class AgentListener extends Thread {
 
-    	private ServerSocket srvSock;
-    	private int x;
-    	private int y;
-    	private int squareSize;
-    	private Grid grid;
-    	private char head;
-    	// constructor
-    	AgentListener(int ix, int iy, int s, Grid mg, ServerSocket ss, char heading){
-    	    srvSock = ss;
-    	    x = ix;
-    	    y = iy;
-    	    squareSize = s;
-    	    grid = mg;
-    	    head = heading;
-    	}
+        private ServerSocket srvSock;
+        private int x;
+        private int y;
+        private int squareSize;
+        private Grid grid;
+        private char head;
+        // constructor
+        AgentListener(int ix, int iy, int s, Grid mg, ServerSocket ss, char heading){
+            srvSock = ss;
+            x = ix;
+            y = iy;
+            squareSize = s;
+            grid = mg;
+            head = heading;
+        }
 
-    	/** the run method for this AgentListener thread gets called by start() */
-    	public void run() {
-    	    Socket tSock;
-    	    while (true) {
-    		try {
-                    tSock = srvSock.accept();		// listen for connection, and
+        /** the run method for this AgentListener thread gets called by start() */
+        public void run() {
+            Socket tSock;
+            while (true) {
+                try {
+                    tSock = srvSock.accept();           // listen for connection, and
                     GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
                     grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
                     synchronized (agents) {
@@ -774,19 +774,19 @@ public class Grid
                     }
                     try { sendSensationsToAgent(gagent); }
                     catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
-		    Thread.sleep(50);
+                    Thread.sleep(50);
                     if (killGrid) {
                         try {
                             gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
                         }
                         catch(Exception e) {System.out.println("error closing server socket");}
                     }
-    		} catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
-		} catch (Exception e) {
-		    System.out.println("AgentListener.run(): some other exception: ");
-		    e.printStackTrace();
-		}
-    	    }
-    	}
+                } catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
+                } catch (Exception e) {
+                    System.out.println("AgentListener.run(): some other exception: ");
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

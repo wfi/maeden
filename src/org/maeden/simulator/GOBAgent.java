@@ -32,10 +32,10 @@ import java.util.Random;
 public class GOBAgent extends GridObject {
 
     // Agent global parameters, switches, flags, ...
-    private boolean STOCHASTICISM = false;		// control if actions always have intended effect (when true)
-    private double STOCHASTIC_RATE = 0.1;		// probability of unintended effect when STOCHASTICISM is true
+    private boolean STOCHASTICISM = false;              // control if actions always have intended effect (when true)
+    private double STOCHASTIC_RATE = 0.1;               // probability of unintended effect when STOCHASTICISM is true
     private Random randGenerator = new Random();
-    private int ATTACK_LOSS = 100;			// amount of energy lost when get hit
+    private int ATTACK_LOSS = 100;                      // amount of energy lost when get hit
     private int INVENTORYCAPACITY = 100;
 
     // OTHERS ....
@@ -50,7 +50,7 @@ public class GOBAgent extends GridObject {
     private String nextCommand;        //string to hold agent command
     private String lastActionStatus = "ok";
     private boolean haveMsg = false;
-    private char status = 'c';		// continuing (?)
+    private char status = 'c';          // continuing (?)
     private boolean needUpdate = true; // flag for indetifying if an agent acts and needs updated sensor info
 
     private int myID;                  // used to distinguish this agent from others
