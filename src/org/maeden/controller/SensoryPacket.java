@@ -215,8 +215,7 @@ public class SensoryPacket {
     /**
      * @return the array of Strings representing the raw sensory data
      */
-    public String[] getRawSenseData(){
-    	return rawSenseData; }
+    public String[] getRawSenseData(){return rawSenseData; }
 
     /**
      * Renders the visual information as semi-formatted string, making no allowances for
