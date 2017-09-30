@@ -2,7 +2,9 @@ package org.maeden.simulator;
 
 import java.lang.Math;
 import java.util.StringTokenizer;
+///*maedengraphics
 import java.awt.*;
+//maedengraphics*/
 import java.awt.Point;
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +25,10 @@ import org.json.simple.JSONArray;
  *@version: Beta 0.5
  */
 
-public class Grid extends Frame
-//maedengraphics*/
+public class Grid 
+///*maedengraphics
+    extends Frame
+//maedgraphics*/
 {
     // window and grid variables
     private int xCols, yRows; // logical size of grid where yRows number of rows
@@ -272,7 +276,20 @@ public class Grid extends Frame
     }
 
     /**
-     * sendAgentSensations: for each agent that is read for it, send their sensory information
+     * sendAgentSensations: for each agent that is ready for it as determined by getNeedUpdate(),
+     * send their sensory information
+     */
+    public void sendAgentSensations() {
+        for (GOBAgent a : agents) {
+            if (a.getNeedUpdate())
+                sendSensationsToAgent(a);
+        }
+        //**** WARNING: review this logic -- since not all agents may receive sensory updates
+        msgs.clear();              //once messages are sent, they don't need to be saved any longer
+    }
+
+    /**
+     * sendSensationsToAgent: for each agent that is read for it, send their sensory information
      * LINE1: The number of lines that are going to be sent (excluding this line) *could also be d, e, or s (die, end, success)*
      * LINE2: smell direction to food
      * LINE3: inventory in form ("inv-char")
@@ -282,32 +299,28 @@ public class Grid extends Frame
      * LINE7: Agent's energy
      * LINE8: last action's result status (ok or fail)
      */
-    public void sendAgentSensations() {
-        // agents is a list. Thus, we need a for loop to access all this information.
-        for (GOBAgent a : agents) {  //for each agent do this
-            if (a.getNeedUpdate()) {
-                JSONArray jsonArray = new JSONArray();
-                // We added String.valueOf to make sure that everything that is send is a String.
-                jsonArray.add(String.valueOf(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. send smell
-                String inv = "(";
-                if (a.inventory().size() > 0){
-                    for (GridObject gob : a.inventory()) {
-                        inv += "\"" + gob.printChar() + "\" ";
-                    }
+    public void sendSensationsToAgent(GOBAgent a) {
+        if (a.getNeedUpdate()) {
+            JSONArray jsonArray = new JSONArray();
+            // We added String.valueOf to make sure that everything that is send is a String.
+            jsonArray.add(String.valueOf(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. send smell
+            String inv = "(";
+            if (a.inventory().size() > 0){
+                for (GridObject gob : a.inventory()) {
+                    inv += "\"" + gob.printChar() + "\" ";
                 }
-                inv = inv.trim() + ")";
-                jsonArray.add(String.valueOf(inv)); // 2. send inventory
-                jsonArray.add(String.valueOf(visField(a.pos, new Point(a.dx(), a.dy())))); // 3. send visual info
-                jsonArray.add(String.valueOf(groundContents(a, myMap[a.pos.x][a.pos.y])));  // 4.send contents of current location
-                jsonArray.add(String.valueOf(sendAgentMessages(a)));  // 5. send any messages that may be heard by the agent
-                jsonArray.add(String.valueOf(a.energy()));  // 6. send agent's energy
-                jsonArray.add(String.valueOf(a.lastActionStatus()));// 7. send last-action status
-                jsonArray.add(String.valueOf(worldTime)); // 8. send world time
-                a.send().println(jsonArray); // send JsonArray
             }
+            inv = inv.trim() + ")";
+            jsonArray.add(String.valueOf(inv)); // 2. send inventory
+            jsonArray.add(String.valueOf(visField(a.pos, new Point(a.dx(), a.dy())))); // 3. send visual info
+            jsonArray.add(String.valueOf(groundContents(a, myMap[a.pos.x][a.pos.y])));  // 4.send contents of current location
+            jsonArray.add(String.valueOf(sendAgentMessages(a)));  // 5. send any messages that may be heard by the agent
+            jsonArray.add(String.valueOf(a.energy()));  // 6. send agent's energy
+            jsonArray.add(String.valueOf(a.lastActionStatus()));// 7. send last-action status
+            jsonArray.add(String.valueOf(worldTime)); // 8. send world time
+            a.send().println(jsonArray); // send JsonArray
             a.setNeedUpdate(false);
         }
-        msgs.clear();              //once messages are sent, they don't need to be saved any longer
     }
 
     /*
@@ -485,11 +498,9 @@ public class Grid extends Frame
      * visField: extract the local visual field to send to the agent controller
      * INPUT: agent point location, and agent heading (as point)
      * OUTPUT: sequence of characters
-     parens encapsulate three things: the whole string
-     the row
-     the individual cells
-     quotes encapsulate individual cell contents
-     (string (row1 ("cell5") ("cell4")...)(row2 ("cell5")...)...)
+     * parens encapsulate three things: the whole string,
+     * the row, the individual cells. The contents of individual cells are
+     * lists of strings. See README.SensoryMotor for more description and examples.
      * The row behind the agent is given first followed by its current row and progressing away from the agent
      * with characters left-to-right in visual field.
      */
@@ -547,8 +558,6 @@ public class Grid extends Frame
             return "()";
     }
 
-
-
     /**
      * mapRef: safe map reference checking for out-of-bounds
      */
@@ -570,7 +579,7 @@ public class Grid extends Frame
 
     /*sendAgentMessages sends any and all relevant messages to the passed in agent
      * If an agent is within hearing distance of a message,
-     * add that message to the rest of the messages that 
+     * add that message to the rest of the messages that
      * can be heard by the agent and send them all
      ***Note: It is assumed that an agent can only send one message at a time, but can receive multiple messages***
      ***Note: The messages are bound inside parentheses in form : (Message1 Message2...MessageN) ***
@@ -672,12 +681,14 @@ public class Grid extends Frame
             }
             agents.clear();
         }
-        try {
-            gwServer.close();                     //close server
-        }
-        catch(Exception e) {System.out.println("error closing server socket");}
+        /*try {
+          gwServer.close();
+          }
+          catch(Exception e) {System.out.println("error closing server socket");}*/
         System.exit(4);  //exit
     }
+    //socket.Shutdown(SocketShutdown.Both);
+    //socket.Close();
 
     /** print the proper usage of the program
      */
@@ -750,20 +761,26 @@ public class Grid extends Frame
             head = heading;
         }
 
-        // the run method for this thread gets called by start()
+        /** the run method for this AgentListener thread gets called by start() */
         public void run() {
             Socket tSock;
             while (true) {
                 try {
-                    tSock = srvSock.accept();               // listen for connection, and
+                    tSock = srvSock.accept();           // listen for connection, and
                     GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
                     grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
                     synchronized (agents) {
                         agents.add(gagent);
                     }
-                    try { sendAgentSensations(); }
+                    try { sendSensationsToAgent(gagent); }
                     catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
                     Thread.sleep(50);
+                    if (killGrid) {
+                        try {
+                            gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
+                        }
+                        catch(Exception e) {System.out.println("error closing server socket");}
+                    }
                 } catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
                 } catch (Exception e) {
                     System.out.println("AgentListener.run(): some other exception: ");
@@ -773,5 +790,3 @@ public class Grid extends Frame
         }
     }
 }
- 
- 
