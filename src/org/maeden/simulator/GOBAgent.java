@@ -19,23 +19,23 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
- * @author:  Wayne Iba and Josh Holm
- * @date:    12-1-2010
- * @version: Beta 0.4
- *
- * GOBAgent objects have responsibility to check legality of moves.
- * A general issue is granting authority for the object to move itself
- * but since the agent controller is always mediated by the Grid itself,
- * this may be reasonable.
- */
+* @author:  Wayne Iba and Josh Holm
+* @date:    12-1-2010
+* @version: Beta 0.4
+*
+* GOBAgent objects have responsibility to check legality of moves.
+* A general issue is granting authority for the object to move itself
+* but since the agent controller is always mediated by the Grid itself,
+* this may be reasonable.
+*/
 
 public class GOBAgent extends GridObject {
 
     // Agent global parameters, switches, flags, ...
-    private boolean STOCHASTICISM = false;              // control if actions always have intended effect (when true)
-    private double STOCHASTIC_RATE = 0.1;               // probability of unintended effect when STOCHASTICISM is true
+    private boolean STOCHASTICISM = false;		// control if actions always have intended effect (when true)
+    private double STOCHASTIC_RATE = 0.1;		// probability of unintended effect when STOCHASTICISM is true
     private Random randGenerator = new Random();
-    private int ATTACK_LOSS = 100;                      // amount of energy lost when get hit
+    private int ATTACK_LOSS = 100;			// amount of energy lost when get hit
     private int INVENTORYCAPACITY = 100;
 
     // OTHERS ....
@@ -50,9 +50,9 @@ public class GOBAgent extends GridObject {
     private String nextCommand;        //string to hold agent command
     private String lastActionStatus = "ok";
     private boolean haveMsg = false;
-    private char status = 'c';          // continuing (?)
+    private char status = 'c';		// continuing (?)
     private boolean needUpdate = true; // flag for indetifying if an agent acts and needs updated sensor info
-    
+
     private int myID;                  // used to distinguish this agent from others
 
     private int dx, dy;                //heading x and y coor.
@@ -105,7 +105,7 @@ public class GOBAgent extends GridObject {
     private Polygon dTri = new Polygon(dpxs, dpys, 8);
     //maedengraphics*/
 
-   
+
     /** Constructor for the agent for use by Grid Class
      *sets agent at position (s * ix, x * iy), connects to ss over sockets and gets an initial heading (N,S,E,W)
      *Pre: Grid is using this constructor, ss is the Socket that the agent uses to connect to the Grid, ix and iy are valid values, s > 0
@@ -113,6 +113,7 @@ public class GOBAgent extends GridObject {
      */
     public GOBAgent(int ix, int iy, int s, Grid mg, Socket sock, char heading){
         super(ix, iy, s);
+        shareable = false; // don't allow agents in the same cell at the same time
         myID = idSequence++;
         myGrid = mg;
         conn = sock;
@@ -135,7 +136,6 @@ public class GOBAgent extends GridObject {
         inventory = new LinkedList<GridObject>();
     }
 
-
     /** Constructor for use by KeyboardController ONLY
      * Used only for drawing purposes
      * Pre: KEYBOARDCONTROLLER IS USING THE CONSTRUCTOR, s > 0, ix > 0, iy > 0
@@ -143,6 +143,7 @@ public class GOBAgent extends GridObject {
      */
     public GOBAgent(int ix, int iy, int s, char heading) {
         super(ix, iy, s);
+        shareable = false; // don't allow agents in the same cell at the same time
         ///*maedengraphics
         myColor = Color.green;
         //maedengraphics*/
