@@ -13,20 +13,20 @@ import java.net.*;
  */
 
 public class GridClient {
-    protected Socket gridSocket;			// socket for communicating w/ server
+    protected Socket gridSocket;                        // socket for communicating w/ server
     protected PrintWriter gridOut;                      // takes care of output stream for sockets
-    protected BufferedReader gridIn;			// bufferedreader for input reading
+    protected BufferedReader gridIn;                    // bufferedreader for input reading
     protected String myID;
     public static final int MAEDENPORT = 7237;       // uses port 1237 on localhost
 
 
     /**
-    public GridClient(){
-	this("localhost", EDENPORT);
-    }
+       public GridClient(){
+       this("localhost", EDENPORT);
+       }
     */
     public GridClient(String h, int p) {
-	registerWithGrid(h, p);
+        registerWithGrid(h, p);
     }
 
     /**
@@ -37,15 +37,15 @@ public class GridClient {
      */
     public void registerWithGrid(String h, int p) {
         try {
-	    // connects to h machine on port p
+            // connects to h machine on port p
             gridSocket = new Socket(h, p);
 
-	    // create output stream to communicate with grid
+            // create output stream to communicate with grid
             gridOut = new PrintWriter(gridSocket.getOutputStream(), true); 
 
-	    //buffered reader reads from input stream from grid
+            //buffered reader reads from input stream from grid
             gridIn = new BufferedReader(new InputStreamReader(gridSocket.getInputStream()));
-	    myID = gridIn.readLine(); // read this agent's ID number
+            myID = gridIn.readLine(); // read this agent's ID number
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host: " + h);
             System.exit(1);
@@ -54,7 +54,7 @@ public class GridClient {
             System.exit(1);
         }
     }
-	
+        
     /**
      * getSensoryPacket : this should return a SensoryPacket corresponding to lines read from
      * the Grid.  Note: this drains the information available on the socket connecting to the Grid server,
@@ -62,8 +62,8 @@ public class GridClient {
      * @return the latest sensory information from the Grid server wrapped in a SensoryPacket
      */
     public SensoryPacket getSensoryPacket() {
-	SensoryPacket sp = new SensoryPacket(gridIn);
-	return sp;
+        SensoryPacket sp = new SensoryPacket(gridIn);
+        return sp;
     }
 
 
@@ -75,8 +75,8 @@ public class GridClient {
      * *NOTE: GOBAgent only looks at first letter of command string unless talk or shout is sent*
      */
     public void effectorSend(String command) {
-	gridOut.println(command);
+        gridOut.println(command);
     }
-	
+        
 
 }

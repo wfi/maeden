@@ -32,10 +32,10 @@ import java.util.Random;
 public class GOBAgent extends GridObject {
 
     // Agent global parameters, switches, flags, ...
-    private boolean STOCHASTICISM = false;		// control if actions always have intended effect (when true)
-    private double STOCHASTIC_RATE = 0.1;		// probability of unintended effect when STOCHASTICISM is true
+    private boolean STOCHASTICISM = false;              // control if actions always have intended effect (when true)
+    private double STOCHASTIC_RATE = 0.1;               // probability of unintended effect when STOCHASTICISM is true
     private Random randGenerator = new Random();
-    private int ATTACK_LOSS = 100;			// amount of energy lost when get hit
+    private int ATTACK_LOSS = 100;                      // amount of energy lost when get hit
     private int INVENTORYCAPACITY = 100;
 
     // OTHERS ....
@@ -50,7 +50,7 @@ public class GOBAgent extends GridObject {
     private String nextCommand;        //string to hold agent command
     private String lastActionStatus = "ok";
     private boolean haveMsg = false;
-    private char status = 'c';		// continuing (?)
+    private char status = 'c';          // continuing (?)
     private boolean needUpdate = true; // flag for indetifying if an agent acts and needs updated sensor info
     
     private int myID;                  // used to distinguish this agent from others
@@ -62,19 +62,19 @@ public class GOBAgent extends GridObject {
     //can't currently change keys to action characters
     //same character for "useKey" and "useHammer"
     static {
-    	costs = new HashMap<String,Integer>();
-    	costs.put("forward", 5);
-    	costs.put("back", 5);
-    	costs.put("turn", 3);
-    	costs.put("wait", 1);
-    	costs.put("grab", 2);
-    	costs.put("drop", 1);
-    	costs.put("useT", 15);
-    	costs.put("useK", 2);
-	costs.put("useG", 2);
-    	costs.put("talk", 2);
-    	costs.put("shout", 4);
-    	costs.put("attack", 15);
+        costs = new HashMap<String,Integer>();
+        costs.put("forward", 5);
+        costs.put("back", 5);
+        costs.put("turn", 3);
+        costs.put("wait", 1);
+        costs.put("grab", 2);
+        costs.put("drop", 1);
+        costs.put("useT", 15);
+        costs.put("useK", 2);
+        costs.put("useG", 2);
+        costs.put("talk", 2);
+        costs.put("shout", 4);
+        costs.put("attack", 15);
     }
     private int agentEnergy = 2000;
     //private int comPayment = 1000;
@@ -112,27 +112,27 @@ public class GOBAgent extends GridObject {
      *Post:GOBAgent Object is created
      */
     public GOBAgent(int ix, int iy, int s, Grid mg, Socket sock, char heading){
-		super(ix, iy, s);
-		myID = idSequence++;
-		myGrid = mg;
-		conn = sock;
-		///*maedengraphics
-		myColor = colorSet[myID%colorSet.length];
-		//maedengraphics*/
-		setAgentHeading(heading);
-		try {
-		    send = new PrintWriter(conn.getOutputStream(), true);
-		    recv = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		} catch(IOException e) {
-		    System.out.println("GOBAgent constructor: Accept failed on port: " + myGrid.MAEDENPORT);
-		    System.exit(-1);
-		}
-		send.println(myID);
-	    ///*maedengraphics
-	    myColor = Color.green;
-	    //maedengraphics*/
-	    newPrintChar('A');   //Agent's printchar is A
-		inventory = new LinkedList<GridObject>();
+        super(ix, iy, s);
+        myID = idSequence++;
+        myGrid = mg;
+        conn = sock;
+        ///*maedengraphics
+        myColor = colorSet[myID%colorSet.length];
+        //maedengraphics*/
+        setAgentHeading(heading);
+        try {
+            send = new PrintWriter(conn.getOutputStream(), true);
+            recv = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } catch(IOException e) {
+            System.out.println("GOBAgent constructor: Accept failed on port: " + myGrid.MAEDENPORT);
+            System.exit(-1);
+        }
+        send.println(myID);
+        ///*maedengraphics
+        myColor = Color.green;
+        //maedengraphics*/
+        newPrintChar('A');   //Agent's printchar is A
+        inventory = new LinkedList<GridObject>();
     }
 
 
@@ -142,16 +142,16 @@ public class GOBAgent extends GridObject {
      * Post: GOBAgent object is created
      */
     public GOBAgent(int ix, int iy, int s, char heading) {
-	super(ix, iy, s);
-	///*maedengraphics
-	myColor = Color.green;
-	//maedengraphics*/
-	setAgentHeading(heading);
-	inventory = new LinkedList<GridObject>();
+        super(ix, iy, s);
+        ///*maedengraphics
+        myColor = Color.green;
+        //maedengraphics*/
+        setAgentHeading(heading);
+        inventory = new LinkedList<GridObject>();
     }
 
     public void printstats(){
-	System.out.println("Energy: " + agentEnergy);
+        System.out.println("Energy: " + agentEnergy);
     }
 
     //PUBLIC ACCESSORS
@@ -161,87 +161,87 @@ public class GOBAgent extends GridObject {
 
     //public accessors for the need sensor update flag
     public boolean getNeedUpdate() {
-	return needUpdate; 
+        return needUpdate; 
     }
     //public accessor for the id Sequence
     public int idSequence() {
-	return idSequence;
+        return idSequence;
     }
     //public accessor for the Socket connection
     public Socket conn() {
-	return conn;
+        return conn;
     }
     //public accessor for the printwriter
     public PrintWriter send() {
-	return send;
+        return send;
     }
     //public accessor for the bufferedreader
     public BufferedReader recv() {
-	return recv;
+        return recv;
     }
     //public accessor for receiving the next command to be executed from the controller and caching it in nextCommand
     public void getNextCommand() {
-	try {
-	    // Only read in the next command if there is one
-	    // if there is not, set nextCommand to null
-	    if(recv.ready()){
-		nextCommand = recv.readLine();
-	    }
-	    else {
-		nextCommand = null;
-	    }
-	} catch (Exception e) { System.out.println("getNextCommand: Failed to receive command from controller process " + e); }
+        try {
+            // Only read in the next command if there is one
+            // if there is not, set nextCommand to null
+            if(recv.ready()){
+                nextCommand = recv.readLine();
+            }
+            else {
+                nextCommand = null;
+            }
+        } catch (Exception e) { System.out.println("getNextCommand: Failed to receive command from controller process " + e); }
     }
     //public accessor for viewing the next command
     public String nextCommand() {
-	return nextCommand;
+        return nextCommand;
     }
     //public accessor for dx
     public int dx() {
-	return dx;
+        return dx;
     }
     //public accessor for dy
     public int dy() {
-	return dy;
+        return dy;
     }
     //public accessor for the Agent's inventory
     public LinkedList<GridObject> inventory() {
-	return inventory;
+        return inventory;
     }
     //public accessor for Agent's amount of remaining energy;
     public int energy() {
-	return agentEnergy;
+        return agentEnergy;
     }
     //public accessor for finding if agent should die or not
     public char status() {
-	return status;
+        return status;
     }
     //public accessor for lastActionStatus (result from most recent action: either "ok" or "fail")
     public String lastActionStatus() { return lastActionStatus; }
 
     // ID accessor
     public int getAgentID(){ 
-	return myID;
+        return myID;
     }
 
     // Grid simulation time accessor via agent
     public int simTime(){
-	return myGrid.worldTime;
+        return myGrid.worldTime;
     }
 
     // PUBLIC SETTERS
 
     public void setNeedUpdate(boolean bool) {
-	needUpdate = bool;
+        needUpdate = bool;
     }
     public void setAgentEnergy(int newValue) {
-	agentEnergy = newValue;
+        agentEnergy = newValue;
     }
 
     /** 
      */
     public void decrEnergyWait() {
-	agentEnergy -= costs.get("wait");
+        agentEnergy -= costs.get("wait");
     }
 
     // AGENT ACTIONS
@@ -250,30 +250,30 @@ public class GOBAgent extends GridObject {
      * subtracts amount of energy required for moving forward *defined by forwardCost*
      */
     public void moveForward(){
-	Point fSpot = new Point(pos.x + dx, pos.y + dy);
-	if ( myGrid.passable(fSpot, this) ) {
-	    myGrid.removeGOB(this);
-	    pos.x += dx; pos.y += dy;
-	    myGrid.addGOB(this);
-	} else
-	    lastActionFails();
-	agentEnergy -= costs.get("forward");           //subtract energy required to move forward
-	dieIfNoEnergy();                      //agent dies if no energy left
+        Point fSpot = new Point(pos.x + dx, pos.y + dy);
+        if ( myGrid.passable(fSpot, this) ) {
+            myGrid.removeGOB(this);
+            pos.x += dx; pos.y += dy;
+            myGrid.addGOB(this);
+        } else
+            lastActionFails();
+        agentEnergy -= costs.get("forward");           //subtract energy required to move forward
+        dieIfNoEnergy();                      //agent dies if no energy left
     }
     
     /* moveBackward checks cell behind agent.  If passable, agent moves to it, otherwise does nothing
      * subtracts amount of energy required for moving backward *defined by backCost*
      */
     public void moveBackward(){
-	Point fSpot = new Point(pos.x - dx, pos.y - dy);
-	if ( myGrid.passable(fSpot, this) ) {
-	    myGrid.removeGOB(this);
-	    pos.x -= dx; pos.y -= dy;
-	    myGrid.addGOB(this);
-	} else
-	    lastActionFails();
-	agentEnergy -= costs.get("back");              //subtract energy required to move backward
-	dieIfNoEnergy();                      //agent dies if no energy left
+        Point fSpot = new Point(pos.x - dx, pos.y - dy);
+        if ( myGrid.passable(fSpot, this) ) {
+            myGrid.removeGOB(this);
+            pos.x -= dx; pos.y -= dy;
+            myGrid.addGOB(this);
+        } else
+            lastActionFails();
+        agentEnergy -= costs.get("back");              //subtract energy required to move backward
+        dieIfNoEnergy();                      //agent dies if no energy left
     }
 
     /* turnLeft calls dieIfQuicksand. turns agent left
@@ -281,12 +281,12 @@ public class GOBAgent extends GridObject {
      */
     public void turnLeft(){
 
-	// if on quicksand, die
-	dieIfQuicksand();
-	int tmp = dx;
-	dx = dy; dy = - tmp;
-	agentEnergy -= costs.get("turn");              //subtract energy required to turn
-	dieIfNoEnergy();                      //agent dies if no energy left
+        // if on quicksand, die
+        dieIfQuicksand();
+        int tmp = dx;
+        dx = dy; dy = - tmp;
+        agentEnergy -= costs.get("turn");              //subtract energy required to turn
+        dieIfNoEnergy();                      //agent dies if no energy left
     }
 
     /* turnRight calls dieIfQuicksand. turns agent right
@@ -294,60 +294,60 @@ public class GOBAgent extends GridObject {
      */
     public void turnRight(){
 
-	// if on quicksand, die
-	dieIfQuicksand();
-	int tmp = dx;
-	dx = - dy; dy = tmp;
-	agentEnergy -= costs.get("turn");              //subtract energy required to turn
-	dieIfNoEnergy();                      //agent dies if no energy left
+        // if on quicksand, die
+        dieIfQuicksand();
+        int tmp = dx;
+        dx = - dy; dy = tmp;
+        agentEnergy -= costs.get("turn");              //subtract energy required to turn
+        dieIfNoEnergy();                      //agent dies if no energy left
     }
 
     /* attack: ....
      * hit agent in cell directly ahead.  [to do: extend to use weapons]
      */
     public void attack(){
-	Point pointAhead = new Point(pos.x + dx, pos.y + dy);
-	GOBAgent attackee;
+        Point pointAhead = new Point(pos.x + dx, pos.y + dy);
+        GOBAgent attackee;
 
-	// find agent if there is one in the grid ahead
-	if ( myGrid.myMap()[pointAhead.x][pointAhead.y] != null &&
-	     ! myGrid.myMap()[pointAhead.x][pointAhead.y].isEmpty() ){
-	    try {
-		attackee = (GOBAgent) getGOBbyPrintChar('A', myGrid.myMap()[pointAhead.x][pointAhead.y]);
-		// reduce their energy by attack amount
-		attackee.setAgentEnergy(attackee.energy() - ATTACK_LOSS);
-	    } catch (NoSuchElementException e) { agentEnergy -= 5; } // penalty for attacking when nothing there to hit
-	}
-	agentEnergy -= costs.get("attack");
-	dieIfNoEnergy();
+        // find agent if there is one in the grid ahead
+        if ( myGrid.myMap()[pointAhead.x][pointAhead.y] != null &&
+             ! myGrid.myMap()[pointAhead.x][pointAhead.y].isEmpty() ){
+            try {
+                attackee = (GOBAgent) getGOBbyPrintChar('A', myGrid.myMap()[pointAhead.x][pointAhead.y]);
+                // reduce their energy by attack amount
+                attackee.setAgentEnergy(attackee.energy() - ATTACK_LOSS);
+            } catch (NoSuchElementException e) { agentEnergy -= 5; } // penalty for attacking when nothing there to hit
+        }
+        agentEnergy -= costs.get("attack");
+        dieIfNoEnergy();
     }
 
     /* grab calls dieIfQuicksand. agent picks up item, transfer it to agent's inventory
      * subtracts amount of energy required for grabbing object *defined by grabCost*
      */
     public void grab(String gAction){
-	char tool;
-	GridObject grabobj;
-	// if on quicksand, die
-	dieIfQuicksand();
-	tool = getToolChar(gAction, myGrid.myMap()[pos.x][pos.y]);
+        char tool;
+        GridObject grabobj;
+        // if on quicksand, die
+        dieIfQuicksand();
+        tool = getToolChar(gAction, myGrid.myMap()[pos.x][pos.y]);
 
-	if ( myGrid.cellHasTool(pos.x, pos.y, tool) && inventory.size() < INVENTORYCAPACITY ){
-	    try {
-		grabobj = myGrid.getTool(this, pos.x, pos.y, tool); // in case food supply not ready, throw NoSuchElementException
-		inventory.push( grabobj );
-		myGrid.removeGOB( grabobj );
-		grabobj.pos = this.pos; // make inventory's position point to agent's position while being carried
-	    } catch (NoSuchElementException e) {
-		System.out.println("grab: myGrid.cellHasTool returns true but NoSuchElement: " + e);
-		lastActionFails();
-	    }
-	} else {
-	    System.out.println("grab: myGrid.cellHasTool returns false for tool '" + tool + "'");
-	    lastActionFails();
-	}
-	agentEnergy -= costs.get("grab");                    //subtract energy required to grab an object
-	dieIfNoEnergy();                            //agent dies if no energy is left
+        if ( myGrid.cellHasTool(pos.x, pos.y, tool) && inventory.size() < INVENTORYCAPACITY ){
+            try {
+                grabobj = myGrid.getTool(this, pos.x, pos.y, tool); // in case food supply not ready, throw NoSuchElementException
+                inventory.push( grabobj );
+                myGrid.removeGOB( grabobj );
+                grabobj.pos = this.pos; // make inventory's position point to agent's position while being carried
+            } catch (NoSuchElementException e) {
+                System.out.println("grab: myGrid.cellHasTool returns true but NoSuchElement: " + e);
+                lastActionFails();
+            }
+        } else {
+            System.out.println("grab: myGrid.cellHasTool returns false for tool '" + tool + "'");
+            lastActionFails();
+        }
+        agentEnergy -= costs.get("grab");                    //subtract energy required to grab an object
+        dieIfNoEnergy();                            //agent dies if no energy is left
     }
 
     /* drop calls dieIfQuicksand. drop inventory item into cell, remove from inventory
@@ -355,19 +355,19 @@ public class GOBAgent extends GridObject {
      * with no arguments, drops the list thing added to the inventory (i.e., front of inventory list)
      */
     public void drop(String dAction){
-	GridObject dropTool = null;
-	// if on quicksand, die
-	dieIfQuicksand();
-	dropTool = getGOBtool(dAction, inventory);
+        GridObject dropTool = null;
+        // if on quicksand, die
+        dieIfQuicksand();
+        dropTool = getGOBtool(dAction, inventory);
 
-	if ( dropTool != null ){
-	    inventory.remove(dropTool);
-	    dropTool.onDrop(this, myGrid);
-	} else {
-	    lastActionFails();
-	}
-	agentEnergy -= costs.get("drop");              //subtract amount of energy required to drop an object
-	dieIfNoEnergy();                      //agent dies if he has no energy left
+        if ( dropTool != null ){
+            inventory.remove(dropTool);
+            dropTool.onDrop(this, myGrid);
+        } else {
+            lastActionFails();
+        }
+        agentEnergy -= costs.get("drop");              //subtract amount of energy required to drop an object
+        dieIfNoEnergy();                      //agent dies if he has no energy left
     }
     
     /* use calls dieIfQuicksand. use inventory object on gridobject in front of agent
@@ -378,38 +378,38 @@ public class GOBAgent extends GridObject {
      * using other objects applies the object to the object immediately in front of the agent
      */
     public void use(String uAction){ 
-	GridObject useTool = null;
-	// if on quicksand, die
-	dieIfQuicksand();
-	useTool = getGOBtool(uAction, inventory);
-	Point fSpot = new Point(pos.x + dx, pos.y + dy);
-	// if useobj is food, then eat and end
-	if ( useTool != null && useTool.printChar() == '+'){
-	    if ( myGrid.EAT_FOOD_ENDS_IT ){
-		send.println("success");                                //agent succeeded in using the food
-		status = 's';
-		return; // this is the end */
-	    } else {
-		inventory.remove(useTool);
-		agentEnergy += ((GOBFood)useTool).foodInc();
-	    }
-	} else if ( useTool != null && myGrid.myMap()[fSpot.x][fSpot.y] != null &&
-		    ! myGrid.myMap()[fSpot.x][fSpot.y].isEmpty() ){
-	    // assume a single object that is being acted upon
-	    GridObject gob = (GridObject) myGrid.myMap()[fSpot.x][fSpot.y].getLast();
-	    boolean result = gob.actedOnBy(useTool, myGrid);
-	    if (!result)
-		lastActionFails();
-	    else
-		agentEnergy -= costs.get("use" + useTool.printChar());
-	    if (gob.printChar() == '#' && useTool.printChar() == 'K') {
-		inventory.remove(useTool);                      // key gets consumed
-	    }
-	} else {
-	    lastActionFails();
-	    agentEnergy -= costs.get("wait");                   //agent hasn't done anything, so just subtract wait energy
-	}
-	dieIfNoEnergy();                                        //if out of energy, agent dies
+        GridObject useTool = null;
+        // if on quicksand, die
+        dieIfQuicksand();
+        useTool = getGOBtool(uAction, inventory);
+        Point fSpot = new Point(pos.x + dx, pos.y + dy);
+        // if useobj is food, then eat and end
+        if ( useTool != null && useTool.printChar() == '+'){
+            if ( myGrid.EAT_FOOD_ENDS_IT ){
+                send.println("success");                                //agent succeeded in using the food
+                status = 's';
+                return; // this is the end */
+            } else {
+                inventory.remove(useTool);
+                agentEnergy += ((GOBFood)useTool).foodInc();
+            }
+        } else if ( useTool != null && myGrid.myMap()[fSpot.x][fSpot.y] != null &&
+                    ! myGrid.myMap()[fSpot.x][fSpot.y].isEmpty() ){
+            // assume a single object that is being acted upon
+            GridObject gob = (GridObject) myGrid.myMap()[fSpot.x][fSpot.y].getLast();
+            boolean result = gob.actedOnBy(useTool, myGrid);
+            if (!result)
+                lastActionFails();
+            else
+                agentEnergy -= costs.get("use" + useTool.printChar());
+            if (gob.printChar() == '#' && useTool.printChar() == 'K') {
+                inventory.remove(useTool);                      // key gets consumed
+            }
+        } else {
+            lastActionFails();
+            agentEnergy -= costs.get("wait");                   //agent hasn't done anything, so just subtract wait energy
+        }
+        dieIfNoEnergy();                                        //if out of energy, agent dies
     }
 
     /** getToolChar: String, LinkedList -> Char
@@ -418,20 +418,20 @@ public class GOBAgent extends GridObject {
      * @param items 
      */
     private char getToolChar(String actString, LinkedList<GridObject> items){
-	char tool;
-	StringTokenizer actToks = new StringTokenizer(actString);
-	actToks.nextToken();	// eat up the main action and prepare for optional argument
-	if ( actToks.hasMoreTokens() ){
-	    tool = Character.toUpperCase(actToks.nextToken().toCharArray()[0]); // print-char of item to
-	} else {
-	    if ( items.size() > 0 )
-		tool = items.getFirst().printChar();	// in the case of cell contents,
-	    // Grid.addGOB() attempts (but does not guarantee)
-	    // to NOT grab an agent self or other if other object present
-	    else
-		tool = '*';
-	}
-	return tool;
+        char tool;
+        StringTokenizer actToks = new StringTokenizer(actString);
+        actToks.nextToken();    // eat up the main action and prepare for optional argument
+        if ( actToks.hasMoreTokens() ){
+            tool = Character.toUpperCase(actToks.nextToken().toCharArray()[0]); // print-char of item to
+        } else {
+            if ( items.size() > 0 )
+                tool = items.getFirst().printChar();    // in the case of cell contents,
+            // Grid.addGOB() attempts (but does not guarantee)
+            // to NOT grab an agent self or other if other object present
+            else
+                tool = '*';
+        }
+        return tool;
     }
 
     /** Get the first grid object in the given LinkedList of items that matches the given print-char.
@@ -440,11 +440,11 @@ public class GOBAgent extends GridObject {
      * @return the found item
      */
     private GridObject getGOBbyPrintChar(char pc, LinkedList<GridObject> items) throws NoSuchElementException {
-	for ( GridObject ldt : items ){
-	    if ( ldt.printChar() == pc ) 
-		return ldt;
-	}
-	throw new NoSuchElementException();
+        for ( GridObject ldt : items ){
+            if ( ldt.printChar() == pc ) 
+                return ldt;
+        }
+        throw new NoSuchElementException();
     }
 
     /** getGOBtool: String, LinkedList -> GridObject
@@ -454,12 +454,12 @@ public class GOBAgent extends GridObject {
      * @return the tool indicated in the action string
      */
     private GridObject getGOBtool(String actString, LinkedList<GridObject> items){
-	GridObject theTool = null;
-	char tool = getToolChar(actString, items);
-	try {
-	    theTool = getGOBbyPrintChar(tool, items);
-	} catch (NoSuchElementException e) { theTool = null; }
-	return theTool;
+        GridObject theTool = null;
+        char tool = getToolChar(actString, items);
+        try {
+            theTool = getGOBbyPrintChar(tool, items);
+        } catch (NoSuchElementException e) { theTool = null; }
+        return theTool;
     }
 
     /**
@@ -468,23 +468,23 @@ public class GOBAgent extends GridObject {
      * method.
      */
     private void dieIfQuicksand(){
-	if (myGrid.myMap()[pos.x][pos.y] != null)
-	    for (GridObject go : (myGrid.myMap())[pos.x][pos.y]) {
-		if ( go.printChar() == 'Q' ){
-		    send.println("die");
-		    status = 'd';
-		}
-	    }
+        if (myGrid.myMap()[pos.x][pos.y] != null)
+            for (GridObject go : (myGrid.myMap())[pos.x][pos.y]) {
+                if ( go.printChar() == 'Q' ){
+                    send.println("die");
+                    status = 'd';
+                }
+            }
     }
 
     /** dieIfNoEnergy determines if agent has energy left.  Call this function for every action
      * if no energy left, exit
      */
     private void dieIfNoEnergy() {
-	if(agentEnergy <= 0) {
-	    send.println("die");                                //agent died
-	    status = 'd';
-	}
+        if(agentEnergy <= 0) {
+            send.println("die");                                //agent died
+            status = 'd';
+        }
     }
 
     /** setAgentHeading takes in a char and converts it to a dx, dy setup
@@ -498,21 +498,21 @@ public class GOBAgent extends GridObject {
      * POST: dx and dy are set based on the character
      */
     private void setAgentHeading(char h){
-	Character headChar = new Character(h);
-	h = headChar.toUpperCase(h);
-	switch (h) {
-	case 'N': dx = 0; dy = -1; 
-	    break;
-	case 'E': dx = 1; dy = 0;
-	    break;
-	case 'S': dx = 0; dy = 1;
-	    break;
-	case 'W': dx = -1; dy = 0;
-	    break;
-	case '?': dx = 0; dy = 0;
-	    break;
-	default: System.out.println("GOBAgent:setAgentHeading: Unrecognized heading char: " + h);
-	}
+        Character headChar = new Character(h);
+        h = headChar.toUpperCase(h);
+        switch (h) {
+        case 'N': dx = 0; dy = -1; 
+            break;
+        case 'E': dx = 1; dy = 0;
+            break;
+        case 'S': dx = 0; dy = 1;
+            break;
+        case 'W': dx = -1; dy = 0;
+            break;
+        case '?': dx = 0; dy = 0;
+            break;
+        default: System.out.println("GOBAgent:setAgentHeading: Unrecognized heading char: " + h);
+        }
     }
 
     /** processAction
@@ -522,52 +522,52 @@ public class GOBAgent extends GridObject {
      * @param action the command string that the agent controller wants to perform
      */
     public void processAction(String action) {
-	String[] actionLetters =  {"f", "b", "r", "l", "u", "d", "g", "w", "t", "s", "a"}; // but not 'k' to killself
-	char actionChar, origActionChar = Character.toLowerCase(action.toCharArray()[0]);
-	String actionLetter;
-	resetActionStatus();
-	if (STOCHASTICISM && (Math.random() < STOCHASTIC_RATE)) {	// something random happened
-	    actionLetter = actionLetters[randGenerator.nextInt(actionLetters.length)];
-	    actionChar = actionLetter.charAt(0);
-	    action = actionLetter + action.substring(1, action.length());
-	    System.out.println("processAction: about to work with '" + action + "' instead of orig act: '" + origActionChar + "'");
-	} else {							// do what was intended
-	    actionChar = origActionChar;
-	}
-	switch(actionChar) {
-	case 'f': moveForward();   //move forward command
-	    break;
-	case 'b': moveBackward();  //move backward command
-	    break;
-	case 'r': turnRight(); //turn right command
-	    break;
-	case 'l': turnLeft(); //turn left command
-	    break;
-	case 'u': use(action); //use command
-	    break;
-	case 'd': drop(action); //drop command
-	    break;
-	case 'g': grab(action);  //grab command
-	    break;
-	case 'w': // wait command
-	    agentEnergy -= costs.get("wait"); dieIfNoEnergy(); dieIfQuicksand();
-	    break;
-	case 't': communicate(action);         //talk command
-	    break;
-	case 's': communicate(action);         //shout command
-	    break;
-	case 'a': attack();     // attack another agent
-	    break;
-	case 'k': agentEnergy = 0; dieIfNoEnergy();	// allow agents to kill themselves
-	    break;
-	default:
-	    System.out.println("processAction: Illegal command " + action);
-	    break;
-	}
-	if (actionChar != origActionChar){
-	    System.out.println("processAction: actionChar != origActChar -- lastActionFails");
-	    lastActionFails();
-	}
+        String[] actionLetters =  {"f", "b", "r", "l", "u", "d", "g", "w", "t", "s", "a"}; // but not 'k' to killself
+        char actionChar, origActionChar = Character.toLowerCase(action.toCharArray()[0]);
+        String actionLetter;
+        resetActionStatus();
+        if (STOCHASTICISM && (Math.random() < STOCHASTIC_RATE)) {       // something random happened
+            actionLetter = actionLetters[randGenerator.nextInt(actionLetters.length)];
+            actionChar = actionLetter.charAt(0);
+            action = actionLetter + action.substring(1, action.length());
+            System.out.println("processAction: about to work with '" + action + "' instead of orig act: '" + origActionChar + "'");
+        } else {                                                        // do what was intended
+            actionChar = origActionChar;
+        }
+        switch(actionChar) {
+        case 'f': moveForward();   //move forward command
+            break;
+        case 'b': moveBackward();  //move backward command
+            break;
+        case 'r': turnRight(); //turn right command
+            break;
+        case 'l': turnLeft(); //turn left command
+            break;
+        case 'u': use(action); //use command
+            break;
+        case 'd': drop(action); //drop command
+            break;
+        case 'g': grab(action);  //grab command
+            break;
+        case 'w': // wait command
+            agentEnergy -= costs.get("wait"); dieIfNoEnergy(); dieIfQuicksand();
+            break;
+        case 't': communicate(action);         //talk command
+            break;
+        case 's': communicate(action);         //shout command
+            break;
+        case 'a': attack();     // attack another agent
+            break;
+        case 'k': agentEnergy = 0; dieIfNoEnergy();     // allow agents to kill themselves
+            break;
+        default:
+            System.out.println("processAction: Illegal command " + action);
+            break;
+        }
+        if (actionChar != origActionChar){
+            System.out.println("processAction: actionChar != origActChar -- lastActionFails");
+            lastActionFails();
+        }
     }
 
     /** communicate breaks up a message string and calls ComSentence(Command/Question) to compose it into the correct message form
@@ -577,97 +577,97 @@ public class GOBAgent extends GridObject {
      * Post: new ComSentence(Command/Question) Object is created for Grid to send to other agents
      */
     public void communicate(String sent) {
-	//System.out.println(sent);
-	StringTokenizer aTokenizer = new StringTokenizer(sent);       //initialize Tokenizer
-	String vol = aTokenizer.nextToken();                          //volume is first token
-	//subtract appropriate amount of energy
-	if(vol.equalsIgnoreCase("shout"))
-	    agentEnergy -= costs.get("shout");
-	else
-	    agentEnergy -= costs.get("talk");
-	String cat = aTokenizer.nextToken();        //category is second token
-	if(cat.equalsIgnoreCase("command")) {                       //if it is a command, there are two possibilities for tokens
-	    String goalActName = aTokenizer.nextToken();  //next token is the goal or action name
-	    String subject = aTokenizer.nextToken();
-	    String pmt = aTokenizer.nextToken();
-	    int comPayment = Integer.parseInt(pmt);
-	    //create new command Object
-	    agentCom = new ComSentenceCommand(myID, vol, cat, goalActName, subject, comPayment, pos.y, pos.x);
-	    //agent has a message
-	    haveMsg = true;
-	} else if (cat.equalsIgnoreCase("question")) {       //otherwise the message is a question
-	    String qType = aTokenizer.nextToken();      // next token is the question type
-	    String subj = aTokenizer.nextToken();       // next token is the subject of the question
-	    if(aTokenizer.hasMoreTokens()) {            //if there is another token, it is the answer to the question
-	        String ans = aTokenizer.nextToken();
-		//create answer to question
-	        agentCom = new ComSentenceQuestion(myID, vol, cat, qType, subj, ans, pos.y, pos.x);
-	    }
-	    else
-		agentCom = new ComSentenceQuestion(myID, vol, cat, qType, subj, pos.y, pos.x);
-	    //System.out.println("question created");
-	    //agent has a message
-	    haveMsg = true;
-	}
-	else
-	    System.out.println("error with sentence syntax or vocab");
-	dieIfNoEnergy();                 //agent dies if no energy
+        //System.out.println(sent);
+        StringTokenizer aTokenizer = new StringTokenizer(sent);       //initialize Tokenizer
+        String vol = aTokenizer.nextToken();                          //volume is first token
+        //subtract appropriate amount of energy
+        if(vol.equalsIgnoreCase("shout"))
+            agentEnergy -= costs.get("shout");
+        else
+            agentEnergy -= costs.get("talk");
+        String cat = aTokenizer.nextToken();        //category is second token
+        if(cat.equalsIgnoreCase("command")) {                       //if it is a command, there are two possibilities for tokens
+            String goalActName = aTokenizer.nextToken();  //next token is the goal or action name
+            String subject = aTokenizer.nextToken();
+            String pmt = aTokenizer.nextToken();
+            int comPayment = Integer.parseInt(pmt);
+            //create new command Object
+            agentCom = new ComSentenceCommand(myID, vol, cat, goalActName, subject, comPayment, pos.y, pos.x);
+            //agent has a message
+            haveMsg = true;
+        } else if (cat.equalsIgnoreCase("question")) {       //otherwise the message is a question
+            String qType = aTokenizer.nextToken();      // next token is the question type
+            String subj = aTokenizer.nextToken();       // next token is the subject of the question
+            if(aTokenizer.hasMoreTokens()) {            //if there is another token, it is the answer to the question
+                String ans = aTokenizer.nextToken();
+                //create answer to question
+                agentCom = new ComSentenceQuestion(myID, vol, cat, qType, subj, ans, pos.y, pos.x);
+            }
+            else
+                agentCom = new ComSentenceQuestion(myID, vol, cat, qType, subj, pos.y, pos.x);
+            //System.out.println("question created");
+            //agent has a message
+            haveMsg = true;
+        }
+        else
+            System.out.println("error with sentence syntax or vocab");
+        dieIfNoEnergy();                 //agent dies if no energy
     }
 
     //true if agent has a new message to send
     public boolean hasMsg() {
-	return haveMsg;
+        return haveMsg;
     }
 
     //send the ComSentence(Question/Command) for processing the action
     public ComSentence msg() {
-	haveMsg = false;
-	return (ComSentence) agentCom;
+        haveMsg = false;
+        return (ComSentence) agentCom;
     }
 
     /** paint draws the agent with the appropriate heading if carrying
      * an object, draw oval behind agent
      @param g the current Graphics context
-     */
+    */
     ///*maedengraphics
     public void paint(Graphics g){
-	g.translate(pos.x*scale,pos.y*scale);
-	// NOW SIGNIFY IF CARRYING ANYTHING
-	if ( inventory.size() > 0 ){
-	    int scaleCenter = scale / 2;
-	    g.setColor(Color.black);
-	    g.fillOval(scaleCenter-scale/3, scaleCenter-scale/3, 2*scale/3, 2*scale/3);
-	}
-	//if no heading, draw agent pointing all directions (indicates heading is unknown)
-	g.setColor(myColor);
-	if(dx == 0 && dy == 0) {
-	    g.fillPolygon(dTri);
-	    g.setColor(Color.black);
-	    g.drawPolygon(dTri);
-	}
-	//otherwise draw agent with appropriate heading
-	else {
-	    if (dx == 0) // NORTH or SOUTH
-		if (dy == 1) { //NORTH
-		    g.fillPolygon(southTri);
-		    g.setColor(Color.black);
-		    g.drawPolygon(southTri);
-		}
-		else { //SOUTH
-		    g.fillPolygon(northTri);
-		    g.setColor(Color.black);
-		    g.drawPolygon(northTri); }
-	    else // EAST or WEST
-		if (dx == 1) { //EAST
-		    g.fillPolygon(eastTri);
-		    g.setColor(Color.black);
-		    g.drawPolygon(eastTri); }
-		else { //WEST
-		    g.fillPolygon(westTri);
-		    g.setColor(Color.black);
-		    g.drawPolygon(westTri); }
-	}
-	g.translate(-pos.x*scale,-pos.y*scale);
+        g.translate(pos.x*scale,pos.y*scale);
+        // NOW SIGNIFY IF CARRYING ANYTHING
+        if ( inventory.size() > 0 ){
+            int scaleCenter = scale / 2;
+            g.setColor(Color.black);
+            g.fillOval(scaleCenter-scale/3, scaleCenter-scale/3, 2*scale/3, 2*scale/3);
+        }
+        //if no heading, draw agent pointing all directions (indicates heading is unknown)
+        g.setColor(myColor);
+        if(dx == 0 && dy == 0) {
+            g.fillPolygon(dTri);
+            g.setColor(Color.black);
+            g.drawPolygon(dTri);
+        }
+        //otherwise draw agent with appropriate heading
+        else {
+            if (dx == 0) // NORTH or SOUTH
+                if (dy == 1) { //NORTH
+                    g.fillPolygon(southTri);
+                    g.setColor(Color.black);
+                    g.drawPolygon(southTri);
+                }
+                else { //SOUTH
+                    g.fillPolygon(northTri);
+                    g.setColor(Color.black);
+                    g.drawPolygon(northTri); }
+            else // EAST or WEST
+                if (dx == 1) { //EAST
+                    g.fillPolygon(eastTri);
+                    g.setColor(Color.black);
+                    g.drawPolygon(eastTri); }
+                else { //WEST
+                    g.fillPolygon(westTri);
+                    g.setColor(Color.black);
+                    g.drawPolygon(westTri); }
+        }
+        g.translate(-pos.x*scale,-pos.y*scale);
     }
     //maedengraphics*/
 
@@ -685,13 +685,13 @@ public class GOBAgent extends GridObject {
      * call function when exiting
      */
     public void cleanDie() {
-	myGrid.removeGOB(this);
-	try {
-	    recv.close();   //close bufferedreader
-	    send.close();   //close printwriter
-	    conn.close();   //close socket
-	}
-	catch (Exception e) {}
+        myGrid.removeGOB(this);
+        try {
+            recv.close();   //close bufferedreader
+            send.close();   //close printwriter
+            conn.close();   //close socket
+        }
+        catch (Exception e) {}
     }
 
 }
