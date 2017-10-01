@@ -14,7 +14,6 @@ import java.util.NoSuchElementException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.json.simple.JSONArray;
 
 /**
  *@author:  Wayne Iba,
@@ -47,11 +46,12 @@ public class Grid
     //private Graphics g;
     //maedengraphics*/
 
-    // items
+    // items and agents and stuff
     private List<ComSentence> msgs = Collections.synchronizedList(new LinkedList<ComSentence>());   //holds agent messages
     private List<GridObject> gobs = Collections.synchronizedList(new LinkedList<GridObject>());   //holds world gridobjects
     private List<GOBAgent> agents; //holds world agents
     private LinkedListGOB[][] myMap;                 //holds gridobjects
+    private SensoryPacketSender sps;
 
     // misc (possibly temporary) variables
     private GridObject food;                   //world goal
@@ -59,7 +59,7 @@ public class Grid
     private ServerSocket gwServer;  // server-socket for listening for connection requests
 
     public boolean EAT_FOOD_ENDS_IT = true; // control if eating food terminates sim (true) or increases energy (false)
-    public int WORLD_CYCLE_TIME = 50;       // replaces sleepTime to control wall-time length of simulation cycle
+    public int WORLD_CYCLE_TIME = 200;      // replaces sleepTime to control wall-time length of simulation cycle
 
     // Constructors
 
@@ -94,7 +94,7 @@ public class Grid
         squareSize = approxWidth / xCols;
         approxWidth = squareSize * xCols;
 
-        /** Read in the Character Map **/
+        // Read in the Character Map 
         for (int y = 0; y < yRows; y++)
             for (int x = 0; x < xCols; x++){
                 switch (gridspaceInputData.map(x,y)) {
@@ -161,6 +161,7 @@ public class Grid
                 }
             }
 
+        // set up the graphics stuff
         ///*maedengraphics
         showDisplay = showD;                                              //if true, show graphical display
         if(showDisplay) {
@@ -176,7 +177,9 @@ public class Grid
             setTitle(gridspaceInputData.windowTitle());
         }
         //maedengraphics*/
-        //gwServer.close();                     //close server
+
+        // initialize the SensoryPacketSender
+        sps = new SensoryPacketSender(myMap, food);
     }
 
     //public accessor for the grid map
@@ -282,72 +285,12 @@ public class Grid
     public void sendAgentSensations() {
         for (GOBAgent a : agents) {
             if (a.getNeedUpdate())
-                sendSensationsToAgent(a);
+                sps.sendSensationsToAgent(a, worldTime);
         }
         //**** WARNING: review this logic -- since not all agents may receive sensory updates
         msgs.clear();              //once messages are sent, they don't need to be saved any longer
     }
 
-    /**
-     * sendSensationsToAgent: for each agent that is read for it, send their sensory information
-     * LINE1: The number of lines that are going to be sent (excluding this line) *could also be d, e, or s (die, end, success)*
-     * LINE2: smell direction to food
-     * LINE3: inventory in form ("inv-char")
-     * LINE4: visual array (as single string) in form ((row ("cell") ("cell"))(row ("cell")))
-     * LINE5: ground contents of agent position in form ("cont" "cont")
-     * LINE6: Agent's messages
-     * LINE7: Agent's energy
-     * LINE8: last action's result status (ok or fail)
-     */
-    public void sendSensationsToAgent(GOBAgent a) {
-        if (a.getNeedUpdate()) {
-            JSONArray jsonArray = new JSONArray();
-            // We added String.valueOf to make sure that everything that is send is a String.
-            jsonArray.add(String.valueOf(relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. send smell
-            String inv = "(";
-            if (a.inventory().size() > 0){
-                for (GridObject gob : a.inventory()) {
-                    inv += "\"" + gob.printChar() + "\" ";
-                }
-            }
-            inv = inv.trim() + ")";
-            jsonArray.add(String.valueOf(inv)); // 2. send inventory
-            jsonArray.add(String.valueOf(visField(a.pos, new Point(a.dx(), a.dy())))); // 3. send visual info
-            jsonArray.add(String.valueOf(groundContents(a, myMap[a.pos.x][a.pos.y])));  // 4.send contents of current location
-            jsonArray.add(String.valueOf(sendAgentMessages(a)));  // 5. send any messages that may be heard by the agent
-            jsonArray.add(String.valueOf(a.energy()));  // 6. send agent's energy
-            jsonArray.add(String.valueOf(a.lastActionStatus()));// 7. send last-action status
-            jsonArray.add(String.valueOf(worldTime)); // 8. send world time
-            a.send().println(jsonArray); // send JsonArray
-            a.setNeedUpdate(false);
-        }
-    }
-
-    /*
-     * groundContents iterates through the cell the agent is standing on and returns a string of chars
-     * enclosed in quotes and parens to represent what is in the cell
-     * Pre: a is GOBAgent who is in cell thisCell
-     * Post: String is returned in form: ("cont1" "cont2" "cont3" ...)
-     *       where cont is the individual contents of the cell
-     */
-    public String groundContents(GOBAgent a, List<GridObject> thisCell) {
-        if (thisCell != null && ! thisCell.isEmpty()) {
-            //encapsulate contents within parentheses
-            String ground = "(";
-            //iterate through the cell, gather the print-chars
-            for(GridObject gob : thisCell){
-                //if the gob is an agent (and not the one passed in) get the agent id
-                if ((gob.printChar() == 'A' || gob.printChar() == 'H') && ((GOBAgent) gob != a)) {
-                    ground = ground + "\"" + ((GOBAgent)gob).getAgentID() + "\" ";   // \" specifies the string "
-                } else if (gob.printChar() != 'A' && gob.printChar() != 'H') {
-                    ground += "\"" +  gob.printChar() + "\" ";
-                }
-            }
-            ground = ground.trim() + ')';  //trim any leading or ending spaces, close paren
-            return ground;
-        }
-        return "()";
-    }
 
     /**
      * updateWorldTime: update the world time
@@ -460,7 +403,7 @@ public class Grid
      * INPUT: agent point, agent heading, target location
      * OUTPUT: char: one of F(orward), R(ight), L(eft) or B(ack) or H(ere)
      */
-    public char relDirToPt(Point aPt, Point aDir, Point target){
+    public static char relDirToPt(Point aPt, Point aDir, Point target){
         int xDisplace = target.x - aPt.x;                     //difference in x and y directions
         int yDisplace = target.y - aPt.y;
         int fDiff = aDir.x * xDisplace + aDir.y * yDisplace;  //takes into account the agent heading
@@ -494,77 +437,6 @@ public class Grid
         }
     }
 
-    /**
-     * visField: extract the local visual field to send to the agent controller
-     * INPUT: agent point location, and agent heading (as point)
-     * OUTPUT: sequence of characters
-     * parens encapsulate three things: the whole string,
-     * the row, the individual cells. The contents of individual cells are
-     * lists of strings. See README.SensoryMotor for more description and examples.
-     * The row behind the agent is given first followed by its current row and progressing away from the agent
-     * with characters left-to-right in visual field.
-     */
-    public String visField(Point aPt, Point heading){
-        String myString = "(";
-        int senseRow, senseCol;
-        //iterate from one behind to five in front of agent point
-        for (int relRow=-1; relRow <= 5; relRow++) {
-            //add paren for the row
-            myString += "(";
-            String rowString = "";
-            //iterate from two to the left to two to the right of agent point
-            for (int relCol=-2; relCol <= 2; relCol++){
-                senseRow = aPt.x + relRow * heading.x + relCol * -heading.y;
-                senseCol = aPt.y + relRow * heading.y + relCol * heading.x;
-                //add cell information
-                rowString += " " + visChar(mapRef(senseRow, senseCol), heading);
-            }
-            //trim any leading or closing spaces, close row paren
-            myString += rowString.trim() + ")";
-        }
-        //return string with close paren
-        return myString + ')';
-    }
-
-    /* visChar iterates through the gridobjects located in a cell and returns all of their printchars
-     * enclosed in parens and quotes: ("cont1 cont2 cont3")
-     * The one exception is the agent.  For an agent, its agent-id is returned (0-9)
-     * Note: the heading of an agent is not reported at this time.
-     * Pre: cellContents contains any and all gridobjects in a cell
-     * Post: String ("cont1 cont2 cont3") is returned (where cont1-3 are gridobject printchars or agent IDs)
-     */
-    private String visChar(List<GridObject> cellContents, Point heading){
-        String cellConts = "(";
-        //if there are any gridobjects in the cell iterate and collect them
-        if (cellContents != null && !cellContents.isEmpty()) {
-            //iterate through cellContents, gather printchars or agent IDs
-            for(GridObject gObj : cellContents) {
-                if(gObj.printChar() == 'A') {           //if it is an agent
-                    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-                }
-                // *** To Do: eliminate the base/helper distinction within the simulator
-                else if (gObj.printChar() == 'H') { // if it is a helper agent
-                    cellConts = cellConts + "\"" + ((GOBAgent)gObj).getAgentID() + "\" ";
-                } else {        //if gridobject is not an agent, return its print character
-                    cellConts = cellConts + "\"" + gObj.printChar() + "\" ";
-                }
-            }
-            //trim leading and closing spaces
-            cellConts = cellConts.trim() + ')';
-            return cellConts;
-        }
-        //otherwise return a space representing no gridobject
-        else
-            return "()";
-    }
-
-    /**
-     * mapRef: safe map reference checking for out-of-bounds
-     */
-    private List<GridObject> mapRef(int x, int y){
-        if ( (x < 0) || (x >= xCols) || (y < 0) || (y >= yRows) ) return null;
-        else return myMap[x][y];
-    }
 
     /*getAgentMessages iterates through all agents on the map and stores any messages they have in the msgs linkedlist
      *Pre: msgs has been initialized
@@ -772,7 +644,7 @@ public class Grid
                     synchronized (agents) {
                         agents.add(gagent);
                     }
-                    try { sendSensationsToAgent(gagent); }
+                    try { sps.sendSensationsToAgent(gagent, worldTime); }
                     catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
                     Thread.sleep(50);
                     if (killGrid) {
