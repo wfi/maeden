@@ -285,7 +285,7 @@ public class Grid
     public void sendAgentSensations() {
         for (GOBAgent a : agents) {
             if (a.getNeedUpdate())
-                sps.sendSensationsToAgent(a, worldTime);
+                sps.sendSensationsToAgent(a);
         }
         //**** WARNING: review this logic -- since not all agents may receive sensory updates
         msgs.clear();              //once messages are sent, they don't need to be saved any longer
@@ -644,7 +644,7 @@ public class Grid
                     synchronized (agents) {
                         agents.add(gagent);
                     }
-                    try { sps.sendSensationsToAgent(gagent, worldTime); }
+                    try { sps.sendSensationsToAgent(gagent); }
                     catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
                     Thread.sleep(50);
                     if (killGrid) {

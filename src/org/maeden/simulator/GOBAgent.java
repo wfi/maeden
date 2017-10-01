@@ -340,7 +340,7 @@ public class GOBAgent extends GridObject {
                 myGrid.removeGOB( grabobj );
                 grabobj.pos = this.pos; // make inventory's position point to agent's position while being carried
             } catch (NoSuchElementException e) {
-                System.out.println("grab: myGrid.cellHasTool returns true but NoSuchElement: " + e);
+                System.out.println("grab: myGrid.cellHasTool returns true for " + tool + " but NoSuchElement: " + e);
                 lastActionFails();
             }
         } else {
