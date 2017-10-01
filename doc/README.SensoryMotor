@@ -1,74 +1,79 @@
-[v.2017.09.28]
+[v.2017.09.30]
 --------------------------------------------------------------
 ----------  Maeden Sensory-Motor Interface Protocol  ---------
 --------------------------------------------------------------
 
+When an agent controller first connects to the Grid server, it opens a
+socket connect and enters a sense/think/act cycle.  Sensory
+information is provided by the grid server to the controller, by some
+unspecified mechanism the agent chooses an action, and then sends the
+appropriate command to the server.  Information is sent back and forth
+between the Grid server and agent controllers in a JSON format. This
+allows agent controllers to be implemented in any language that
+supports both the standard socket layer and JSON.
+
+[note: currently only sensory information is handled like this, and
+that only incompletely. The visual information, ground contents, and
+perhaps other fields need to be converted to JSON arrays; currently
+just strings. Finally, the agent actions need to be sent by
+controllers and received by the Grid server via JSON objects (or
+arrays).]
+
 SENSORY INFORMATION
 
-Sensory information is sent as a JSON Array. The reasons for this change is
-because we want to 1) Send the data faster 2) send the data in
-one object(instead of separate Strings) 3) allow any programing language
-to access the Sensory information since it is sent as a JsonArray.
+[note: this protocol is prescribed. this is not how it currently is
+implemented. this is how it is supposed to be implemented]
 
-The senses to be sent as a JSON Array are packaged in the
-"sendAgentSensations" method of the Grid class. Each of the following
-senses, numbered 1 through 8, is converted to a string, and then
-entered in to the JSON Array. After all senses have been added to the
-array, the array is sent to the SensoryPacket class, more specifically the
-getRawSenseDataFromGrid method, which unpacks the information.
+Each of the sensory modalities, here numbered 0 through 8, is stored
+in a JSON Array. The elements of the array vary in their type.  On the
+server side, the method sendSensationsToAgent(GOBAgent) handles the packaging
+and sending of the information.  On the controller side, the
+SensoryPacket class handles the receiving and unpacking of the data,
+as well as provides an interface to that information.
+The elements of the JSON array are as follows:
 
-The "getRawSenseDataFromGrid" method of the SensoryPacket class
-unpacks the JSON Array sent from the Grid class. A JSONParser object
-unpacks the JSON Array and puts the information stored in it into a
-separate array. The elements of that array are then each converted to
-strings and stored in an array "result". "result" is then returned by
-the method getRawSenseDataFromGrid, as if the senses were initially
-sent from Grid as a series of strings.
+0. Simulation status. [String] The first field is one of four string
+values: "DIE", "SUCCESS", "END", or "CONTINUE".  DIE is sent when the
+agent runs out of energy or falls into quicksand.  SUCCESS is sent
+when the agent eats the food (only when the default EAT_FOOD_ENDS_IT
+flag is true).  (In the non-default simulator mode, eating an item of
+food simply increases the agent's energy by a set amount; this
+increase is reflected in the next sensory packet sent to the agent.)
+END is sent when some other agent eats the food (in the default
+condition).  CONTINUE is sent in all other cases.
 
-If the agent status is "die" or "success" or "end",
-then the JsonArray will be null. Thus, the KeyboardController will exist.
-DIE is sent when the agent runs out of energy.  SUCCESS is sent
-when the agent eats the food.  (In the non-default simulator mode,
-eating an item of food simply increases the agent's energy by a set
-amount; this increase is reflected in the next sensory packet sent to
-the agent.)  END is sent when some other agent eats the food.  Although
-multiple food objects may exist in the world, in the default mode as
-soon as one agent eats the food the simulation ends.
+1. The "smell" direction to the food source. [String] This is sent as
+the direction to the food-source relative to the agent's current
+heading.  The value will be the first character of the appropriate
+relative direction: "forward", "back", "right", "left", or "here"
+(i.e., 'f', 'b', 'r', 'l', or 'h').  When the food source is located
+on the main diagonals with respect to the agent's current location,
+the smell reports forward or back as appropriate (instead of right or
+left).  A food source may have one or more pieces of food.  When an
+agent attempts to grab the food source, it ends up with a piece of
+food in its inventory.  The food source remains in place and continues
+to provide the smell direction regardless of the food pieces that may
+be carried or dropped by any agents.
 
-1.  The "smell" direction to the food source.  This is sent as the
-direction to the food-source relative to the agent's current heading.
-The value will be the first character of the appropriate relative
-direction for directions: "forward", "back", "right", "left", or
-"here" (i.e., 'f', 'b', 'r', 'l', or 'h').  When the food source is
-located on the main diagonals with respect to the agent's current
-location, the smell reports forward or back as appropriate (instead of
-right or left).  A food source may have one or more pieces of food.
-When an agent attempts to grab the food source, it ends up with a
-piece of food in its inventory.  The food source remains in place and
-continues to provide the smell direction regardless of the food pieces
-that may be carried or dropped by any agents.
+2. The "inventory" of the agent is sent. [Array of String] The
+inventory is sent as an array of single-character strings, one for
+each item currently carried by the agent.  Example objects that may be
+carried include: "K", "T", "G", "+", or "$".  K indicates the agent is
+carrying a key, T a hammer, + the food, etc.  If the agent's inventory
+is empty, the empty array will be sent.
 
-2.  The "inventory" of the agent is sent.  The inventory is sent as a
-list of single-character strings, one for each item being carried by
-the agent.  Example objects that may be carried include: "K", "T",
-"+", or "$".  K indicates the agent is carrying a key, T a hammer, +
-the food, etc.  If the agent's inventory is empty, the empty list will
-be sent: ().
-
-3.  The "sight" information.  The agent has a visual field that is
+3. The "sight" information. [Array of Array of Array of String] The agent has a visual field that is
 seven (7) cells deep and five (5) cells wide.  The agent can see one
 row behind it, the current row (i.e., two cells to either side), and
 five (5) rows ahead.
-	 
-Visual information is given as a single line consisting of a
-parenthesized list of rows, where each row is a parenthesized list of
-cells, where each cell is a parenthesized list of double-quoted
-strings as described for the ground information below (#5).
-
+Visual information is given as a multi-level JSON array.
 For example, if the agent with ID of 2 was standing with a key and a
 hammer to its left, while facing a wall with a door two cells away and
 the food three rows beyond the door, the received visual information
 line would look like this (without line-breaks):
+
+[note: convert this to the appropriate JSON representation, replacing
+empty cells with empty arrays. (would that be null?)]
 
 ((()     ()       ()     ()     ()   )
 
@@ -105,62 +110,74 @@ work in "agent-centered" coordinates where the agent is always located
 at [0,0] with negative rows and columns over the left shoulder.  This
 is left as an exercise for designers of agents.
 
-4.  The "Ground Contents" consisting of items that occupy the same
-cell as this agent (except the agent itself).  Each item's character
-(if there is such an item) is wrapped in double quotes and the
-collection (always at least one) is wrapped in parentheses.  For
-example: ("K" "3") for the situation where agent 3 is also in the same
-location and a key is on the ground.  The empty list, (), is sent if
+4. The ground contents. [Array of String] The contents of the cell
+where the agent is located is sent as an array with elements for each item present there.
+Each item's print-character
+(if there is such an item) appears as a one-character string.
+For example: ["K", "$"] for the situation where there is a key and a money piece in the
+same location as the agent.
+The empty array, [], is sent if
 nothing other than the agent is present.
 
 Note: the agent-self does not appear in the ground contents, but
 _does_ appear in the visual information.
 
-5.  The "messages" that this agent hears.  All messages that are in
-hearing range of the agent are sent inside parentheses.  For example:
+5. The "messages" that this agent hears. [Array of JSON Object]
+
+[note: currently messages are effectively unsupported and this field
+of the array should always be empty.]
+
+All messages that are in
+hearing range of the agent are sent as an array.  For example:
 (Message1 Message2 Message3 ... MessageN ) Note: Each individual
 Message will conform to the format described in Inter-Agent
 Communication README.
 
-6.  The "energy" is sent.  The energy corresponds to the amount of
-energy that the agent has left.  The lower the amount of energy, the
-fewer the number of moves can be performed by the agent.  It is sent
+6. The "energy" is sent. [Number] The amount of energy that the agent
+has left.  The lower the amount of energy, the fewer the number of
+moves can still be performed by the agent before it dies.  It is sent
 and should be interpreted as an integer.
 
-7.  The result status on the most recent agent action is given as
-either "ok" or "fail".  Given the physics of the environment, this
-line will be "ok" if the action was able to be completed, actually was
-completed, and had the desired result.  Thus, if the last action was
+7. The result status. [String] Reports whether the most recent action
+attempted by the agent was successful or not; given as either "ok" or
+"fail", respectively. Given the physics of the environment, this line
+will be "ok" if the action was able to be completed, actually was
+completed, and had the desired result. Thus, if the last action was
 "f"orward and if the agent actually moved one cell in the direction of
 its current heading, the result will be "ok".  However, if the last
 action was "u" and either the inventory is empty, the agent is not
 facing anything, the tool in the inventory does not match the object
 the agent is facing, or for some other reason the expected result does
-not attain (perhaps, because the environment has been enhanced with
-non-determinism), then the value for this line will be "fail".
+not happen (perhaps, because non-determinism has been activated in the
+environment), then the value for this field will be "fail".
 
-8.  The world time is sent.  Because agents sense and act
+8. The world time is sent. [Number] Because agents sense and act
 asynchronously, agents are sent the time maintained by the simulator.
 This data should be interpreted as an integer.
 
 EFFECTOR COMMANDS
 
+[Note: as above, this is now a prescription of what _should_ be --
+not a description of what _is_.]
+
 Maeden agents have a simple set of commands that may be performed.
 They may move forward and back; turn left or right; grab, use or drop
 an object, or wait and do nothing. (In addition, agents may talk or
 shout as described in Inter-Agent Communication README.)  Actions are
-expressed as single characters followed by any appropriate arguments
-and terminated with a newline character.  The three actions -- grab,
-use and drop -- accept an optional argument.  Without this argument,
-the first item available is selected (for grabbing, using or
-dropping).  Because more than one item may rest in a cell or be
-carried in the inventory, the optional argument allows the agent to
-specify a particular item to grab, use or drop.  Thus, to pick up the
-food if more than one item were present on the ground, the command "g
-+" would be sent (again, assuming the string is terminated with a
-newline).  Similarly, if an agent were trying to open a door and its
-inventory held: ("$" "+" "K" "$"), the agent would send the command "u
-K" in order to open a door that it was immediately facing.
+expressed as JSON objects with a "command" field consisting of a
+single-character string, and an optional "arguments" field, consisting
+of a JSON array of strings, one for each argument.  The three actions
+-- grab, use and drop -- accept an optional argument.  Without this
+argument (i.e., either empty array or missing field), the first item
+available is selected (for grabbing, using or dropping).  Because more
+than one item may rest in a cell or be carried in the inventory, the
+optional argument allows the agent to specify a particular item to
+grab, use or drop.  Thus, to pick up the food if more than one item
+were present on the ground, the command {"command":"g",
+"arguments":["+"]} would be sent.  Similarly, if an agent were trying
+to open a door and its inventory held: ["$", "+", "K", "$"], the agent
+would send the command {"command":"u", "arguments":["K"]} in order to
+open a door that it was immediately facing.
 
 In summary, the valid actions are: f, b, r, l, g, u, d, a, and w for
 the commands forward, back, turn right, turn left, grab something, use
@@ -170,9 +187,9 @@ attack another agent, and wait (do nothing), respectively.
 BEHAVIOR OF OBJECTS: OBSTACLES AND TOOLS
 
 Doors and Keys.  Doors can be permanently opened by using a key.  If
-an agent has a key in its inventory and is facing a door, the command
-"u K" will cause the door to disappear.  Note, this action also
-consumes the key.
+an agent has a key in its inventory and is facing a door, the use-key
+command, {"command":"u", "arguments":["K"]}, will cause the door to
+disappear.  Note, this action also consumes the key.
 
 Rocks and Hammers.  As with doors via keys, rocks can be removed by
 using a hammer.  The corresponding command would be "u T" (when facing
@@ -188,7 +205,7 @@ in cannot pass through a narrows.  Dropping all the items in the
 inventory will allow the agent to pass.
 
 Food.  In the default mode, eating the food terminates the simulation.
-When this mode is overridden, eating the food increases the energy of
+When this mode is disabled, eating the food increases the energy of
 the agent by a set amount.
 
 Food Supply.  It is actually the food supply that agents smell -- not
@@ -200,4 +217,4 @@ Gold.  Currently, gold items do nothing, but they're fun to grab.
 
 Attacking.  If an agent is facing another agent and applies the attack
 command, the agent that is being hit loses an amount of energy.  It is
-possible to kill an agent by repeated attacks.
+possible to kill an agent by repeated attacks.  So be nice.
