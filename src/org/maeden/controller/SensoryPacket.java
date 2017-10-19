@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.io.BufferedReader;
-import java.util.StringTokenizer;
+import static java.lang.Math.toIntExact;
 
 /**
  * Simple class for representing 'pre-processed' sensory packets.
@@ -31,7 +31,7 @@ public class SensoryPacket
     int energy;
     boolean lastActionStatus;
     int worldTime;
-    String[] rawSenseData;
+    JSONArray rawSenseData;
 
     /**
      * constructor that reads the raw data from the server via the provided BufferedReader
@@ -83,48 +83,42 @@ public class SensoryPacket
      * @param gridIn the reader connected to the server
      * @return the array of String representing the raw (unprocessed) sensory data starting with smell
      */
-    protected String[] getRawSenseDataFromGrid(BufferedReader gridIn) {
-        String[] result = new String[Integer.parseInt(NUMLINES)];
+    protected JSONArray getRawSenseDataFromGrid(BufferedReader gridIn) {
+        JSONArray jsonArray = null;
         try {
             JSONParser jsonParser = new JSONParser();
             Object object = jsonParser.parse(gridIn.readLine()); // unpack the JsonArray.
-            JSONArray jsonArray = (JSONArray) object;
-            for (int i = 0; i < jsonArray.size(); i++) {
-                result[i] = jsonArray.get(i).toString(); // fill the the reasultArray with the information.
-            }
+            jsonArray = (JSONArray) object;
         } catch (Exception e){
             e.getMessage();
-            System.exit(1); // exist if all the elements in the JsonArray are null.
+            System.exit(1); // exits if all the elements in the JsonArray are null.
         }
-        return result;
+        return jsonArray;
     }
 
     /**
      * Perform any pre-processing, especially on the visual data
      * @param rawSenseData the raw unprocessed sense data
      */
-    protected void initPreProcessedFields(String[] rawSenseData){
+    protected void initPreProcessedFields(JSONArray rawSenseData){
         try {
+            this.status = (String) rawSenseData.get(0);
             // smell
-            this.smell = rawSenseData[0];
+            this.smell = (String) rawSenseData.get(1);
             // process inventory
-            this.inventory = new ArrayList<Character>();
-            for(char item : rawSenseData[1].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
-                this.inventory.add(item);
+            this.inventory = (ArrayList) rawSenseData.get(2);
             // visual field
-            processRetinalField(rawSenseData[2]);
+            processRetinalField((JSONArray) rawSenseData.get(3));
             // ground contents
-            this.groundContents = new ArrayList<Character>();
-            for(char item : rawSenseData[3].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
-                this.groundContents.add(item);
+            this.groundContents = (ArrayList) rawSenseData.get(4);
             // messages: *** Revisit this!! ***
-            this.messages = rawSenseData[4];
+            this.messages = (String) rawSenseData.get(5);
             // energy
-            this.energy = Integer.parseInt(rawSenseData[5]);
+            this.energy = toIntExact((Long) rawSenseData.get(6));
             // lastActionStatus
-            this.lastActionStatus = rawSenseData[6].equalsIgnoreCase("ok");
+            this.lastActionStatus = ((String) rawSenseData.get(7)).equalsIgnoreCase("ok");
             // world Time
-            this.worldTime = Integer.parseInt(rawSenseData[7]);
+            this.worldTime = toIntExact((Long) rawSenseData.get(8));
         }catch (NullPointerException e){ e.getMessage(); }
 
     }
@@ -134,37 +128,18 @@ public class SensoryPacket
      * and convert it to a 2D array of Vectors of Strings.
      * @param info the visual sensory data string (structered as parenthesized list of lists) from server
      */
-    protected void processRetinalField(String info) {
-        boolean seeAgent;
-        StringTokenizer visTokens = new StringTokenizer(info, "(", true);
-        visTokens.nextToken();
-        for (int i = 6; i >= 0; i--) {              //iterate backwards so character printout displays correctly
-            visTokens.nextToken();
-            for (int j=0; j <=4; j++) {             //iterate through the columns
-                seeAgent = false;
-                int agentID = 0;
-                visTokens.nextToken();
-                char[] visArray = visTokens.nextToken().replaceAll("[\\(\"\\)\\s]+","").toCharArray();
-                for(int k=0; k < visArray.length; k++){
-                    if (visArray[k] >= 0 && visArray[k] <= 9){  // we have a digit
-                        if (seeAgent){ // we're already processing an agent ID with possibly more than one digit
-                            agentID = 10*agentID + (visArray[k] - '0');
-                        } else {       // starting to process an agent ID
-                            seeAgent = true;
-                            agentID = (visArray[k] - '0');
-                        }
-                    } else {                                    // we have a non-agent ID
-                        if (seeAgent){ // just finished processing agent ID -- record it
-                            visualArray.get(i).get(j).add(String.valueOf(agentID));
-                            seeAgent = false;
-                            agentID = 0;
-                        }
-                        visualArray.get(i).get(j).add(String.valueOf(visArray[k])); // add the non-agent item
-                    }
+    protected void processRetinalField(JSONArray info) {
+        for (int i = 6; i >= 0; i--) {
+            JSONArray q = (JSONArray) info.get(i);
+            for (int j = 0; j <= 4; j++) {
+                JSONArray z = (JSONArray) q.get(j);
+                for (int k = 0; k < z.size(); k++) {
+                    visualArray.get(i).get(j).add((String) z.get(k));
                 }
             }
         }
     }
+
 
     /** Get the status of the agent in the simulation.  Refer to documentation and/or code
      * for definitive details but either is a number of raw lines to be subsequently processed
@@ -217,7 +192,7 @@ public class SensoryPacket
     /**
      * @return the array of Strings representing the raw sensory data
      */
-    public String[] getRawSenseData(){return rawSenseData; }
+    public JSONArray getRawSenseData(){return rawSenseData; }
 
     /**
      * Renders the visual information as semi-formatted string, making no allowances for

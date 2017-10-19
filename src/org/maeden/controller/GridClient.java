@@ -1,6 +1,8 @@
 package org.maeden.controller;
 
 
+import org.json.simple.JSONArray;
+
 import java.io.*;
 import java.net.*;
 
@@ -17,7 +19,7 @@ public class GridClient {
     protected PrintWriter gridOut;                      // takes care of output stream for sockets
     protected BufferedReader gridIn;                    // bufferedreader for input reading
     protected String myID;
-    public static final int MAEDENPORT = 7237;       // uses port 1237 on localhost
+    public static final int MAEDENPORT = 7237;          // uses port 1237 on localhost
 
 
     /**

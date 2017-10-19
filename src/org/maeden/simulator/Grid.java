@@ -241,13 +241,18 @@ public class Grid
         try {
             for (GOBAgent a : agents) {    //process and perform each agent's action
                 //Process the action only if there is a next command
+                Integer count = 0;
                 if(a.nextCommand() != null)
                     {
                         a.processAction(a.nextCommand());
                         a.setNeedUpdate(true);
+                        count += 1;
                     }
                 else {
                     a.decrEnergyWait(); // otherwise, deduct the wait cost from agent's energy
+                }
+                if (count > 1){
+                    Collections.shuffle(agents);
                 }
             }
         } catch (Exception e) {
@@ -266,9 +271,12 @@ public class Grid
                 case 'd':                       // die: agent died from lack of energy or quicksand
                     while ( a.inventory().size() > 0 )
                         a.drop("drop");         // drop all items from inventory before removing agent
+                    sps.sendSensationsToAgent(a, "DIE");
                     a.cleanDie(); i.remove();
                     break;
-                case 's': killGrid = true;      // success: agent found the food, end the simulation
+                case 's':
+                    sps.sendSensationsToAgent(a, "SUCCESS");
+                    killGrid = true;      // success: agent found the food, end the simulation
                     break;
                 case 'c':                       // continuing: agent is alive, hasn't found the food
                 default:
@@ -547,8 +555,10 @@ public class Grid
         // *** remove **********************************
         if( agents != null && !agents.isEmpty() ) {  //if there are agents on the grid still
             for(GOBAgent g : agents) {  //iterate through and close their connections
+                sendAgentSensations();
                 g.printstats();
-                g.send().println("End");              //Other agent got food, simulation ended
+                //g.send().println("End");              //Other agent got food, simulation ended
+                sps.sendSensationsToAgent(g, "END");
                 g.cleanDie();
             }
             agents.clear();
@@ -645,10 +655,12 @@ public class Grid
                         agents.add(gagent);
                     }
                     try { sps.sendSensationsToAgent(gagent); }
-                    catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations " + e); }
+                    catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations ");
+                        e.printStackTrace(); }
                     Thread.sleep(50);
                     if (killGrid) {
                         try {
+                            sendAgentSensations();
                             gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
                         }
                         catch(Exception e) {System.out.println("error closing server socket");}
