@@ -61,6 +61,7 @@ public class Grid
     public boolean EAT_FOOD_ENDS_IT = true; // control if eating food terminates sim (true) or increases energy (false)
     public int WORLD_CYCLE_TIME = 200;      // replaces sleepTime to control wall-time length of simulation cycle
     public int counter = 0;
+    private static AgentListener theAl;
     // Constructors
 
     /**
@@ -77,7 +78,7 @@ public class Grid
             gwServer = new ServerSocket(MAEDENPORT);        //create new server Socket on Maeden port
         } catch(IOException e) {
             System.err.println("could not listen on port: " + MAEDENPORT);
-            System.exit(1);   //exit if cannot use the port number
+            //System.exit(1);   //exit if cannot use the port number
         }
 
         /** Parse Data File **/
@@ -106,7 +107,8 @@ public class Grid
                     GOBFoodCollect fc = new GOBFoodCollect(x,y,squareSize);
                     // start the AgentListener thread
                     AgentListener al = new AgentListener(x,y,squareSize,this,'W');
-                    al.start();
+                    theAl = al;
+                    theAl.start();
                     counter++;
                     System.out.println(counter);
                     //System.out.println("AgentListener just started");
@@ -307,11 +309,12 @@ public class Grid
       killGrid = true;      // success: agent found the food, end the simulation
       cleanClose();
       try {
-          
+
           gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
           System.out.println("server should be closed.");
       }
       catch(Exception e) {System.out.println("error closing server socket");}
+
     }
     /**
      * updateWorldTime: update the world time
@@ -629,13 +632,27 @@ public class Grid
             //   myGrid.setVisible(true);
             //maedengraphics*/
             if (myGrid != null) myGrid.run();  //run the simulation
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e){
+
         }
         catch (FileNotFoundException e) { System.out.println("Could not find file"); }
         catch (Exception e) { System.out.println("Some exception: " + e);
       }
-          System.out.println(Thread.currentThread().isAlive());
+
+      theAl.interrupt();
+      try{
+        Thread.sleep(50);
+      }
+      catch(Exception e){
+
+      }
+          System.out.println(theAl.isAlive());
+          myGrid.dispose();
             System.out.println("end of main");
     }
+
 
 
 
@@ -667,7 +684,7 @@ public class Grid
 
 
 
-            while (!killGrid) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     tSock = gwServer.accept();           // listen for connection, and
                     GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
@@ -680,13 +697,16 @@ public class Grid
                         e.printStackTrace(); }
                     Thread.sleep(50);
 
-                } catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
+                }
+
+                catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
                 } catch (Exception e) {
                     System.out.println("AgentListener.run(): some other exception: ");
                     e.printStackTrace();
                 }
             }
             System.out.println("out of the while");
+
 
 
 
