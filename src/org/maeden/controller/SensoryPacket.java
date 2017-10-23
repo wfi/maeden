@@ -126,7 +126,7 @@ public class SensoryPacket
     /**
      * Process the single string representing all the rows and column contents of the visual sensory data
      * and convert it to a 2D array of Vectors of Strings.
-     * @param info the visual sensory data string (structered as parenthesized list of lists) from server
+     * @param info the visual sensory data string (structured as parenthesized list of lists) from server
      */
     protected void processRetinalField(JSONArray info) {
         for (int i = 6; i >= 0; i--) {

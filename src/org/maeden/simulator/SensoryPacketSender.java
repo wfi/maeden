@@ -73,10 +73,8 @@ public class SensoryPacketSender
     /**
      * visField: extract the local visual field to send to the agent controller
      * INPUT: agent point location, and agent heading (as point)
-     * OUTPUT: sequence of characters
-     * parens encapsulate three things: the whole string,
-     * the row, the individual cells. The contents of individual cells are
-     * lists of strings. See README.SensoryMotor for more description and examples.
+     * OUTPUT: JSONArray <JSONArray <JSONArray>>
+     * See README.SensoryMotor for more description and examples.
      * The row behind the agent is given first followed by its current row and progressing away from the agent
      * with characters left-to-right in visual field.
      */
@@ -99,11 +97,11 @@ public class SensoryPacketSender
     }
 
     /** visChar iterates through the gridobjects located in a cell and returns all of their printchars
-     * enclosed in parens and quotes: ("cont1 cont2 cont3")
+     * as strings as elements in a JSONArray
      * The one exception is the agent.  For an agent, its agent-id is returned (0-9)
      * Note: the heading of an agent is not reported at this time.
      * Pre: cellContents contains any and all gridobjects in a cell
-     * Post: String ("cont1 cont2 cont3") is returned (where cont1-3 are gridobject printchars or agent IDs)
+     * Post: JSONArray with string of objects in each part
      * @param cellContents the GOBs in a particular cell
      * @param heading (which is not used)
      * @return a String that represents a list of items in the cell
@@ -139,13 +137,12 @@ public class SensoryPacketSender
     }
 
 
-    /*
-     * groundContents iterates through the cell the agent is standing on and returns a string of chars
-     * enclosed in quotes and parens to represent what is in the cell
+    /**
+     * groundContents iterates through the cell the agent is standing on and returns a list of strings
+     * to represent what is on the ground at that position
      * Pre: a is GOBAgent who is in cell thisCell
-     * Post: String is returned in form: ("cont1" "cont2" "cont3" ...)
-     *       where cont is the individual contents of the cell
-     */
+     * Post: JSONArray is returned containing a list of strings as the elements of the Array
+     **/
     public JSONArray groundContents(GOBAgent a, List<GridObject> thisCell) {
         JSONArray ground = new JSONArray();
         if (thisCell != null && ! thisCell.isEmpty()) {
