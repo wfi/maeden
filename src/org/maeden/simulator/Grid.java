@@ -24,7 +24,7 @@ import java.net.Socket;
  *@version: Beta 0.5
  */
 
-public class Grid 
+public class Grid
 ///*maedengraphics
     extends Frame
 //maedgraphics*/
@@ -60,7 +60,7 @@ public class Grid
 
     public boolean EAT_FOOD_ENDS_IT = true; // control if eating food terminates sim (true) or increases energy (false)
     public int WORLD_CYCLE_TIME = 200;      // replaces sleepTime to control wall-time length of simulation cycle
-
+    public int counter = 0;
     // Constructors
 
     /**
@@ -94,7 +94,7 @@ public class Grid
         squareSize = approxWidth / xCols;
         approxWidth = squareSize * xCols;
 
-        // Read in the Character Map 
+        // Read in the Character Map
         for (int y = 0; y < yRows; y++)
             for (int x = 0; x < xCols; x++){
                 switch (gridspaceInputData.map(x,y)) {
@@ -105,8 +105,10 @@ public class Grid
                     // place the FoodCollector here
                     GOBFoodCollect fc = new GOBFoodCollect(x,y,squareSize);
                     // start the AgentListener thread
-                    AgentListener al = new AgentListener(x,y,squareSize,this,gwServer,'W');
+                    AgentListener al = new AgentListener(x,y,squareSize,this,'W');
                     al.start();
+                    counter++;
+                    System.out.println(counter);
                     //System.out.println("AgentListener just started");
                     break;
                 case '+': //food
@@ -208,7 +210,8 @@ public class Grid
      *
      */
     public void run() {
-        while(true) {
+
+        while(!killGrid) {
             try { processAgentActions(); }
             catch (Exception e) {System.out.println("run: failure reading agent actions " + e); }
             try { sendAgentSensations(); }
@@ -276,7 +279,7 @@ public class Grid
                     break;
                 case 's':
                     sps.sendSensationsToAgent(a, "SUCCESS");
-                    killGrid = true;      // success: agent found the food, end the simulation
+                    success();
                     break;
                 case 'c':                       // continuing: agent is alive, hasn't found the food
                 default:
@@ -300,6 +303,16 @@ public class Grid
     }
 
 
+    public void success(){
+      killGrid = true;      // success: agent found the food, end the simulation
+      cleanClose();
+      try {
+          
+          gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
+          System.out.println("server should be closed.");
+      }
+      catch(Exception e) {System.out.println("error closing server socket");}
+    }
     /**
      * updateWorldTime: update the world time
      */
@@ -567,7 +580,7 @@ public class Grid
           gwServer.close();
           }
           catch(Exception e) {System.out.println("error closing server socket");}*/
-        System.exit(4);  //exit
+        //System.exit(4);  //exit
     }
     //socket.Shutdown(SocketShutdown.Both);
     //socket.Close();
@@ -618,8 +631,13 @@ public class Grid
             if (myGrid != null) myGrid.run();  //run the simulation
         }
         catch (FileNotFoundException e) { System.out.println("Could not find file"); }
-        catch (Exception e) { System.out.println("Some exception: " + e); }
+        catch (Exception e) { System.out.println("Some exception: " + e);
+      }
+          System.out.println(Thread.currentThread().isAlive());
+            System.out.println("end of main");
     }
+
+
 
     /**
      * AgentListener
@@ -627,15 +645,15 @@ public class Grid
      */
     class AgentListener extends Thread {
 
-        private ServerSocket srvSock;
+
         private int x;
         private int y;
         private int squareSize;
         private Grid grid;
         private char head;
         // constructor
-        AgentListener(int ix, int iy, int s, Grid mg, ServerSocket ss, char heading){
-            srvSock = ss;
+        AgentListener(int ix, int iy, int s, Grid mg, char heading){
+
             x = ix;
             y = iy;
             squareSize = s;
@@ -646,9 +664,12 @@ public class Grid
         /** the run method for this AgentListener thread gets called by start() */
         public void run() {
             Socket tSock;
-            while (true) {
+
+
+
+            while (!killGrid) {
                 try {
-                    tSock = srvSock.accept();           // listen for connection, and
+                    tSock = gwServer.accept();           // listen for connection, and
                     GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
                     grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
                     synchronized (agents) {
@@ -658,19 +679,20 @@ public class Grid
                     catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations ");
                         e.printStackTrace(); }
                     Thread.sleep(50);
-                    if (killGrid) {
-                        try {
-                            sendAgentSensations();
-                            gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
-                        }
-                        catch(Exception e) {System.out.println("error closing server socket");}
-                    }
+
                 } catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
                 } catch (Exception e) {
                     System.out.println("AgentListener.run(): some other exception: ");
                     e.printStackTrace();
                 }
             }
+            System.out.println("out of the while");
+
+
+
+
+
+
         }
     }
 }
