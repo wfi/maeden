@@ -85,23 +85,25 @@ public class KeyboardController extends AbstractAgentController {
     public void processSensoryInfo() {
         SensoryPacket sp = currentSensePacket;
         //sp.printVisualArray();
-        String[] rawSenses = sp.getRawSenseData();
         // 1: get the smell info
-        String heading = rawSenses[0];
+        String heading = sp.getSmell();
         // 2: get the inventory
-        String inventory = rawSenses[1];
+        String inventory = sp.getInventory().toString();
         // 3: get the currently visible objects info the visField list for display
         processRetinalField(sp.getVisualArray());
         // 4: get ground contents
-        String ground = rawSenses[3];
+        String ground = sp.getGroundContents().toString();
         // 5: get messages
-        String messages = rawSenses[4]; //CHECKS MESSAGES ****CHANGE****
+        String messages = sp.getMessages(); //CHECKS MESSAGES ****CHANGE****
         // 6: energy
-        String energy = rawSenses[5];
+        String energy = String.valueOf(sp.getEnergy());
         // 7: lastActionStatus
-        String lastActionStatus = rawSenses[6];
+        String lastActionStatus;
+        if (sp.getLastActionStatus())
+            lastActionStatus = "ok";
+        else lastActionStatus = "fail";
         // 8: world time
-        String worldTime = rawSenses[7];
+        String worldTime = String.valueOf(sp.getWorldTime());
 
         // store or update according to the data just read. . . .
         gd.updateGDObjects(visField);
