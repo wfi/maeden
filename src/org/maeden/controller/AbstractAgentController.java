@@ -41,7 +41,7 @@ public abstract class AbstractAgentController {
      * @param command the intended command to be performed by the agent in the simulator
      */
     public void sendEffectorCommand(String command) {
-	gc.gridOut.println(command);
+	gc.effectorSend(command); // use GridClient.effectorSend() to construct JSONObject
     }
  
     /**

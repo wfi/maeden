@@ -1,5 +1,10 @@
 package org.maeden.simulator;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.lang.Math;
 ///*maedengraphics
 import java.awt.*;
@@ -47,7 +52,7 @@ public class GOBAgent extends GridObject {
     private Socket conn;               //socket connection
     private PrintWriter send;          //for writing to the socket
     private BufferedReader recv;       //for reading from the socket
-    private String nextCommand;        //string to hold agent command
+    private String nextCommand;        // String to hold agent command
     private String lastActionStatus = "ok";
     private boolean haveMsg = false;
     private char status = 'c';          // continuing (?)
@@ -180,20 +185,33 @@ public class GOBAgent extends GridObject {
     public BufferedReader recv() {
         return recv;
     }
-    //public accessor for receiving the next command to be executed from the controller and caching it in nextCommand
+
+    /** initiate reading/parsing JSONObject command from controller
+     * which should be the next command to be executed. Convert it to a string
+     * and cache it in nextCommand
+     */
     public void getNextCommand() {
         try {
             // Only read in the next command if there is one
             // if there is not, set nextCommand to null
             if(recv.ready()){
-                nextCommand = recv.readLine();
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jo = (JSONObject) jsonParser.parse(recv.readLine());
+                nextCommand = (String)jo.get("command");
+                for(Object a : (JSONArray)jo.get("arguments")){
+                    nextCommand = nextCommand + " " + (String)a;
+                }
             }
             else {
                 nextCommand = null;
             }
+        } catch (ParseException e) { e.printStackTrace();
         } catch (Exception e) { System.out.println("getNextCommand: Failed to receive command from controller process " + e); }
     }
-    //public accessor for viewing the next command
+    
+    /** return the next command (currently cached in nextCommand)
+     * @return the String consisting of command character and optional arguments
+     */
     public String nextCommand() {
         return nextCommand;
     }
@@ -520,7 +538,7 @@ public class GOBAgent extends GridObject {
      * chooses an appropriate action based on the first letter of the action String
      * Pre: first letter of action == f, b, r, l, u, d, g, h, w, t, s, a, k
      * Post: Agent does appropriate action
-     * @param action the command string that the agent controller wants to perform
+     * @param action the JSONObject received from agent controller
      */
     public void processAction(String action) {
         String[] actionLetters =  {"f", "b", "r", "l", "u", "d", "g", "w", "t", "s", "a"}; // but not 'k' to killself

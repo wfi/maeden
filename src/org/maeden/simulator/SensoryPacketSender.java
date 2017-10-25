@@ -12,8 +12,7 @@ import org.json.simple.JSONArray;
  * @author: Wayne Iba
  * @version: 2017093001
  */
-public class SensoryPacketSender
-{
+public class SensoryPacketSender {
     private int xCols, yRows;
     private LinkedListGOB[][] myMap; //holds gridobjects
     private GridObject food;
@@ -29,43 +28,37 @@ public class SensoryPacketSender
     }
 
     /**
-     * sendSensationsToAgent: send sensory information to given agent
-     * LINE0: Simulation status. One of: DIE, END, SUCCESS, CONTINUE
-     * LINE1: smell direction to food
-     * LINE2: inventory in form ("inv-char")
-     * LINE3: visual array (as single string) in form ((row ("cell") ("cell"))(row ("cell")))
-     * LINE4: ground contents of agent position in form ("cont" "cont")
-     * LINE5: Agent's messages
-     * LINE6: Agent's energy
-     * LINE7: last action's result status (ok or fail)
-     * LINE8: Second world time
+     * sendSensationsToAgent: send sensory information to given agent.
+     * See README.SensorMotor for protocol details.
      * @param a the agent to which the information should be sent
      */
     @SuppressWarnings("unchecked")
     public void sendSensationsToAgent(GOBAgent a){
-    sendSensationsToAgent(a, "CONTINUE");
+        sendSensationsToAgent(a, "CONTINUE");
     }
+    /** sendSensationsToAgent: with the given status.
+     * @param a the agent to which the information should be sent
+     * @param status the status to report to this agent
+     */
     public void sendSensationsToAgent(GOBAgent a, String status) {
         if (a.getNeedUpdate()) {
             JSONArray jsonArray = new JSONArray();
             JSONArray invArray = new JSONArray();
-
-            // We added String.valueOf to make sure that everything that is send is a String
-            jsonArray.add(status); // 0. send status
-            jsonArray.add(String.valueOf(Grid.relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. send smell
+            jsonArray.add(status); // 0. status
+            jsonArray.add(String.valueOf(Grid.relDirToPt(a.pos, new Point(a.dx(), a.dy()), food.pos))); // 1. smell direction to food
             if (a.inventory().size() > 0){
                 for(GridObject gob : a.inventory()){
                     invArray.add(String.valueOf(gob.printChar()));
                 }
             }
-            jsonArray.add(invArray); //2. send inv
-            jsonArray.add(visField(a.pos, new Point(a.dx(), a.dy()))); // 3. send visual info
-            jsonArray.add(groundContents(a, myMap[a.pos.x][a.pos.y]));  // 4.send contents of current location
-            jsonArray.add(null); // 5. send any messages that may be heard by the agent
-            jsonArray.add(a.energy());  // 6. send agent's energy
-            jsonArray.add(String.valueOf(a.lastActionStatus()));// 7. send last-action status
-            jsonArray.add(a.simTime()); // 8. send world time
-            a.send().println(jsonArray); // send JsonArray
+            jsonArray.add(invArray); //2. inv
+            jsonArray.add(visField(a.pos, new Point(a.dx(), a.dy()))); // 3. visual info
+            jsonArray.add(groundContents(a, myMap[a.pos.x][a.pos.y]));  // 4. contents of current location
+            jsonArray.add(null); // 5. any messages that may be heard by the agent
+            jsonArray.add(a.energy());  // 6. agent's energy
+            jsonArray.add(a.lastActionStatus());// 7. last-action status
+            jsonArray.add(a.simTime()); // 8. world time
+            a.send().println(jsonArray); // finally, send the assembled JsonArray
             a.setNeedUpdate(false);
         }
     }
@@ -77,6 +70,9 @@ public class SensoryPacketSender
      * See README.SensoryMotor for more description and examples.
      * The row behind the agent is given first followed by its current row and progressing away from the agent
      * with characters left-to-right in visual field.
+     * @param aPt the viewer-centered origin where the agent is standing
+     * @param heading the direction the agent is facing
+     * @return the assembled JSONArray containing the visual field contents
      */
     public JSONArray visField(Point aPt, Point heading){
         int senseRow, senseCol;
@@ -118,11 +114,9 @@ public class SensoryPacketSender
                     cellConts.add(String.valueOf(gObj.printChar()));
                 }
             }
-            return cellConts;
         }
-        //otherwise return a space representing no gridobject
-        else
-            return cellConts;
+        // finally, return the cell contents 
+        return cellConts;
     }
 
     
@@ -146,7 +140,6 @@ public class SensoryPacketSender
     public JSONArray groundContents(GOBAgent a, List<GridObject> thisCell) {
         JSONArray ground = new JSONArray();
         if (thisCell != null && ! thisCell.isEmpty()) {
-            //encapsulate contents within parentheses
             //iterate through the cell, gather the print-chars
             for(GridObject gob : thisCell){
                 //if the gob is an agent (and not the one passed in) get the agent id
@@ -156,9 +149,8 @@ public class SensoryPacketSender
                     ground.add(String.valueOf(gob.printChar()));
                 }
             }
-            return ground;
         }
-        return ground;
+        return ground; // the ground contents (if any)
     }
 
 }

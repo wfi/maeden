@@ -2,9 +2,13 @@ package org.maeden.controller;
 
 
 import org.json.simple.JSONArray;
-
-import java.io.*;
-import java.net.*;
+import org.json.simple.JSONObject;
+import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * class GridClient : useful for any controller that wants to connect and interact with
@@ -73,11 +77,20 @@ public class GridClient {
      * effectorSend : this should consume a String which will be the action to perform.
      * Most actions are single characters but once we implement communication, we'll want
      * to be able to send messages.
-     *
-     * *NOTE: GOBAgent only looks at first letter of command string unless talk or shout is sent*
+     * Commands are assumed to be single characters, and currently only supports
+     * one single-letter argument
+     * @param command the String command that the controller wants to execute in the world
      */
     public void effectorSend(String command) {
-        gridOut.println(command);
+        JSONObject toSend = new JSONObject();
+        toSend.put("command", command.substring(0,1));
+        if(command.length() > 1){
+            JSONArray args = new JSONArray();
+            args.add(command.substring(2,3));
+            toSend.put("arguments", args);
+        }
+        gridOut.println(toSend);
+        //System.out.println(".... as " + toSend.toString());
     }
         
 

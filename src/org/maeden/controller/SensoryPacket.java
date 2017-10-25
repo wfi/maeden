@@ -16,15 +16,11 @@ import static java.lang.Math.toIntExact;
  * @author: Wayne Iba
  * @version: 2017090901
  */
-public class SensoryPacket
-{
-
-    public static final String NUMLINES = "8";
+public class SensoryPacket {
 
     String status;
     String smell;
     List<Character> inventory;
-    //List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
     ArrayList<ArrayList<Vector<String>>> visualArray;
     List<Character> groundContents;
     String messages;
@@ -35,7 +31,9 @@ public class SensoryPacket
 
     /**
      * constructor that reads the raw data from the server via the provided BufferedReader
-     * and performs some amount of preprocessing on that raw data.
+     * over the Socket that connects the controller to the Grid server.
+     * Initiates some amount of preprocessing on the raw (JSON) data received from the Grid server.
+     * @param gridIn the BufferedReader to read from the Grid server
      */
     public SensoryPacket(BufferedReader gridIn) {
         visualArray = new ArrayList<ArrayList<Vector<String>>>();
@@ -68,17 +66,18 @@ public class SensoryPacket
     }
 
     /**
-     * Just read the raw data into an array of String.  Initialize the status field from line 0
+     * Just read the raw JSON data into various arrays.
      * <p>
-     * LINE0: # of lines to be sent or one of: die, success, or End
-     * LINE1: smell (food direction)
-     * LINE2: inventory
-     * LINE3: visual contents
-     * LINE4: ground contents
-     * LINE5: messages
-     * LINE6: remaining energy
-     * LINE7: lastActionStatus
-     * LINE8: world time
+     * The JSONArray contains data indexed as follows (and documented in README.SensoryMotor):<br>
+     * 0: simulation status, one of: CONTINUE, DIE, SUCCESS, or END<br>
+     * 1: smell (food direction)<br>
+     * 2: inventory<br>
+     * 3: visual contents<br>
+     * 4: ground contents<br>
+     * 5: messages<br>
+     * 6: remaining energy<br>
+     * 7: lastActionStatus<br>
+     * 8: world time<br>
      *
      * @param gridIn the reader connected to the server
      * @return the array of String representing the raw (unprocessed) sensory data starting with smell
@@ -102,31 +101,23 @@ public class SensoryPacket
      */
     protected void initPreProcessedFields(JSONArray rawSenseData){
         try {
-            this.status = (String) rawSenseData.get(0);
-            // smell
-            this.smell = (String) rawSenseData.get(1);
-            // process inventory
-            this.inventory = (ArrayList) rawSenseData.get(2);
-            // visual field
-            processRetinalField((JSONArray) rawSenseData.get(3));
-            // ground contents
-            this.groundContents = (ArrayList) rawSenseData.get(4);
-            // messages: *** Revisit this!! ***
-            this.messages = (String) rawSenseData.get(5);
-            // energy
-            this.energy = toIntExact((Long) rawSenseData.get(6));
-            // lastActionStatus
-            this.lastActionStatus = ((String) rawSenseData.get(7)).equalsIgnoreCase("ok");
-            // world Time
-            this.worldTime = toIntExact((Long) rawSenseData.get(8));
-        }catch (NullPointerException e){ e.getMessage(); }
-
+            this.status = (String) rawSenseData.get(0);                  // status
+            this.smell = (String) rawSenseData.get(1);                   // smell
+            this.inventory = (ArrayList) rawSenseData.get(2);            // process inventory
+            processRetinalField((JSONArray) rawSenseData.get(3));        // visual field
+            this.groundContents = (ArrayList) rawSenseData.get(4);       // ground contents
+            this.messages = (String) rawSenseData.get(5);            // messages: *** Revisit this!! ***
+            this.energy = toIntExact((Long) rawSenseData.get(6));        // energy
+            this.lastActionStatus = ((String) rawSenseData.get(7)).equalsIgnoreCase("ok");            // lastActionStatus
+            this.worldTime = toIntExact((Long) rawSenseData.get(8));     // world Time
+        } catch (NullPointerException e){ e.getMessage();
+        }
     }
 
     /**
      * Process the single string representing all the rows and column contents of the visual sensory data
      * and convert it to a 2D array of Vectors of Strings.
-     * @param info the visual sensory data string (structured as parenthesized list of lists) from server
+     * @param info the JSONArray (2D with each cell as JSONArray of contents) of the portion of grid visible to agent
      */
     protected void processRetinalField(JSONArray info) {
         for (int i = 6; i >= 0; i--) {

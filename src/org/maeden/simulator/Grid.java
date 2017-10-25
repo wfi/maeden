@@ -37,7 +37,7 @@ public class Grid
     private StringTokenizer msgTokenizer;
     private int talkDist = Integer.MAX_VALUE;  //distance in cells a message with volume talk will travel
     private int shoutDist = Integer.MAX_VALUE; //distance in cells a message with volume shout will travel
-    public boolean killGrid = false;     //grid will exit if true
+    public boolean RUN_SIM = true;     //grid will exit if becomes false
     ///*maedengraphics
     private Insets iTrans;
     private boolean showDisplay = true;  //set true if a graphical display is desired, false otherwise
@@ -77,8 +77,7 @@ public class Grid
             gwServer = new ServerSocket(MAEDENPORT);        //create new server Socket on Maeden port
         } catch(IOException e) {
             System.err.println("could not listen on port: " + MAEDENPORT);
-            killGrid = true;
-            this.dispose();   //exit if cannot use the port number
+            RUN_SIM = false;
         }
 
         /** Parse Data File **/
@@ -210,7 +209,7 @@ public class Grid
      */
     public void run() {
 
-        while(!killGrid) {
+        while(RUN_SIM) {
             try { processAgentActions(); }
             catch (Exception e) {System.out.println("run: failure reading agent actions " + e); }
             try { sendAgentSensations(); }
@@ -219,7 +218,7 @@ public class Grid
             // sleep time controls the speed of the simulation
             try {Thread.sleep(WORLD_CYCLE_TIME);} catch (Exception e) {System.out.println("error with sleeping"); }
 
-            if(killGrid)
+            if(!RUN_SIM)
                 cleanClose();
             ///*maedengraphics
             if(showDisplay){
@@ -248,8 +247,8 @@ public class Grid
                     {
                         a.processAction(a.nextCommand());
                         if(a.nextCommand() == "k"){
-                           System.out.println("agent killed self");
-                           finish();
+                            System.out.println("agent killed self");
+                            finish();
                         }
                         a.setNeedUpdate(true);
                         count += 1;
@@ -307,31 +306,30 @@ public class Grid
         msgs.clear();              //once messages are sent, they don't need to be saved any longer
     }
 
-/**
-* finish: used to set killGrid to true, call clean close, and close the server
-*/
+    /**
+     * finish: used to set RUN_SIM to false, call clean close, and close the server
+     */
     public void finish(){
-      killGrid = true;      // success: agent found the food, end the simulation
-      cleanClose();
-      try {
-
-          gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
-
-      }
-      catch(Exception e) {System.out.println("error closing server socket");}
-
+        RUN_SIM = false;      // success: agent found the food, end the simulation
+        cleanClose();
+        try {
+            gwServer.close(); //moved closing the server socket to the run function in order to not close it prematurely
+        }
+        catch(Exception e) {System.out.println("error closing server socket");}
     }
+    
     /**
      * updateWorldTime: update the world time
      */
     public void updateWorldTime(){
-
         // update local book keeping: time, energy(?), ...
         worldTime++;
     }
 
 
-    // add a GridObject to the Grid
+    /** add a GridObject to the Grid
+     * @param val the GridObject to be added
+     */
     public void addGOB(GridObject val){
         synchronized (gobs){
             gobs.add(val); // add object to the last slot of the gobs linked list
@@ -450,10 +448,11 @@ public class Grid
     /**
      * absDirToPt: compute the absolute (compass) direction to a given target point
      * with respect to a given reference point
-     * INPUT: agent point, target location
-     * OUTPUT: char: one of N(orth), S(outh), E(ast) or W(est) or H(ere)
+     * @param aPt the starting place where the agent is located
+     * @param target the location towards which we want the compass heading
+     * @return the char direction, one of: E, W, N, S, or H (for here)
      */
-    public char absDirToPt(Point aPt, Point target){
+    public static char absDirToPt(Point aPt, Point target){
         int xdiff = aPt.x - target.x;             //difference in x and y directions
         int ydiff = aPt.y - target.y;
         if (xdiff == 0 && ydiff == 0) return 'H'; //if no difference, point is here
@@ -534,31 +533,24 @@ public class Grid
 
         Graphics g = offscreen.getGraphics();
 
-
         g.setColor(getBackground());
         g.fillRect(0, 0, d.width, d.height);
-
         iTrans = getInsets();             //window margins
         g.translate(iTrans.left, iTrans.top); //compensates for window margins
         g.setColor(Color.gray.brighter());          //set the color
-
         // draw the grid lines
         for (int i=0; i < yRows; i++)   //draw horizontal lines
             g.drawLine(0,(i*squareSize),(xCols*squareSize),(i*squareSize));
-
         for(int j=0; j < xCols; j++)    //draw vertical lines
             g.drawLine((j*squareSize),0,(j*squareSize),(yRows*squareSize));
-
         // draw the objects
         for(GridObject gob : gobs) {
             gob.paint(g);   //each gridobject paints itself
         }
         g.translate(-iTrans.left, -iTrans.top);
-
         if ( ! rg.drawImage(offscreen, 0, 0, null) )
             System.out.println("Didn't finish loading, . . .");
         g.dispose();
-
     }
 
     // update: override the default update
@@ -566,12 +558,12 @@ public class Grid
 
     //maedengraphics*/
 
-    /** cleanClose provides a way to cleanly close all buffers and sockets and exit the grid
+    /** cleanClose provides a way to cleanly close all buffers and sockets and exit the grid simulation
+     *
      * calls the cleanDie method for each agent which closes their buffers and sockets, then shuts down serversocket
-     * POST: buffers and sockets closed, grid exits
+     * POST: buffers and sockets closed
      */
     public void cleanClose() {
-
         if( agents != null && !agents.isEmpty() ) {  //if there are agents on the grid still
             for(GOBAgent g : agents) {  //iterate through and close their connections
                 sendAgentSensations();
@@ -596,6 +588,7 @@ public class Grid
                            + "    simspeed-int: number of milliseconds per simulation step\n"
                            + "    eatfoodends-bool: true/false whether any agent eating the food ends the simulation");
     }
+
 
     /** Kicks everything off
      * takes 3 optional args from the command line:
@@ -630,33 +623,23 @@ public class Grid
             //   myGrid.setVisible(true);
             //maedengraphics*/
             if (myGrid != null) myGrid.run();  //run the simulation
-            Thread.sleep(2000); //to interrupt the AL thread
+            Thread.sleep(200); //to interrupt the AL thread
+        } catch (InterruptedException e){
+        } catch (FileNotFoundException e) { System.out.println("Could not find file");
+        } catch (Exception e) { System.out.println("Some exception: " + e);
         }
-        catch (InterruptedException e){
-
+        theAl.interrupt();
+        try{
+            Thread.sleep(50);
+        } catch(Exception e){
         }
-        catch (FileNotFoundException e) { System.out.println("Could not find file"); }
-        catch (Exception e) { System.out.println("Some exception: " + e);
-      }
-
-      theAl.interrupt();
-      try{
-        Thread.sleep(50);
-      }
-      catch(Exception e){
-
-      }
-
-          myGrid.dispose(); //close the myGrid Frame
-
+        myGrid.dispose(); //close the myGrid Frame
     }
-
-
 
 
     /**
      * AgentListener
-     * private inner class that listens for connection requests from agent controllers
+     * private inner class that listens for and services connection requests from agent controllers
      */
     class AgentListener extends Thread {
 
@@ -668,7 +651,6 @@ public class Grid
         private char head;
         // constructor
         AgentListener(int ix, int iy, int s, Grid mg, char heading){
-
             x = ix;
             y = iy;
             squareSize = s;
@@ -679,39 +661,28 @@ public class Grid
         /** the run method for this AgentListener thread gets called by start() */
         public void run() {
             Socket tSock;
-
-
-           //check for agent connections as long as the thread is not isInterrupted
-            while (!Thread.currentThread().isInterrupted() && !killGrid) {
+            //check for agent connections as long as the thread is not isInterrupted
+            while (RUN_SIM) {
                 try {
-
                     tSock = gwServer.accept();           // listen for connection, and
                     GOBAgent gagent = new GOBAgent(x,y,squareSize,grid,tSock,head);
-                    grid.addGOB(gagent); // addGOB(...) is synchronized on gobs
+                    grid.addGOB(gagent); // add the agent to the grid representation
                     synchronized (agents) {
-                        agents.add(gagent);
+                        agents.add(gagent); // add the agent to the list of agents
                     }
+                    Collections.shuffle(agents);         // 
                     try { sps.sendSensationsToAgent(gagent); }
                     catch (Exception e) {System.out.println("AgentListener.run(): failure sending sensations ");
                         e.printStackTrace(); }
                     Thread.sleep(50);
-
-                }
-                catch (InterruptedException e) { System.out.println("ok " + e);
-                }
-                catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
+                } catch (InterruptedException e) { System.out.println("ok " + e);
+                } catch (IOException e) { System.out.println("AgentListener.run(): failed accepting socket connection: " + e);
                 } catch (Exception e) {
                     System.out.println("AgentListener.run(): some other exception: ");
                     e.printStackTrace();
                 }
             }
-
-
-
-
-
-
-
         }
     }
+
 }

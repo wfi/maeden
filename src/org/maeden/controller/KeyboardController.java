@@ -286,8 +286,8 @@ public class KeyboardController extends AbstractAgentController {
                 if (invalidCommand(commandString)){
                     printHelp();
                 } else {
-                    gridOut.println(commandString);
-                    //System.out.println("SENT: " + text.getText().toLowerCase());
+                    //System.out.println("actionPerformed: sending " + commandString);
+                    sendEffectorCommand(commandString);
                 }
                 text.setText("");
             }
