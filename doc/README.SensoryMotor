@@ -21,16 +21,13 @@ arrays).]
 
 SENSORY INFORMATION
 
-[note: this protocol is prescribed. this is not how it currently is
-implemented. this is how it is supposed to be implemented]
-
 Each of the sensory modalities, here numbered 0 through 8, is stored
 in a JSON Array. The elements of the array vary in their type.  On the
-server side, the method sendSensationsToAgent(GOBAgent) handles the packaging
-and sending of the information.  On the controller side, the
+server side, the method sendSensationsToAgent(GOBAgent) handles the
+packaging and sending of the information.  On the controller side, the
 SensoryPacket class handles the receiving and unpacking of the data,
-as well as provides an interface to that information.
-The elements of the JSON array are as follows:
+as well as provides an interface to that information.  The elements of
+the JSON array are as follows:
 
 0. Simulation status. [String] The first field is one of four string
 values: "DIE", "SUCCESS", "END", or "CONTINUE".  DIE is sent when the
@@ -157,14 +154,12 @@ This data should be interpreted as an integer.
 
 EFFECTOR COMMANDS
 
-[Note: as above, this is now a prescription of what _should_ be --
-not a description of what _is_.]
-
 Maeden agents have a simple set of commands that may be performed.
 They may move forward and back; turn left or right; grab, use or drop
 an object, or wait and do nothing. (In addition, agents may talk or
-shout as described in Inter-Agent Communication README.)  Actions are
-expressed as JSON objects with a "command" field consisting of a
+shout as described in Inter-Agent Communication README. However, this
+communication functionality is currently out of commission.)  Actions
+are expressed as JSON objects with a "command" field consisting of a
 single-character string, and an optional "arguments" field, consisting
 of a JSON array of strings, one for each argument.  The three actions
 -- grab, use and drop -- accept an optional argument.  Without this
@@ -174,7 +169,7 @@ than one item may rest in a cell or be carried in the inventory, the
 optional argument allows the agent to specify a particular item to
 grab, use or drop.  Thus, to pick up the food if more than one item
 were present on the ground, the command {"command":"g",
-"arguments":["+"]} would be sent.  Similarly, if an agent were trying
+"arguments":["+"]} would be sent.  Similarly, if an agent is trying
 to open a door and its inventory held: ["$", "+", "K", "$"], the agent
 would send the command {"command":"u", "arguments":["K"]} in order to
 open a door that it was immediately facing.

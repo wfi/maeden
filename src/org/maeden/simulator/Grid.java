@@ -263,7 +263,6 @@ public class Grid
             System.out.println("Failed processing the next command just read");
             e.printStackTrace();
         }
-
         try {
             getAgentMessages();             //places any messages generated from agent actions inside msgs linked list
         } catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
