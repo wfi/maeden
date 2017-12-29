@@ -198,15 +198,20 @@ public class GOBAgent extends GridObject {
                 JSONParser jsonParser = new JSONParser();
                 JSONObject jo = (JSONObject) jsonParser.parse(recv.readLine());
                 nextCommand = (String)jo.get("command");
-                for(Object a : (JSONArray)jo.get("arguments")){
-                    nextCommand = nextCommand + " " + (String)a;
+                if (jo.containsKey("arguments")){
+                    for(Object a : (JSONArray)jo.get("arguments")){
+                        nextCommand = nextCommand + " " + (String)a;
+                    }
                 }
             }
             else {
                 nextCommand = null;
             }
         } catch (ParseException e) { e.printStackTrace();
-        } catch (Exception e) { System.out.println("getNextCommand: Failed to receive command from controller process " + e); }
+        } catch (Exception e) {
+            System.out.println("getNextCommand: Failed to receive command from controller process ");
+            e.printStackTrace();
+        }
     }
     
     /** return the next command (currently cached in nextCommand)
@@ -350,20 +355,19 @@ public class GOBAgent extends GridObject {
         // if on quicksand, die
         dieIfQuicksand();
         tool = getToolChar(gAction, myGrid.myMap()[pos.x][pos.y]);
-
-        if ( myGrid.cellHasTool(pos.x, pos.y, tool) && inventory.size() < INVENTORYCAPACITY ){
+        if ( inventory.size() >= INVENTORYCAPACITY ){
+            System.out.println("grab: Inventory full");
+            lastActionFails();
+        } else {
             try {
                 grabobj = myGrid.getTool(this, pos.x, pos.y, tool); // in case food supply not ready, throw NoSuchElementException
                 inventory.push( grabobj );
                 myGrid.removeGOB( grabobj );
                 grabobj.pos = this.pos; // make inventory's position point to agent's position while being carried
             } catch (NoSuchElementException e) {
-                System.out.println("grab: myGrid.cellHasTool returns true for " + tool + " but NoSuchElement: " + e);
+                System.out.println("grab: nothing available to grab: " + e);
                 lastActionFails();
             }
-        } else {
-            System.out.println("grab: myGrid.cellHasTool returns false for tool '" + tool + "'");
-            lastActionFails();
         }
         agentEnergy -= costs.get("grab");                    //subtract energy required to grab an object
         dieIfNoEnergy();                            //agent dies if no energy is left
@@ -432,23 +436,24 @@ public class GOBAgent extends GridObject {
     }
 
     /** getToolChar: String, LinkedList -> Char
-     * extract the argument (if any) from the command
+     * extract the argument (if any) from the command, 
+     * and if not take the first non-agent item from the contents of the cell
      * @param actString is the action command this agent want to perform
      * @param items 
      */
     private char getToolChar(String actString, LinkedList<GridObject> items){
-        char tool;
+        char tool = '*';
         StringTokenizer actToks = new StringTokenizer(actString);
         actToks.nextToken();    // eat up the main action and prepare for optional argument
         if ( actToks.hasMoreTokens() ){
             tool = Character.toUpperCase(actToks.nextToken().toCharArray()[0]); // print-char of item to
         } else {
-            if ( items.size() > 0 )
-                tool = items.getFirst().printChar();    // in the case of cell contents,
-            // Grid.addGOB() attempts (but does not guarantee)
-            // to NOT grab an agent self or other if other object present
-            else
-                tool = '*';
+            for (GridObject go : items){
+                if ( go.printChar() != 'A' ){
+                    tool = go.printChar();
+                    break;
+                }
+            }
         }
         return tool;
     }

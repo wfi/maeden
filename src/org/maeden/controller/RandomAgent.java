@@ -7,7 +7,7 @@ import java.util.Random;
  */
 public class RandomAgent extends AbstractAgentController {
 
-    String possibleActions = "fbrldguwa"; // exclude the s, t, and k actions
+    String possibleActions = "fbrldgu"; // exclude the s, t, and k actions
     Random myRand;
 
     /** RandomAgent constructor: creates an instance
@@ -26,11 +26,11 @@ public class RandomAgent extends AbstractAgentController {
      */
     public void run() {
 	getSensoryInfo();	// sense
-	while (currentSensePacket.getStatus().equals(SensoryPacket.NUMLINES)) {
+	while (currentSensePacket.getStatus().equals("CONTINUE")) {
 	    int randomAct = myRand.nextInt(possibleActions.length());			// 'think'
-	    sendEffectorCommand(possibleActions.substring(randomAct, randomAct + 1));	//  act
+	    sendEffectorCommand(Character.toString(possibleActions.charAt(randomAct)));	//  act
 	    getSensoryInfo();								//  sense
-        //try {Thread.sleep(20000);} catch (Exception e) {system.out.println ("sleep error");}
+            try {Thread.sleep(200);} catch (Exception e) {system.out.println ("sleep error");}
 	}
     }
 

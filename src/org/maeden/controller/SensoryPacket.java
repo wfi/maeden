@@ -133,8 +133,7 @@ public class SensoryPacket {
 
 
     /** Get the status of the agent in the simulation.  Refer to documentation and/or code
-     * for definitive details but either is a number of raw lines to be subsequently processed
-     * or is one of "DIE", "END", or "SUCCEED".  This will not typically be used by agents.
+     * for definitive details. Status is one of "DIE", "END", or "SUCCEED".  
      * @return the status of the simulation
      */
     public String getStatus(){ return status; }

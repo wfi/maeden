@@ -248,7 +248,6 @@ public class Grid
                         a.processAction(a.nextCommand());
                         if(a.nextCommand() == "k"){
                             System.out.println("agent killed self");
-                            finish();
                         }
                         a.setNeedUpdate(true);
                         count += 1;
@@ -278,8 +277,6 @@ public class Grid
                         a.drop("drop");         // drop all items from inventory before removing agent
                     sps.sendSensationsToAgent(a, "DIE");
                     a.cleanDie(); i.remove();
-                    finish();
-
                     break;
                 case 's':
                     sps.sendSensationsToAgent(a, "SUCCESS");
@@ -544,8 +541,10 @@ public class Grid
         for(int j=0; j < xCols; j++)    //draw vertical lines
             g.drawLine((j*squareSize),0,(j*squareSize),(yRows*squareSize));
         // draw the objects
-        for(GridObject gob : gobs) {
-            gob.paint(g);   //each gridobject paints itself
+        synchronized(gobs) {
+            for(GridObject gob : gobs) {
+                gob.paint(g);   //each gridobject paints itself
+            }
         }
         g.translate(-iTrans.left, -iTrans.top);
         if ( ! rg.drawImage(offscreen, 0, 0, null) )
