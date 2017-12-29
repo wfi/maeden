@@ -6,33 +6,36 @@
 All communication between the Maeden simulator and an agent controller
 is done through the standard socket layer.  Sockets provide
 versatility in the Maeden Simulator so that controllers written in
-different languages can still interact with Maeden.  The Grid class
-provides the code for the server socket that accepts connections from
-agent controllers.  Maeden listens on port number 7237, known within
-the simulator source code as MAEDENPORT.
+different languages can still interact with Maeden worlds.  The Grid
+class provides the code for the server socket that accepts connections
+from agent controllers.  Maeden listens on port number 7237, known
+within the simulator source code as MAEDENPORT.
 
 Once a connection is established, the socket is used for two-way
-communication between the environment server and the agent controller;
-sending sensory data from server to agent and sending actions from
-agent to server (see Sensory-Motor Interface README).  Agent
-controllers are given ID's starting with 0 according to the order in
-which they contact the server.
+communication between the Grid server and agent controller; the socket
+carries sensory data from server to agent and action commands from
+agent to server (see Sensory-Motor Interface README for protocol).
+Agent controllers are given ID's starting with 0 according to the
+order in which they contact the server.
 
-Initial Handshake.  When first establishing a socket connection, the
-agent controller must first "sign in" as either a client "base" agent
-or as a "helper" agent.  (It is assumed that helper agents do not
-attempt to use the food, thereby terminating the simulation.  However,
-this distinction will be eliminated as a future action-item.)  To sign
-in, each agent sends the string either "base" or "helper", followed by
-a newline character.  (All communications over the socket are
-terminated by newlines.)  After receiving the agent's role, the Grid
-server sends the agent's ID on a single line (newline terminated).
-Having completed the initial handshake/registration, the server makes
-the first sensory packet available and the agent controller should
-enter a sense/think/act cycle.  Note, sensory packets are sent after
-each agent action and should be consumed in their entirety.
+Initial Handshake: registering with the server.  An agent controller
+will join a simulation by first attempting to establish a socket
+connection with the server on the designated MAEDENPORT at the host on
+which the simulator is running.  If the server accepts the connection
+from the controller, it will send to the agent controller the ID that
+has been assigned to it followed by an initial sensory packet.  The ID
+is sent as a plain text string (newline terminated); the sensory
+packet is sent in JSON format as described in the Sensory-Motor
+Interface README (README.SensoryMotor).  After the initial connection
+and first sensory packet, the server will wait for a command from the
+controller.
 
-Once the simulation is ended (when the food is eaten and
+Once a command is received (the format of which is also described in
+README.SensoryMotor), the server processes the command and determines
+the consequences of the given action.  A new sensory packet is created
+based on the modified conditions resulting from the action performed.
+
+Once the simulation is ended (when the food is eaten if
 EAT_FOOD_ENDS_IT is true), each socket is closed in the method
 Grid.cleanClose().  All buffers are exited (for the agent) and the
 sockets are closed (for the agent and the Grid server socket).  [If

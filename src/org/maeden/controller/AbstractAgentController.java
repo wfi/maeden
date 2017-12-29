@@ -11,12 +11,10 @@ package org.maeden.controller;
 public abstract class AbstractAgentController {
     
     //private data field
-    protected String myID;
     protected static final int MAEDENPORT = 7237;         // uses port 1237 on localhost
 
     protected GridClient gc;
     protected SensoryPacket currentSensePacket;
-    protected String[] currentRawSenseData;
 
     /**
      * AbstractAgentController constructor takes a string and an int
@@ -43,8 +41,7 @@ public abstract class AbstractAgentController {
      * @param command the intended command to be performed by the agent in the simulator
      */
     public void sendEffectorCommand(String command) {
-	// System.out.println("sendEffectorCommand sending: " + command);
-	gc.gridOut.println(command);
+	gc.effectorSend(command); // use GridClient.effectorSend() to construct JSONObject
     }
  
     /**
@@ -53,7 +50,6 @@ public abstract class AbstractAgentController {
      */
     public void getSensoryInfo() {
 	currentSensePacket = gc.getSensoryPacket();
-	currentRawSenseData = currentSensePacket.getRawSenseData();
     }
 
 }

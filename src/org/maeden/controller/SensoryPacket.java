@@ -1,10 +1,12 @@
 package org.maeden.controller;
 
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.io.BufferedReader;
-import java.util.StringTokenizer;
+import static java.lang.Math.toIntExact;
 
 /**
  * Simple class for representing 'pre-processed' sensory packets.
@@ -16,170 +18,122 @@ import java.util.StringTokenizer;
  */
 public class SensoryPacket {
 
-    public static final String NUMLINES = "8";
-
     String status;
     String smell;
     List<Character> inventory;
-    //List<Character>[][] visualArray = (List<Character>[][])new ArrayList[7][5];
     ArrayList<ArrayList<Vector<String>>> visualArray;
     List<Character> groundContents;
     String messages;
     int energy;
     boolean lastActionStatus;
     int worldTime;
-    String[] rawSenseData;
+    JSONArray rawSenseData;
 
     /**
      * constructor that reads the raw data from the server via the provided BufferedReader
-     * and performs some amount of preprocessing on that raw data.
+     * over the Socket that connects the controller to the Grid server.
+     * Initiates some amount of preprocessing on the raw (JSON) data received from the Grid server.
+     * @param gridIn the BufferedReader to read from the Grid server
      */
-    public SensoryPacket(BufferedReader gridIn){
-	visualArray = new ArrayList<ArrayList<Vector<String>>>();
-	for (int row=0; row<7; row++){
-	    visualArray.add(row, new ArrayList<Vector<String>>());
-	    for (int col=0; col<5; col++){
-		visualArray.get(row).add(col, new Vector<String>());
-	    }
-	}
-	rawSenseData = getRawSenseDataFromGrid(gridIn);
-	initPreProcessedFields(rawSenseData);
+    public SensoryPacket(BufferedReader gridIn) {
+        visualArray = new ArrayList<ArrayList<Vector<String>>>();
+        for (int row = 0; row < 7; row++) {
+            visualArray.add(row, new ArrayList<Vector<String>>());
+            for (int col = 0; col < 5; col++) {
+                visualArray.get(row).add(col, new Vector<String>());
+            }
+        }
+        rawSenseData = getRawSenseDataFromGrid(gridIn);
+        initPreProcessedFields(rawSenseData);
     }
 
     /**
      * another constructor takes in the sensory data as parameters instead of using a BufferedReader
      */
     public SensoryPacket(String inptStatus, String inptSmell, List<Character> inptInventory,
-			 ArrayList<ArrayList<Vector<String>>> inptVisualArray,
-			 List<Character> inptGroundContents, String inptMessages,
-			 Integer inptEnergy, Boolean inptLastActionStatus, Integer inptWorldTime){
-	status=inptStatus;
-	smell=inptSmell;
-	inventory=inptInventory;
-	visualArray=inptVisualArray;
-	groundContents=inptGroundContents;
-	messages=inptMessages;
-	energy=inptEnergy;
-	lastActionStatus=inptLastActionStatus;
-	worldTime=inptWorldTime;
+                         ArrayList<ArrayList<Vector<String>>> inptVisualArray,
+                         List<Character> inptGroundContents, String inptMessages,
+                         Integer inptEnergy, Boolean inptLastActionStatus, Integer inptWorldTime) {
+        status = inptStatus;
+        smell = inptSmell;
+        inventory = inptInventory;
+        visualArray = inptVisualArray;
+        groundContents = inptGroundContents;
+        messages = inptMessages;
+        energy = inptEnergy;
+        lastActionStatus = inptLastActionStatus;
+        worldTime = inptWorldTime;
     }
 
     /**
-     * Just read the raw data into an array of String.  Initialize the status field from line 0
+     * Just read the raw JSON data into various arrays.
+     * <p>
+     * The JSONArray contains data indexed as follows (and documented in README.SensoryMotor):<br>
+     * 0: simulation status, one of: CONTINUE, DIE, SUCCESS, or END<br>
+     * 1: smell (food direction)<br>
+     * 2: inventory<br>
+     * 3: visual contents<br>
+     * 4: ground contents<br>
+     * 5: messages<br>
+     * 6: remaining energy<br>
+     * 7: lastActionStatus<br>
+     * 8: world time<br>
      *
-     * LINE0: # of lines to be sent or one of: die, success, or End
-     * LINE1: smell (food direction)
-     * LINE2: inventory
-     * LINE3: visual contents
-     * LINE4: ground contents
-     * LINE5: messages
-     * LINE6: remaining energy
-     * LINE7: lastActionStatus
-     * LINE8: world time
      * @param gridIn the reader connected to the server
      * @return the array of String representing the raw (unprocessed) sensory data starting with smell
      */
-    protected String[] getRawSenseDataFromGrid(BufferedReader gridIn){
-	String[] result = new String[Integer.parseInt(NUMLINES)];
-	try {
-	    String status = gridIn.readLine().toLowerCase();
-	    if((status.equals("die") || status.equals("success")) || status.equals("end")) {
-		System.out.println("Final status: " + status);
-		System.exit(1);
-	    }
-	    if ( ! status.equals(NUMLINES) ){
-		System.out.println("getSensoryInfo: Unexpected number of data lines - " + status);
-		System.exit(1);
-	    }
-	    this.status = status;
-	    // 1: get the smell info
-	    result[0] = gridIn.readLine();
-	    // 2: get the inventory
-	    result[1] = gridIn.readLine();
-	    // 3: get the visual info
-	    result[2] = gridIn.readLine();
-	    // 4: get ground contents
-	    result[3] = gridIn.readLine();
-	    // 5: get messages
-	    result[4] = gridIn.readLine(); //CHECKS MESSAGES ****CHANGE****
-	    // 6: energy
-	    result[5] = gridIn.readLine();
-	    // 7: lastActionStatus
-	    result[6] = gridIn.readLine();
-	    // 8: world time
-	    result[7] = gridIn.readLine();
-	}
-	catch(Exception e) { e.printStackTrace(); }
-	return result;
+    protected JSONArray getRawSenseDataFromGrid(BufferedReader gridIn) {
+        JSONArray jsonArray = null;
+        try {
+            JSONParser jsonParser = new JSONParser();
+            Object object = jsonParser.parse(gridIn.readLine()); // unpack the JsonArray.
+            jsonArray = (JSONArray) object;
+        } catch (Exception e){
+            e.getMessage();
+            System.exit(1); // exits if all the elements in the JsonArray are null.
+        }
+        return jsonArray;
     }
 
     /**
      * Perform any pre-processing, especially on the visual data
      * @param rawSenseData the raw unprocessed sense data
      */
-    protected void initPreProcessedFields(String[] rawSenseData){
-	// smell
-	this.smell = rawSenseData[0];
-	// process inventory
-	this.inventory = new ArrayList<Character>();
-	for(char item : rawSenseData[1].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
-	    this.inventory.add(item);
-	// visual field
-	processRetinalField(rawSenseData[2]);
-	// ground contents
-	this.groundContents = new ArrayList<Character>();
-	for(char item : rawSenseData[3].replaceAll("[\\(\"\\)\\s]+","").toCharArray())
-	    this.groundContents.add(item);
-	// messages: *** Revisit this!! ***
-	this.messages = rawSenseData[4];
-	// energy
-	this.energy = Integer.parseInt(rawSenseData[5]);
-	// lastActionStatus
-	this.lastActionStatus = rawSenseData[6].equalsIgnoreCase("ok");
-	// world Time
-	this.worldTime = Integer.parseInt(rawSenseData[7]);
+    protected void initPreProcessedFields(JSONArray rawSenseData){
+        try {
+            this.status = (String) rawSenseData.get(0);                  // status
+            this.smell = (String) rawSenseData.get(1);                   // smell
+            this.inventory = (ArrayList) rawSenseData.get(2);            // process inventory
+            processRetinalField((JSONArray) rawSenseData.get(3));        // visual field
+            this.groundContents = (ArrayList) rawSenseData.get(4);       // ground contents
+            this.messages = (String) rawSenseData.get(5);            // messages: *** Revisit this!! ***
+            this.energy = toIntExact((Long) rawSenseData.get(6));        // energy
+            this.lastActionStatus = ((String) rawSenseData.get(7)).equalsIgnoreCase("ok");            // lastActionStatus
+            this.worldTime = toIntExact((Long) rawSenseData.get(8));     // world Time
+        } catch (NullPointerException e){ e.getMessage();
+        }
     }
 
     /**
      * Process the single string representing all the rows and column contents of the visual sensory data
      * and convert it to a 2D array of Vectors of Strings.
-     * @param info the visual sensory data string (structered as parenthesized list of lists) from server
+     * @param info the JSONArray (2D with each cell as JSONArray of contents) of the portion of grid visible to agent
      */
-    protected void processRetinalField(String info) {
-	boolean seeAgent;
-	StringTokenizer visTokens = new StringTokenizer(info, "(", true);
-	visTokens.nextToken();
-	for (int i = 6; i >= 0; i--) {              //iterate backwards so character printout displays correctly
-	    visTokens.nextToken();
-	    for (int j=0; j <=4; j++) {             //iterate through the columns
-		seeAgent = false;
-		int agentID = 0;
-		visTokens.nextToken();
-		char[] visArray = visTokens.nextToken().replaceAll("[\\(\"\\)\\s]+","").toCharArray();
-		for(int k=0; k < visArray.length; k++){
-		    if (visArray[k] >= 0 && visArray[k] <= 9){  // we have a digit
-			if (seeAgent){ // we're already processing an agent ID with possibly more than one digit
-			    agentID = 10*agentID + (visArray[k] - '0');
-			} else {       // starting to process an agent ID
-			    seeAgent = true;
-			    agentID = (visArray[k] - '0');
-			}
-		    } else {                                    // we have a non-agent ID
-			if (seeAgent){ // just finished processing agent ID -- record it
-			    visualArray.get(i).get(j).add(String.valueOf(agentID));
-			    seeAgent = false;
-			    agentID = 0;
-			}
-			visualArray.get(i).get(j).add(String.valueOf(visArray[k])); // add the non-agent item
-		    }
-		}
-	    }
-	}
+    protected void processRetinalField(JSONArray info) {
+        for (int i = 6; i >= 0; i--) {
+            JSONArray q = (JSONArray) info.get(i);
+            for (int j = 0; j <= 4; j++) {
+                JSONArray z = (JSONArray) q.get(j);
+                for (int k = 0; k < z.size(); k++) {
+                    visualArray.get(i).get(j).add((String) z.get(k));
+                }
+            }
+        }
     }
 
+
     /** Get the status of the agent in the simulation.  Refer to documentation and/or code
-     * for definitive details but either is a number of raw lines to be subsequently processed
-     * or is one of "DIE", "END", or "SUCCEED".  This will not typically be used by agents.
+     * for definitive details. Status is one of "DIE", "END", or "SUCCEED".  
      * @return the status of the simulation
      */
     public String getStatus(){ return status; }
@@ -228,27 +182,27 @@ public class SensoryPacket {
     /**
      * @return the array of Strings representing the raw sensory data
      */
-    public String[] getRawSenseData(){ return rawSenseData; }
+    public JSONArray getRawSenseData(){return rawSenseData; }
 
     /**
      * Renders the visual information as semi-formatted string, making no allowances for
      * cells with more than one object
      */
     public void printVisualArray(){
-	for ( ArrayList<Vector<String>> row : visualArray ){
-	    for ( Vector<String> cell : row ){
-		if ( cell != null ){
-		    System.out.print('[');
-		    for (String s : cell)
-			System.out.print(s);
-		    System.out.print(']');
-		} else {
-		    System.out.print("[ ]");
-		}
-	    }
-	    System.out.println();
-	}
-	System.out.println();
+        for ( ArrayList<Vector<String>> row : visualArray ){
+            for ( Vector<String> cell : row ){
+                if ( cell != null ){
+                    System.out.print('[');
+                    for (String s : cell)
+                        System.out.print(s);
+                    System.out.print(']');
+                } else {
+                    System.out.print("[ ]");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
     
 }

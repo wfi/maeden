@@ -24,10 +24,9 @@ compiled
 *.dmg
 *.gz
 *.iso
-*.jar
 *.rar
-*.tar
 *.zip
+*.jar
 *.egg
 *.egg-info
 dist
