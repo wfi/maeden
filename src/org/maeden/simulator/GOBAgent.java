@@ -188,7 +188,8 @@ public class GOBAgent extends GridObject {
 
     /** initiate reading/parsing JSONObject command from controller
      * which should be the next command to be executed. Convert it to a string
-     * and cache it in nextCommand
+     * and cache it in nextCommand. This is a one-time per sense/think/act cycle
+     * which consumes input from the socket and changes the nextCommand instance var
      */
     public void getNextCommand() {
         try {
@@ -262,15 +263,19 @@ public class GOBAgent extends GridObject {
         agentEnergy = newValue;
     }
 
-    /** 
-     */
-    public void decrEnergyWait() {
-        agentEnergy -= costs.get("wait");
-    }
 
     // AGENT ACTIONS
 
-    /* moveForward checks to see if the cell in front of agent is passable.  If it is, agent moves to cell, otherwise does nothing
+    /** doWait deducts the 'wait' cost and checks if positive energy remains or if on Quicksand
+     */
+    public void doWait() {
+        agentEnergy -= costs.get("wait");
+        dieIfNoEnergy();
+        dieIfQuicksand();
+    }
+
+    /** moveForward checks to see if the cell in front of agent is passable.
+     * If it is, agent moves to cell, otherwise does nothing
      * subtracts amount of energy required for moving forward *defined by forwardCost*
      */
     public void moveForward(){
@@ -570,8 +575,7 @@ public class GOBAgent extends GridObject {
             break;
         case 'g': grab(action);  //grab command
             break;
-        case 'w': // wait command
-            agentEnergy -= costs.get("wait"); dieIfNoEnergy(); dieIfQuicksand();
+        case 'w': doWait(); // wait command
             break;
         case 't': communicate(action);         //talk command
             break;

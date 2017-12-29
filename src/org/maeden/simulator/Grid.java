@@ -208,7 +208,6 @@ public class Grid
      *
      */
     public void run() {
-
         while(RUN_SIM) {
             try { processAgentActions(); }
             catch (Exception e) {System.out.println("run: failure reading agent actions " + e); }
@@ -233,16 +232,18 @@ public class Grid
      * to be processed, get them and do whatever needs to be done.
      */
     public void processAgentActions() {
+        // Extract actions sent to simulator by agent controllers
         try {
             for (GOBAgent a : agents) {
                 a.getNextCommand();           //have current agent get next command from controller process
                 //System.out.println("processing agent " + a.getAgentID() + " with action: " + a.nextCommand());
             }
         } catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
+        int count = 0;
+        // Process each agent's action (doing 'wait' if no action sent)
         try {
             for (GOBAgent a : agents) {    //process and perform each agent's action
                 //Process the action only if there is a next command
-                Integer count = 0;
                 if(a.nextCommand() != null)
                     {
                         a.processAction(a.nextCommand());
@@ -253,22 +254,24 @@ public class Grid
                         count += 1;
                     }
                 else {
-                    a.decrEnergyWait(); // otherwise, deduct the wait cost from agent's energy
-                }
-                if (count > 1){
-                    Collections.shuffle(agents);
+                    a.doWait(); // otherwise, deduct the wait cost from agent's energy
                 }
             }
         } catch (Exception e) {
             System.out.println("Failed processing the next command just read");
             e.printStackTrace();
         }
+        // Shuffle to remove order bias on conflict resolution if more than one agent acted
+        if (count > 1){ 
+            Collections.shuffle(agents); 
+        }
+        // Process agent messages
         try {
             getAgentMessages();             //places any messages generated from agent actions inside msgs linked list
         } catch (Exception e) { System.out.println("Failed processing the messages: " + e);}
-
+        // Remove any dead agents
         try {
-            for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {          //remove any dead agents
+            for(Iterator<GOBAgent> i = agents.iterator(); i.hasNext(); ) {          
                 GOBAgent a = i.next();
                 switch(a.status()) {
                 case 'd':                       // die: agent died from lack of energy or quicksand
@@ -277,11 +280,11 @@ public class Grid
                     sps.sendSensationsToAgent(a, "DIE");
                     a.cleanDie(); i.remove();
                     break;
-                case 's':
+                case 's': // success: only gets this status when EAT_FOOD_ENDS_IT is true
                     sps.sendSensationsToAgent(a, "SUCCESS");
                     finish();
                     break;
-                case 'c':                       // continuing: agent is alive, hasn't found the food
+                case 'c':                       // continuing: agent is alive
                 default:
                     break;
                 }

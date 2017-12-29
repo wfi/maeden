@@ -94,7 +94,6 @@ Note: * = wall
       R = Robot
       G = ray-gun
      [0-9] = Agent with particular ID
-      H = Helper Agent
       + = food source or food piece (distinguish via smell)
       O = food collection point (letter Oh)
       $ = gold piece
