@@ -1,4 +1,4 @@
-[v.2017.09.30]
+[v.2017.12.28]
 --------------------------------------------------------------
 ----------  Maeden Sensory-Motor Interface Protocol  ---------
 --------------------------------------------------------------
@@ -11,13 +11,6 @@ appropriate command to the server.  Information is sent back and forth
 between the Grid server and agent controllers in a JSON format. This
 allows agent controllers to be implemented in any language that
 supports both the standard socket layer and JSON.
-
-[note: currently only sensory information is handled like this, and
-that only incompletely. The visual information, ground contents, and
-perhaps other fields need to be converted to JSON arrays; currently
-just strings. Finally, the agent actions need to be sent by
-controllers and received by the Grid server via JSON objects (or
-arrays).]
 
 SENSORY INFORMATION
 
@@ -59,32 +52,30 @@ carried include: "K", "T", "G", "+", or "$".  K indicates the agent is
 carrying a key, T a hammer, + the food, etc.  If the agent's inventory
 is empty, the empty array will be sent.
 
-3. The "sight" information. [Array of Array of Array of String] The agent has a visual field that is
-seven (7) cells deep and five (5) cells wide.  The agent can see one
-row behind it, the current row (i.e., two cells to either side), and
-five (5) rows ahead.
-Visual information is given as a multi-level JSON array.
-For example, if the agent with ID of 2 was standing with a key and a
-hammer to its left, while facing a wall with a door two cells away and
-the food three rows beyond the door, the received visual information
-line would look like this (without line-breaks):
+3. The "sight" information. [Array of Array of Array of String] The
+agent has a visual field that is seven (7) cells deep and five (5)
+cells wide.  The agent can see one row behind it, the current row
+(i.e., two cells to either side), and five (5) rows ahead.  Visual
+information is given as a multi-level JSON array.  For example, if the
+agent with ID of 2 was standing with a key and a hammer to its left,
+while facing a wall with a door two cells away and the food three rows
+beyond the door, the received visual information line would look like
+this (without the spacing and line-breaks shown here for readability):
 
-[note: convert this to the appropriate JSON representation, replacing
-empty cells with empty arrays. (would that be null?)]
 
-((()     ()       ()     ()     ()   )
+[[[],    [],       [],    [],    []   ],
 
- (()     ("K" "T")("2")  ()     ()   )
+ [[],    ["K","T"],["2"], [],    []   ],
 
- (()     ()       ()     ()     ()   )
+ [[],    [],       [],    [],    []   ],
 
- (("*")  ("*")    ("#")  ("*")  ("*"))
+ [["*"], ["*"],    ["#"], ["*"], ["*"]],
 
- (()     ()       ()     ()     ()   )
+ [[],    [],       [],    [],    []   ],
 
- (()     ()       ()     ()     ()   )
+ [[],    [],       [],    [],    []   ],
 
- (()     ()       ("+")  ()     ()   ))
+ [[],    [],       ["+"], [],    []   ]] 
 
 Note: * = wall
       T = hammer
@@ -107,27 +98,22 @@ at [0,0] with negative rows and columns over the left shoulder.  This
 is left as an exercise for designers of agents.
 
 4. The ground contents. [Array of String] The contents of the cell
-where the agent is located is sent as an array with elements for each item present there.
-Each item's print-character
-(if there is such an item) appears as a one-character string.
-For example: ["K", "$"] for the situation where there is a key and a money piece in the
-same location as the agent.
-The empty array, [], is sent if
-nothing other than the agent is present.
+where the agent is located is sent as an array with elements for each
+item present there.  Each item's print-character (if there is such an
+item) appears as a one-character string.  For example: ["K", "$"] for
+the situation where there is a key and a money piece in the same
+location as the agent.  The empty array, [], is sent if nothing other
+than the agent is present.
 
 Note: the agent-self does not appear in the ground contents, but
 _does_ appear in the visual information.
 
 5. The "messages" that this agent hears. [Array of JSON Object]
-
-[note: currently messages are effectively unsupported and this field
-of the array should always be empty.]
-
-All messages that are in
-hearing range of the agent are sent as an array.  For example:
-(Message1 Message2 Message3 ... MessageN ) Note: Each individual
-Message will conform to the format described in Inter-Agent
-Communication README.
+Currently, messages are unsupported and this field of the array will
+always be empty.  When supported, all messages that are in hearing
+range of the agent are sent as an array.  For example: [Message1,
+Message2, Message3, ... MessageN] where each individual Message will
+conform to the format described in Inter-Agent Communication README.
 
 6. The "energy" is sent. [Number] The amount of energy that the agent
 has left.  The lower the amount of energy, the fewer the number of

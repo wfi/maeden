@@ -15,30 +15,30 @@ public class RandomAgent extends AbstractAgentController {
      * @param p the port number on which the simulator is listening
      */
     public RandomAgent(String h, int p) {
-	super(h, p);
-	myRand = new Random();
+        super(h, p);
+        myRand = new Random();
     }
     public RandomAgent(){
-	this("localhost", MAEDENPORT);
+        this("localhost", MAEDENPORT);
     }
 
     /** A degenerate sense/think/act cycle with no real thinking
      */
     public void run() {
-	getSensoryInfo();	// sense
-	while (currentSensePacket.getStatus().equals("CONTINUE")) {
-	    int randomAct = myRand.nextInt(possibleActions.length());			// 'think'
-	    sendEffectorCommand(Character.toString(possibleActions.charAt(randomAct)));	//  act
-	    getSensoryInfo();								//  sense
-            try {Thread.sleep(200);} catch (Exception e) {system.out.println ("sleep error");}
-	}
+        getSensoryInfo();       // sense
+        while (currentSensePacket.getStatus().equals("CONTINUE")) {
+            int randomAct = myRand.nextInt(possibleActions.length());                   // 'think'
+            sendEffectorCommand(Character.toString(possibleActions.charAt(randomAct))); //  act
+            getSensoryInfo();                                                           //  sense
+            try {Thread.sleep(200);} catch (Exception e) {System.out.println ("sleep error");}
+        }
     }
 
     /** main: run a RandomAgent in the simulator
      * @param args any commandline arguments (currently ignored)
      */
     public static void main(String[] args){
-	RandomAgent ra = new RandomAgent();
+        RandomAgent ra = new RandomAgent();
 	ra.run();
     }
     

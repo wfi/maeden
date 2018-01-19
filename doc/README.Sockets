@@ -1,4 +1,4 @@
-[v.2017.04.01]
+[v.2017.12.28]
 -----------------------------------------------------
 ------------- Maeden Socket Communication -----------
 -----------------------------------------------------
@@ -18,22 +18,28 @@ agent to server (see Sensory-Motor Interface README for protocol).
 Agent controllers are given ID's starting with 0 according to the
 order in which they contact the server.
 
-Initial Handshake: registering with the server.  An agent controller
-will join a simulation by first attempting to establish a socket
-connection with the server on the designated MAEDENPORT at the host on
-which the simulator is running.  If the server accepts the connection
-from the controller, it will send to the agent controller the ID that
-has been assigned to it followed by an initial sensory packet.  The ID
-is sent as a plain text string (newline terminated); the sensory
-packet is sent in JSON format as described in the Sensory-Motor
-Interface README (README.SensoryMotor).  After the initial connection
-and first sensory packet, the server will wait for a command from the
-controller.
+Initial Handshake: Registering with the server.
+
+An agent controller will join a simulation by first attempting to
+establish a socket connection with the server on the designated
+MAEDENPORT at the host on which the simulator is running.  If the
+server accepts the connection from the controller, a socket connection
+will provide (support for) an input and output I/O ports by which the
+agent controller and the simulator can send and receive information to
+and from each other. Using these I/O ports, the simulator will send to
+the agent controller the ID that has been assigned to it followed by
+an initial sensory packet.  The ID is sent as a plain text string
+(newline terminated); the sensory packets are sent in JSON format as
+described in the Sensory-Motor Interface README (README.SensoryMotor).
+After the initial connection and first sensory packet, the server will
+wait for a command from the controller.
 
 Once a command is received (the format of which is also described in
 README.SensoryMotor), the server processes the command and determines
 the consequences of the given action.  A new sensory packet is created
-based on the modified conditions resulting from the action performed.
+based on the modified conditions resulting from the action
+performed. This sensory packet is sent to the agent controller and
+again the simulator waits for another command.
 
 Once the simulation is ended (when the food is eaten if
 EAT_FOOD_ENDS_IT is true), each socket is closed in the method
@@ -49,6 +55,7 @@ try{
 } catch(IOException e) {
 }
 
-New agent controllers should consider using the GridClient class (when
-using Java or as inspiration in other languages) to streamline
-connection issues.
+New agent controllers written in Java should consider extending from
+the AbstractAgentController class. Use the AbstractAgentController and
+GridClient classes for inspiration when using other languages to
+implement agent controllers.
