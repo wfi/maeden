@@ -240,7 +240,7 @@ public class Grid
             }
         } catch (Exception e) { System.out.println("Failed reading the next command: " + e);}
         int count = 0;
-        // Process each agent's action (doing 'wait' if no action sent)
+        // Process each agent's action (deducting 'wait' cost if no action sent)
         try {
             for (GOBAgent a : agents) {    //process and perform each agent's action
                 //Process the action only if there is a next command
@@ -254,7 +254,7 @@ public class Grid
                         count += 1;
                     }
                 else {
-                    a.doWait(); // otherwise, deduct the wait cost from agent's energy
+                    a.decAgentEnergy(GOBAgent.costs.get("wait")); // otherwise, deduct the wait cost from agent's energy
                 }
             }
         } catch (Exception e) {

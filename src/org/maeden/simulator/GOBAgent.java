@@ -63,7 +63,7 @@ public class GOBAgent extends GridObject {
     private int dx, dy;                //heading x and y coor.
     public LinkedList<GridObject> inventory;
     private Grid myGrid;
-    private static final Map<String, Integer> costs;
+    static final Map<String, Integer> costs;
     //can't currently change keys to action characters
     //same character for "useKey" and "useHammer"
     static {
@@ -262,6 +262,13 @@ public class GOBAgent extends GridObject {
     public void setAgentEnergy(int newValue) {
         agentEnergy = newValue;
     }
+    /**
+     * decrement the agent's energy by the given amount
+     * @param decrement the amount by which to decrement the agentEnergy
+     */
+    public void decAgentEnergy(int decrement) {
+        agentEnergy -= decrement;
+    }
 
 
     // AGENT ACTIONS
@@ -269,7 +276,7 @@ public class GOBAgent extends GridObject {
     /** doWait deducts the 'wait' cost and checks if positive energy remains or if on Quicksand
      */
     public void doWait() {
-        agentEnergy -= costs.get("wait");
+        decAgentEnergy(costs.get("wait"));
         dieIfNoEnergy();
         dieIfQuicksand();
     }
@@ -286,7 +293,7 @@ public class GOBAgent extends GridObject {
             myGrid.addGOB(this);
         } else
             lastActionFails();
-        agentEnergy -= costs.get("forward");           //subtract energy required to move forward
+        decAgentEnergy(costs.get("forward"));           //subtract energy required to move forward
         dieIfNoEnergy();                      //agent dies if no energy left
     }
     
@@ -301,7 +308,7 @@ public class GOBAgent extends GridObject {
             myGrid.addGOB(this);
         } else
             lastActionFails();
-        agentEnergy -= costs.get("back");              //subtract energy required to move backward
+        decAgentEnergy(costs.get("back"));              //subtract energy required to move backward
         dieIfNoEnergy();                      //agent dies if no energy left
     }
 
@@ -314,7 +321,7 @@ public class GOBAgent extends GridObject {
         dieIfQuicksand();
         int tmp = dx;
         dx = dy; dy = - tmp;
-        agentEnergy -= costs.get("turn");              //subtract energy required to turn
+        decAgentEnergy(costs.get("turn"));              //subtract energy required to turn
         dieIfNoEnergy();                      //agent dies if no energy left
     }
 
@@ -327,7 +334,7 @@ public class GOBAgent extends GridObject {
         dieIfQuicksand();
         int tmp = dx;
         dx = - dy; dy = tmp;
-        agentEnergy -= costs.get("turn");              //subtract energy required to turn
+        decAgentEnergy(costs.get("turn"));              //subtract energy required to turn
         dieIfNoEnergy();                      //agent dies if no energy left
     }
 
@@ -344,10 +351,10 @@ public class GOBAgent extends GridObject {
             try {
                 attackee = (GOBAgent) getGOBbyPrintChar('A', myGrid.myMap()[pointAhead.x][pointAhead.y]);
                 // reduce their energy by attack amount
-                attackee.setAgentEnergy(attackee.energy() - ATTACK_LOSS);
-            } catch (NoSuchElementException e) { agentEnergy -= 5; } // penalty for attacking when nothing there to hit
+                attackee.decAgentEnergy(ATTACK_LOSS);
+            } catch (NoSuchElementException e) { decAgentEnergy(5); } // penalty for attacking when nothing there to hit
         }
-        agentEnergy -= costs.get("attack");
+        decAgentEnergy(costs.get("attack"));
         dieIfNoEnergy();
     }
 
@@ -374,7 +381,7 @@ public class GOBAgent extends GridObject {
                 lastActionFails();
             }
         }
-        agentEnergy -= costs.get("grab");                    //subtract energy required to grab an object
+        decAgentEnergy(costs.get("grab"));                    //subtract energy required to grab an object
         dieIfNoEnergy();                            //agent dies if no energy is left
     }
 
@@ -394,7 +401,7 @@ public class GOBAgent extends GridObject {
         } else {
             lastActionFails();
         }
-        agentEnergy -= costs.get("drop");              //subtract amount of energy required to drop an object
+        decAgentEnergy(costs.get("drop"));              //subtract amount of energy required to drop an object
         dieIfNoEnergy();                      //agent dies if he has no energy left
     }
     
@@ -428,13 +435,13 @@ public class GOBAgent extends GridObject {
             if (!result)
                 lastActionFails();
             else
-                agentEnergy -= costs.get("use" + useTool.printChar());
+                decAgentEnergy(costs.get("use" + useTool.printChar()));
             if (gob.printChar() == '#' && useTool.printChar() == 'K') {
                 inventory.remove(useTool);                      // key gets consumed
             }
         } else {
             lastActionFails();
-            agentEnergy -= costs.get("wait");                   //agent hasn't done anything, so just subtract wait energy
+            decAgentEnergy(costs.get("wait"));                   //agent hasn't done anything, so just subtract wait energy
         }
         dieIfNoEnergy();                                        //if out of energy, agent dies
     }
@@ -607,9 +614,9 @@ public class GOBAgent extends GridObject {
         String vol = aTokenizer.nextToken();                          //volume is first token
         //subtract appropriate amount of energy
         if(vol.equalsIgnoreCase("shout"))
-            agentEnergy -= costs.get("shout");
+            decAgentEnergy(costs.get("shout"));
         else
-            agentEnergy -= costs.get("talk");
+            decAgentEnergy(costs.get("talk"));
         String cat = aTokenizer.nextToken();        //category is second token
         if(cat.equalsIgnoreCase("command")) {                       //if it is a command, there are two possibilities for tokens
             String goalActName = aTokenizer.nextToken();  //next token is the goal or action name
