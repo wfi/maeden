@@ -115,17 +115,17 @@ public class SensoryPacket {
     }
 
     /**
-     * Process the single string representing all the rows and column contents of the visual sensory data
+     * Process the contents of the JSONArray into the Java Array visualArray
      * and convert it to a 2D array of Vectors of Strings.
      * @param info the JSONArray (2D with each cell as JSONArray of contents) of the portion of grid visible to agent
      */
     protected void processRetinalField(JSONArray info) {
-        for (int i = 6; i >= 0; i--) {
-            JSONArray q = (JSONArray) info.get(i);
-            for (int j = 0; j <= 4; j++) {
-                JSONArray z = (JSONArray) q.get(j);
+        for (int r = 0; r < 7; r++) {
+            JSONArray q = (JSONArray) info.get(r);
+            for (int c = 0; c < 5; c++) {
+                JSONArray z = (JSONArray) q.get(c);
                 for (int k = 0; k < z.size(); k++) {
-                    visualArray.get(i).get(j).add((String) z.get(k));
+                    visualArray.get(r).get(c).add((String) z.get(k));
                 }
             }
         }

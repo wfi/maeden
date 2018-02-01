@@ -10,7 +10,7 @@ import org.json.simple.JSONArray;
  * Bundles the relevant sensory data and sends it to an agent controller.
  *
  * @author: Wayne Iba
- * @version: 2017093001
+ * @version: 20180201
  */
 public class SensoryPacketSender {
     private int xCols, yRows;
@@ -68,8 +68,8 @@ public class SensoryPacketSender {
      * INPUT: agent point location, and agent heading (as point)
      * OUTPUT: JSONArray <JSONArray <JSONArray>>
      * See README.SensoryMotor for more description and examples.
-     * The row behind the agent is given first followed by its current row and progressing away from the agent
-     * with characters left-to-right in visual field.
+     * The origin of the array [0,0] is the cell one row behind and two columns left of the agent.
+     * The agent should be found at [1,2].
      * @param aPt the viewer-centered origin where the agent is standing
      * @param heading the direction the agent is facing
      * @return the assembled JSONArray containing the visual field contents
@@ -78,7 +78,7 @@ public class SensoryPacketSender {
         int senseRow, senseCol;
         JSONArray bigArray = new JSONArray();
         //iterate from one behind to five in front of agent point
-        for (int relRow=5; relRow >= -1; relRow--) {
+        for (int relRow=-1; relRow <= 5; relRow++) {
             JSONArray rowArray = new JSONArray();
             //iterate from two to the left to two to the right of agent point
             for (int relCol=-2; relCol <= 2; relCol++){
