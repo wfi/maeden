@@ -54,13 +54,15 @@ is empty, the empty array will be sent.
 
 3. The "sight" information. [Array of Array of Array of String] The
 agent has a visual field that is seven (7) cells deep and five (5)
-cells wide.  The agent can see one row behind it, the current row
-(i.e., two cells to either side), and five (5) rows ahead.  Visual
-information is given as a multi-level JSON array.  For example, if the
-agent with ID of 2 was standing with a key and a hammer to its left,
-while facing a wall with a door two cells away and the food three rows
-beyond the door, the received visual information line would look like
-this (without the spacing and line-breaks shown here for readability):
+cells wide. The agent can see one row behind itself, its current row
+(i.e., two cells to either side), and five (5) rows ahead. Visual
+information is given as a multi-level JSON array with the origin of
+the array (i.e., cell [0,0]) one row behind the agent and two columns
+to its left. For example, if the agent with ID of 2 was standing with
+a key and a hammer to its left, while facing a wall with a door two
+cells away and the food three rows beyond the door, the received
+visual information line would look like this (without the spacing and
+line-breaks shown here for readability):
 
 
 [[[],    [],       [],    [],    []   ],
@@ -89,13 +91,15 @@ Note: * = wall
       O = food collection point (letter Oh)
       $ = gold piece
 
-Note, this presentation may be logically thought of as a view from
-underneath the agent, with the agent facing toward the bottom of the
-screen. The actual origin of the array [0,0] is over the agent's left
-shoulder.  However, it may be convenient for an agent controller to
-work in "agent-centered" coordinates where the agent is always located
-at [0,0] with negative rows and columns over the left shoulder.  This
-is left as an exercise for designers of agents.
+Note, arrays are traditionally shown in row-major order with the
+origin (i.e., [0,0]) in the upper left. Printing the visual array in
+this manner as we have done above may be logically thought of as a
+view from underneath the agent, with the agent facing toward the
+bottom of the screen. The actual origin of the array [0,0] is over the
+agent's left shoulder. However, it may be convenient for an agent
+controller to work in "agent-centered" coordinates where the agent is
+always located at [0,0] with negative rows and columns over the left
+shoulder. This is left as an exercise for designers of agents.
 
 4. The ground contents. [Array of String] The contents of the cell
 where the agent is located is sent as an array with elements for each

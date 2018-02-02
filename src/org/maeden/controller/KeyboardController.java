@@ -111,16 +111,18 @@ public class KeyboardController extends AbstractAgentController {
     }
 
     /** processRetinalField: populate the display grid from the pre-processed visual field of a SensoryPacket
+     * Note: the graphical display (as they tend to do) has the origin in the upper left corner rather than
+     * the lower left. Thus, the contents of the given visualArray must be inverted vertically (but not
+     * horizontally.
      * @param visualArray preprocessed array of lists of character representing maeden objects
      */
     void processRetinalField(ArrayList<ArrayList<Vector<String>>> visualArray){
         visField.clear();
         for (int tr = 0; tr < 7; tr++)
-            for (int tc = 0; tc < 5; tc++)
-                if (visualArray.get(tr).get(tc) != null){
+            for (int c = 0; c < 5; c++)
+                if (visualArray.get(tr).get(c) != null){
                     int r = 6 - tr;
-                    int c = 4 - tc;
-                    for (String item : visualArray.get(r).get(c)){
+                    for (String item : visualArray.get(tr).get(c)){
                         //add the GridObjects for the graphical display
                         if (item.length() == 1 && (item.charAt(0) < '0' || item.charAt(0) > '9')){
                             // have a regular grid object or a single-digit agent ID
@@ -141,7 +143,7 @@ public class KeyboardController extends AbstractAgentController {
                             default:
                             }
                         } else { // have an agent ID
-                            if (tr == 1 && tc == 2)
+                            if (tr == 1 && c == 2)
                                 visField.add(new GOBAgent(c, r, cellSize, 'N')); // always facing North in visfield
                             else 
                                 visField.add(new GOBAgent(c, r, cellSize, '?'));
