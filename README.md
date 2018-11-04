@@ -12,6 +12,7 @@ Details and documentation may be
 
 ## To Do
 
+1. Restore communication between agents
 1. [in-process] when simulation ends 
 (in the case where eating the food is the ultimate goal),
 send disconnect signals to any other agents currently connected
